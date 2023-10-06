@@ -1,0 +1,13 @@
+<resources>
+<string name="facebook_app_id">1208804833307020</string>
+<string name="fb_login_protocol_scheme">fb1208804833307020</string>
+<string name="facebook_client_token">b997a59f2b61af77e41de98a3844a7a7</string>
+<string name="filter_view_example_gizmos">fb1019091388574543</string>
+<string name="filter_view_http_gizmos">fb1019091388574543</string>
+<!-- filter_view_example_gizmos -->
+<!-- filter_view_http_gizmos -->
+<string name="app_name">SneakerLog</string>
+<string name="petrol">#ffffff00</string>
+
+    
+</resources>
