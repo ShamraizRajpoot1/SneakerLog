@@ -40,6 +40,9 @@ const Home = ({navigation}) => {
  const Events = () => {
   navigation.navigate('Events')
  }
+ const details = () => {
+  navigation.navigate('UserDetails')
+ }
   
 
   return (
@@ -85,7 +88,7 @@ const Home = ({navigation}) => {
                 </Text>
                 </TouchableOpacity>
               </View>
-              <UserView />
+              <UserView onPress={details}/>
             </View>
 
             <Text

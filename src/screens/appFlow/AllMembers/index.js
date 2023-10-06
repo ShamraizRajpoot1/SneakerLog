@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   StyleSheet,
   Text,
@@ -7,18 +7,25 @@ import {
   TouchableWithoutFeedback,
   ScrollView,
   TouchableOpacity,
-  Platform,
 } from 'react-native';
-import { AppStyles } from '../../../services/utilities/AppStyles';
+import {AppStyles} from '../../../services/utilities/AppStyles';
 import SearchBar from '../../../components/SearchBar';
 import UserView from '../../../components/UserView';
-import { responsiveHeight, responsiveScreenWidth, responsiveWidth } from 'react-native-responsive-dimensions';
+import {
+  responsiveHeight,
+  responsiveScreenWidth,
+  responsiveWidth,
+} from 'react-native-responsive-dimensions';
 import Header from '../../../components/Header';
-import { fontFamily, fontSize } from '../../../services/utilities/Fonts';
-import { Colors } from '../../../services/utilities/Colors';
-import { scale } from 'react-native-size-matters';
+import {fontFamily, fontSize} from '../../../services/utilities/Fonts';
+import {Colors} from '../../../services/utilities/Colors';
+import {scale} from 'react-native-size-matters';
+import Followers from '../Followers';
+import Sent from '../Sent';
+import Following from '../Following';
+import Received from '../Received';
 
-const AllMembers = ({ navigation }) => {
+const AllMembers = ({navigation}) => {
   const [member, setMember] = useState('');
   const [selectedOption, setSelectedOption] = useState(null);
 
@@ -34,7 +41,32 @@ const AllMembers = ({ navigation }) => {
   useEffect(() => {
     setSelectedOption(options[0]);
   }, []);
-  const handleOptionPress = (option) => {
+
+  let selectedComponent;
+
+  switch (selectedOption) {
+    case 'All':
+      selectedComponent = <UserView vertical={true} />;
+      break;
+    case 'Followers':
+      selectedComponent = <Followers />;
+      break;
+    case 'Following':
+      selectedComponent = <Following />;
+      break;
+    case 'Sent':
+      selectedComponent = <Sent />;
+      break;
+    case 'Received':
+      selectedComponent = <Received />;
+      break;
+
+    default:
+      selectedComponent = <UserView vertical={true} />;
+      break;
+  }
+
+  const handleOptionPress = option => {
     setSelectedOption(option);
   };
 
@@ -47,8 +79,7 @@ const AllMembers = ({ navigation }) => {
           style={styles.optionsContainer}
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.optionsScrollContent}
-        >
+          contentContainerStyle={styles.optionsScrollContent}>
           {options.map((option, index) => (
             <TouchableOpacity
               key={index}
@@ -56,8 +87,7 @@ const AllMembers = ({ navigation }) => {
               style={[
                 styles.optionItem,
                 selectedOption === option && styles.selectedOption,
-              ]}
-            >
+              ]}>
               <Text style={styles.optionText}>{option}</Text>
               {selectedOption === option && <View style={styles.selectedBar} />}
             </TouchableOpacity>
@@ -65,19 +95,19 @@ const AllMembers = ({ navigation }) => {
         </ScrollView>
       </View>
 
-      <SearchBar Text={'Search Members'} value={member} onChangeText={setMember} />
-      <View style={{ flex: 1 }}>
-        
-          <TouchableWithoutFeedback>
-            <ScrollView
-              style={{ marginHorizontal: responsiveWidth(5) }}
-              contentContainerStyle={[AppStyles.contentContainer]}
-             
-            >
-              <UserView vertical={true} />
-            </ScrollView>
-          </TouchableWithoutFeedback>
-    
+      <SearchBar
+        Text={'Search Members'}
+        value={member}
+        onChangeText={setMember}
+      />
+      <View style={{flex: 1}}>
+        <TouchableWithoutFeedback>
+          <ScrollView
+            style={{marginHorizontal: responsiveWidth(5)}}
+            contentContainerStyle={[AppStyles.contentContainer]}>
+            {selectedComponent}
+          </ScrollView>
+        </TouchableWithoutFeedback>
       </View>
     </>
   );
@@ -92,21 +122,18 @@ const styles = StyleSheet.create({
     height: '6%',
   },
   optionsContainer: {
-    height:'100%',
+    height: '100%',
     flexDirection: 'row',
-    marginHorizontal:responsiveWidth(3),
-    marginTop:responsiveHeight(2)
+    marginHorizontal: responsiveWidth(3),
+    marginTop: responsiveHeight(2),
   },
-  
   optionItem: {
     alignItems: 'center',
-    marginHorizontal:responsiveWidth(3.5),
-    width:responsiveScreenWidth(18.5)
+    marginHorizontal: responsiveWidth(3.5),
+    width: responsiveScreenWidth(18.5),
   },
-  selectedOption: {
-   
-  },
-  optionText:{
+  selectedOption: {},
+  optionText: {
     fontSize: fontSize.fieldText,
     fontFamily: fontFamily.LatoBold,
     color: Colors.blackText,

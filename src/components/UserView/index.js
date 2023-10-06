@@ -89,8 +89,8 @@ const UserView = props => {
         },
   ];
  const memberimage = {
-    height:props.vertical ? responsiveHeight(8) : responsiveHeight(12),
-    width:props.vertical ? responsiveHeight(8) : responsiveHeight(12), 
+    height:props.vertical ? responsiveHeight(6) : responsiveHeight(12),
+    width:props.vertical ? responsiveHeight(6) : responsiveHeight(12), 
     borderRadius: scale(50),
   }
   const text= {
@@ -117,12 +117,12 @@ const UserView = props => {
       data={displayedUsers.filter((item) => item.Id !== loggedInUser.Id)}
       renderItem={({ item, index }) => {
         return (
-          <TouchableOpacity
+          <TouchableOpacity onPress={props.onPress}
             style={{
               flexDirection: props.vertical ? 'row' : 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              marginVertical: props.vertical ? responsiveHeight(2) : 0,
+              marginVertical: props.vertical ? responsiveHeight(0.5) : 0,
               marginLeft: index === 0 && !props.vertical ? responsiveWidth(5) : 0,
               marginRight: index + 1 === Users.length && !props.vertical ? responsiveWidth(5) : responsiveWidth(3),
             }}>

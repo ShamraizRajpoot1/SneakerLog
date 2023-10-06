@@ -171,5 +171,37 @@ export const AppStyles = StyleSheet.create({
     fontSize: fontSize.h1,
     fontFamily: fontFamily.LatoBold,
     color: Colors.blackText,
-  }
+  },
+  userText: {
+    fontSize: fontSize.userName,
+    fontFamily: fontFamily.LatoBold,
+    textAlignVertical: 'center',
+    width: responsiveWidth(25),
+    marginHorizontal: 2.5,
+    color: Colors.blackText,
+    fontSize: fontSize.usernameText,
+  },
+  userHorizontalText: {
+    fontSize: fontSize.userName,
+    fontFamily: fontFamily.LatoBold,
+    marginTop: responsiveHeight(1.3),
+    color: Colors.blackText,
+  },
+  additionalText: {
+    fontSize: fontSize.userName,
+    fontFamily: fontFamily.LatoRegular,
+    color: Colors.username,
+  },
+   memberimage : {
+    height: responsiveHeight(6),
+    width: responsiveHeight(6),
+    borderRadius: scale(50),
+  },
+  userContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: responsiveHeight(1.2),
+    }
+  
 });

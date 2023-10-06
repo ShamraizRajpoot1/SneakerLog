@@ -10,6 +10,8 @@ import Profile from '../../../screens/appFlow/Profile'
 import EditProfile from '../../../screens/appFlow/EditProfile'
 import Brands from '../../../screens/appFlow/Brands'
 import AllMembers from '../../../screens/appFlow/AllMembers'
+import UserDetails from '../../../screens/appFlow/UserDetails'
+import UserCollection from '../../../screens/appFlow/UserCollection'
 
 const Stack = createNativeStackNavigator()
 const HomeStack = () => {
@@ -23,6 +25,8 @@ const HomeStack = () => {
         <Stack.Screen name='EditProfile' component={EditProfile} />
         <Stack.Screen name='Brands' component={Brands} />
         <Stack.Screen name='AllMembers' component={AllMembers} />
+        <Stack.Screen name='UserDetails' component={UserDetails} />
+        <Stack.Screen name='UserCollection' component={UserCollection} />
     </Stack.Navigator>
   )
 }

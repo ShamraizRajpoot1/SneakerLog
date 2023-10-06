@@ -171,7 +171,7 @@ const Collections = ({navigation}) => {
                     />
                   ) : (
                     <View style={{alignSelf:'center'}}>
-                      <Text style={styles.emptyTe}>No Sneaker</Text>
+                      <Text style={tyles.emptyText}>No Sneaker</Text>
                     </View>
                   )}
                 </View>
