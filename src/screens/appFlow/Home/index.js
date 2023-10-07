@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
-import React from 'react';
+import React,{useState,useEffect} from 'react';
 import {AppStyles} from '../../../services/utilities/AppStyles';
 import {Colors} from '../../../services/utilities/Colors';
 import Header from '../../../components/Header';
@@ -23,8 +23,13 @@ import {appIcons} from '../../../services/utilities/Assets';
 import ProductView from '../../../components/ProductView';
 import UserView from '../../../components/UserView';
 import EventsView from '../../../components/EventsView';
+import { AddCollection } from '../../../components/Modals';
 
 const Home = ({navigation}) => {
+  const [modalVisible, setModalVisible] = useState(true);
+  const toggleCollection = () => {
+    setModalVisible(prev => !prev);
+  };
   const profile = () =>{
     navigation.navigate('Profile')
   }
@@ -60,7 +65,7 @@ const Home = ({navigation}) => {
             <Text style={[AppStyles.fvrtText, {marginLeft: '5%'}]}>
               MY FOVORITE COLLECTIONS
             </Text>
-            <TouchableOpacity style={AppStyles.addCollection}>
+            <TouchableOpacity style={AppStyles.addCollection} onPress={toggleCollection}>
               <Image style={AppStyles.add} source={appIcons.add} />
               <Text style={AppStyles.redtext}>ADD A COLLECTION</Text>
             </TouchableOpacity>
@@ -109,6 +114,13 @@ const Home = ({navigation}) => {
                 View All
               </Text>
             </TouchableOpacity>
+            {modalVisible && (<AddCollection 
+            isVisible={modalVisible}
+            onBackdropPress={toggleCollection}
+            //onChangeText={}
+            //value={}
+            onPress={toggleCollection}
+            />)}
           </ScrollView>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>

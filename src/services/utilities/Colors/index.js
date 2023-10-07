@@ -6,6 +6,7 @@ export const Colors ={
     button1: '#D9173B',
     text: '#e3e1dc',
     text2: '#121212',
+    text3: 'black',
     toggleText: 'rgba(255, 255, 255, 0.7)',
     lebal: '#fff',
     loginText: '#e3e1dc',

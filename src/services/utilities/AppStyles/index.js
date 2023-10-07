@@ -86,7 +86,7 @@ export const AppStyles = StyleSheet.create({
     borderRadius: scale(5),
     borderColor: Colors.blackText,
   },
- 
+
   field: {
     fontFamily: fontFamily.LatoHeavy,
     fontWeight: 'normal',
@@ -111,10 +111,11 @@ export const AppStyles = StyleSheet.create({
     flex: 1,
     height: '100%',
   },
-  plus:{ color: Colors.blackText,
+  plus: {
+    color: Colors.blackText,
     fontSize: fontSize.plus,
-    fontFamily: fontFamily.LatoBold, 
-    fontFamily:fontFamily.LatoBold,
+    fontFamily: fontFamily.LatoBold,
+    fontFamily: fontFamily.LatoBold,
   },
   textContainer: {
     alignItems: 'center',
@@ -156,7 +157,7 @@ export const AppStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-end',
   },
-  arrowRight:{
+  arrowRight: {
     width: scale(13),
     height: scale(13),
     tintColor: Colors.blackText,
@@ -167,7 +168,7 @@ export const AppStyles = StyleSheet.create({
     backgroundColor: Colors.border1,
     marginHorizontal: 10,
   },
-  resultText:{
+  resultText: {
     fontSize: fontSize.h1,
     fontFamily: fontFamily.LatoBold,
     color: Colors.blackText,
@@ -192,16 +193,15 @@ export const AppStyles = StyleSheet.create({
     fontFamily: fontFamily.LatoRegular,
     color: Colors.username,
   },
-   memberimage : {
+  memberimage: {
     height: responsiveHeight(6),
     width: responsiveHeight(6),
     borderRadius: scale(50),
   },
   userContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginBottom: responsiveHeight(1.2),
-    }
-  
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: responsiveHeight(1.2),
+  },
 });
