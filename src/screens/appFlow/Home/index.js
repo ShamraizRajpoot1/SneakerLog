@@ -26,7 +26,7 @@ import EventsView from '../../../components/EventsView';
 import { AddCollection } from '../../../components/Modals';
 
 const Home = ({navigation}) => {
-  const [modalVisible, setModalVisible] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
   const toggleCollection = () => {
     setModalVisible(prev => !prev);
   };
@@ -59,6 +59,7 @@ const Home = ({navigation}) => {
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -500}>
         <TouchableWithoutFeedback>
           <ScrollView
+          showsVerticalScrollIndicator={true}
             style={{flex: 1}}
             contentContainerStyle={[AppStyles.contentContainer]}
             keyboardShouldPersistTaps="handled">

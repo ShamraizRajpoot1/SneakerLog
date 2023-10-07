@@ -1,3 +1,3 @@
 import AddCollection from "./AddCollection";
 
-export{AddCollection}
+export{AddCollection }

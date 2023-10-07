@@ -22,6 +22,7 @@ import {appIcons} from '../../../services/utilities/Assets';
 import {scale} from 'react-native-size-matters';
 import Input from '../../../components/Input';
 import Dropdown from '../../../components/Dropdown';
+import DropDownPicker from 'react-native-dropdown-picker';
 
 const Sneakers = ({navigation}) => {
   const [selectedValue, setSelectedValue] = useState('');
@@ -147,20 +148,27 @@ const Sneakers = ({navigation}) => {
                 </TouchableOpacity>
               </View>
             </View>
-            <View style={[styles.margin,{marginBottom:responsiveHeight(6)}]}>
-              <Text style={AppStyles.field}>SNEAKER STATUS</Text>
-              <Dropdown
-                items={items}
-                selectedValue={selectedValue}
-                onValueChange={setSelectedValue}
-                placeholder="Select an option"
-              />
-            </View>
-          </ScrollView>
+            <View style={styles.margin}>
+        <Text style={AppStyles.field}>SNEAKER STATUS</Text>
+        <DropDownPicker
+          items={items.map((item) => ({
+            label: item,
+            value: item,
+          }))}
+          defaultValue={selectedValue}
+          containerStyle={styles.container}
+          style={styles.dropdown}
+          itemStyle={styles.itemStyle}
+          labelStyle={styles.labelStyle}
+          dropDownStyle={styles.dropDown}
+          onChangeItem={(item) => setSelectedValue(item.value)}
+        />
+      </View>
+                </ScrollView>
           
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
-      <View style={[AppStyles.textinputcontainer,{width:'100%',height:responsiveHeight(8),marginTop: 0}]}>
+      <View style={[AppStyles.textinputcontainer,{width:'100%', borderRadius: 0,  height:responsiveHeight(8),marginTop: 0}]}>
                 <TouchableOpacity style={[AppStyles.touchable]} >
                   <Text style={[styles.touchText,{color: Colors.blue}]}>Cancel</Text>
                 </TouchableOpacity>
@@ -223,4 +231,32 @@ const styles = StyleSheet.create({
     fontSize: fontSize.h3,
     fontFamily: fontFamily.LatoBold,
   },
+  container: {
+    height: responsiveHeight(8),
+    width: '95%',
+    marginTop: 10,
+  },
+  dropdown: {
+    backgroundColor: 'white',
+    borderColor: '#B6BBC8',
+    borderWidth: 1,
+    borderRadius: 5,
+    zIndex: 1000, 
+  },
+  itemStyle: {
+    justifyContent: 'flex-start',
+    paddingLeft: 10,
+  },
+  labelStyle: {
+    fontSize: fontSize.h3,
+    color: Colors.blackText,
+    fontFamily: fontFamily.LatoBold,
+  },
+  // dropDown: {
+  //   backgroundColor: 'white',
+  //   borderColor: '#B6BBC8',
+  //   borderWidth: 1,
+  //   borderBottomLeftRadius: 5,
+  //   borderBottomRightRadius: 5,
+  // },
 });

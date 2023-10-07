@@ -65,8 +65,8 @@ export const AppStyles = StyleSheet.create({
     borderColor: Colors.border1,
   },
   add: {
-    width: scale(25),
-    height: scale(25),
+    width: scale(22),
+    height: scale(22),
   },
   redtext: {
     fontSize: fontSize.h1,
@@ -164,7 +164,7 @@ export const AppStyles = StyleSheet.create({
     marginLeft: responsiveWidth(2),
   },
   line: {
-    height: responsiveWidth(0.5),
+    height: responsiveWidth(0.2),
     backgroundColor: Colors.border1,
     marginHorizontal: 10,
   },

@@ -24,6 +24,7 @@ import {scale} from 'react-native-size-matters';
 import AddSneakers from '../../../components/AddSneakers';
 import CollectionHeader from '../../../components/CollectionHeader';
 import SearchBar from '../../../components/SearchBar';
+import { Collection } from '../../../components/Modals';
 
 const data = [
   {id: 1, name: 'Product 1', price: 10, image: appImages.product1},
@@ -177,6 +178,7 @@ const Collections = ({navigation}) => {
                 </View>
               </>
             )}
+           
           </ScrollView>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>

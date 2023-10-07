@@ -4,10 +4,12 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import Collections from '../../../screens/appFlow/Collections'
 import AddProduct from '../../../screens/appFlow/AddProduct'
 import SearchSneaker from '../../../screens/appFlow/SearchSneaker'
+import ChoseCollection from '../../../screens/appFlow/ChoseCollection'
 const Stack = createNativeStackNavigator()
 const CollectionStack = () => {
   return (
-    <Stack.Navigator screenOptions={{headerShown: false}}>
+    <Stack.Navigator screenOptions={{headerShown: false}} initialRouteName='ChoseCollection'>
+      <Stack.Screen name='ChoseCollection' component={ChoseCollection} />
         <Stack.Screen name='Collections' component={Collections} />
         <Stack.Screen name='AddProduct' component={AddProduct} />
         <Stack.Screen name='SearchSneaker' component={SearchSneaker} />

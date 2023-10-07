@@ -19,5 +19,6 @@ export const Colors ={
     disabledButton : 'rgba(217, 23, 59,0.4)',
     username: '#6C6C6C',
     follow: 'red',
-    blue: '#589BE9'
+    blue: '#589BE9',
+    modalBackground: 'rgba(0,0,0,.7)'
 }

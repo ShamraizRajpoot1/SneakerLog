@@ -16,7 +16,7 @@ const Input = props => {
     ...AppStyles.inputcontainer,
     borderWidth: scale(6),
     alignItems: props.align ? 'center' : null,
-    width: props.width ? props.width : '90%',
+    width: props.width ? props.width : '95%',
   };
 const input ={
   ...styles.input,

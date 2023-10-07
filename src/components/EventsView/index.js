@@ -52,14 +52,7 @@ const EventsView = props => {
           <TouchableOpacity
             style={{ width: responsiveWidth(100) }}
             onPress={props.onPress}
-              // () =>
-              // navigation.navigate('EventDetail', 
-              // {
-              //   EventData: item,
-              // }
-              // )
-            
-
+              
             >
             <Image
               source= {item.image} 
@@ -77,7 +70,7 @@ const styles = StyleSheet.create ({
   eventimage: {
     height: responsiveHeight(20),
     width: responsiveWidth(90),
-    borderRadius: responsiveHeight(2),
+    borderRadius: responsiveScreenWidth(3),
     marginBottom: responsiveWidth(3),
     alignSelf: 'center',
   },

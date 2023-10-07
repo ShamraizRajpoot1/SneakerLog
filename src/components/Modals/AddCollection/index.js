@@ -34,7 +34,9 @@ const AddCollection = props => {
         onPress={props.onBackdropPress}>
         <View style={styles.modalContent}>
           <Text style={styles.modaltxt}>NEW COLLECTION NAME</Text>
-          <Input family={true} margin={true}/>
+          <View style={{alignItems:'center',width:'95%'}}>
+          <Input family={true} margin={true} />
+          </View>
           <View style={styles.row}>
             <Text style={styles.privatetext}>PRIVATE</Text>
             <Switch
@@ -48,14 +50,20 @@ const AddCollection = props => {
           <View
             style={[
               styles.row,
-              {width: '100%', borderTopWidth: responsiveScreenWidth(0.1),marginBottom: responsiveHeight(1)},
+              {
+                width: '100%',
+                borderTopWidth: responsiveScreenWidth(0.1),
+                marginBottom: responsiveHeight(1),
+              },
             ]}>
-            <TouchableOpacity style={[styles.textContainer,{borderRightWidth: responsiveScreenHeight(0.1),}]}>
-              
+            <TouchableOpacity onPress={props.onPress}
+              style={[
+                styles.textContainer,
+                {borderRightWidth: responsiveScreenHeight(0.1)},
+              ]}>
               <Text style={styles.text}>Cancel</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.textContainer}>
-             
+            <TouchableOpacity style={styles.textContainer} onPress={props.onPress}>
               <Text style={styles.text}>Create</Text>
             </TouchableOpacity>
           </View>
@@ -73,8 +81,7 @@ const styles = StyleSheet.create({
     height: '93%',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,.7)',
-    
+    backgroundColor: Colors.modalBackground,
   },
   modalContent: {
     backgroundColor: Colors.fieldBackground,
@@ -82,7 +89,6 @@ const styles = StyleSheet.create({
     borderRadius: scale(6),
     alignItems: 'center',
     justifyContent: 'space-between',
-    
   },
   modaltxt: {
     fontSize: fontSize.h1,
@@ -102,15 +108,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginTop: responsiveScreenHeight(2),
   },
-  textContainer:{
-    width:'50%',
-    alignItems:"center",
-    justifyContent:'center',
-    height: responsiveScreenHeight(7)
+  textContainer: {
+    width: '50%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: responsiveScreenHeight(7),
   },
-  text:{
+  text: {
     fontSize: fontSize.h1,
     fontFamily: fontFamily.LatoRegular,
     color: Colors.blue,
-  }
+  },
 });
