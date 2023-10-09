@@ -68,7 +68,7 @@ const ChoseCollection = ({navigation}) => {
               marginVertical: responsiveScreenHeight(2),
             }}
           />
-          <View style={{marginLeft: responsiveScreenWidth(6)}}>
+          <View style={{marginLeft: responsiveScreenWidth(4)}}>
             <Text style={styles.name}>{item.name}</Text>
             <View style={{flexDirection: 'row'}}>
               <Text style={styles.sneakerCount}>
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.LatoBold,
   },
   textContainer: {
-    paddingHorizontal: responsiveScreenWidth(5),
+    paddingHorizontal: responsiveScreenWidth(7),
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: responsiveScreenHeight(2.5),

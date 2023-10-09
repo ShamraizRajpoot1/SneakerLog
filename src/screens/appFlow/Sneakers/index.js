@@ -87,59 +87,59 @@ const Sneakers = ({navigation}) => {
               />
               <Text style={styles.camtext}>Add Photo</Text>
             </View>
-            <View style={styles.margin}>
+            <View style={AppStyles.margin}>
               <Text style={AppStyles.field}>SNEAKER</Text>
               <Input />
             </View>
-            <View style={styles.margin}>
+            <View style={AppStyles.margin}>
               <Text style={AppStyles.field}>BRAND</Text>
               <Input />
             </View>
-            <View style={styles.margin}>
+            <View style={AppStyles.margin}>
               <Text style={AppStyles.field}>PRICE</Text>
               <Input />
             </View>
-            <View style={styles.margin}>
+            <View style={AppStyles.margin}>
               <Text style={AppStyles.field}>SNEAKER SIZE</Text>
               <Input />
             </View>
-            <View style={styles.margin}>
+            <View style={AppStyles.margin}>
               <Text style={AppStyles.field}>CONDITION</Text>
               <View style={AppStyles.textinputcontainer}>
                 <TouchableOpacity style={[AppStyles.touchable]}>
-                  <Text style={[styles.touchText]}>New</Text>
+                  <Text style={[AppStyles.touchText]}>New</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[
                     AppStyles.touchable,
                     {backgroundColor: Colors.barBackground},
                   ]}>
-                  <Text style={[styles.touchText, {color: Colors.lebal}]}>
+                  <Text style={[AppStyles.touchText, {color: Colors.lebal}]}>
                     Used
                   </Text>
                 </TouchableOpacity>
               </View>
             </View>
-            <View style={styles.margin}>
+            <View style={AppStyles.margin}>
               <Text style={AppStyles.field}>SKU</Text>
               <Input />
             </View>
-            <View style={styles.margin}>
+            <View style={AppStyles.margin}>
               <Text style={AppStyles.field}>COLORWAY</Text>
               <Input />
             </View>
-            <View style={styles.margin}>
+            <View style={AppStyles.margin}>
             <Text style={AppStyles.field}>QUANTITY</Text>
-              <View style={[AppStyles.row2, {height: responsiveHeight(6), marginLeft: 0,}]}>
-                <TouchableOpacity style={[styles.button,{borderRadius: scale(5),}]}>
+              <View style={[AppStyles.row2, {marginTop:responsiveHeight(1), height: responsiveHeight(6), marginLeft: 0,}]}>
+                <TouchableOpacity style={[AppStyles.button1,{borderRadius: scale(5),}]}>
                   <Text style={[AppStyles.plus, {color: Colors.blackText}]}>
                     -
                   </Text>
                 </TouchableOpacity>
-                <Text style={[styles.touchText, {alignSelf: 'center'}]}>1</Text>
+                <Text style={[AppStyles.touchText, {alignSelf: 'center'}]}>1</Text>
                 <TouchableOpacity
                   style={[
-                    styles.button,
+                    AppStyles.button1,
                     {backgroundColor: Colors.barBackground,borderRadius: scale(5)},
                   ]}>
                   <Text style={[AppStyles.plus,{color:Colors.lebal}]}>
@@ -148,7 +148,7 @@ const Sneakers = ({navigation}) => {
                 </TouchableOpacity>
               </View>
             </View>
-            <View style={styles.margin}>
+            <View style={AppStyles.margin}>
         <Text style={AppStyles.field}>SNEAKER STATUS</Text>
         <DropDownPicker
           items={items.map((item) => ({
@@ -156,11 +156,11 @@ const Sneakers = ({navigation}) => {
             value: item,
           }))}
           defaultValue={selectedValue}
-          containerStyle={styles.container}
-          style={styles.dropdown}
-          itemStyle={styles.itemStyle}
-          labelStyle={styles.labelStyle}
-          dropDownStyle={styles.dropDown}
+          containerStyle={AppStyles.container}
+          style={AppStyles.dropdown}
+          itemStyle={AppStyles.itemStyle}
+          labelStyle={AppStyles.labelStyle}
+          dropDownStyle={AppStyles.dropDown}
           onChangeItem={(item) => setSelectedValue(item.value)}
         />
       </View>
@@ -201,10 +201,7 @@ const styles = StyleSheet.create({
     fontSize: fontSize.lebal,
     color: Colors.blue,
   },
-  margin: {
-    marginTop: responsiveHeight(3),
-    marginLeft: responsiveWidth(5),
-  },
+ 
   camtext: {
     fontSize: fontSize.lebal,
     color: Colors.blackText,
@@ -216,47 +213,4 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  button: {
-    height: '100%',
-    width: '40%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderBottomWidth:scale(0.5) ,
-    borderTopWidth: scale(0.5),
-    borderLeftWidth: scale(0.5),
-    borderRightWidth: scale(0.5),
-  },
-  touchText: {
-    color: Colors.blackText,
-    fontSize: fontSize.h3,
-    fontFamily: fontFamily.LatoBold,
-  },
-  container: {
-    height: responsiveHeight(8),
-    width: '95%',
-    marginTop: 10,
-  },
-  dropdown: {
-    backgroundColor: 'white',
-    borderColor: '#B6BBC8',
-    borderWidth: 1,
-    borderRadius: 5,
-    zIndex: 1000, 
-  },
-  itemStyle: {
-    justifyContent: 'flex-start',
-    paddingLeft: 10,
-  },
-  labelStyle: {
-    fontSize: fontSize.h3,
-    color: Colors.blackText,
-    fontFamily: fontFamily.LatoBold,
-  },
-  // dropDown: {
-  //   backgroundColor: 'white',
-  //   borderColor: '#B6BBC8',
-  //   borderWidth: 1,
-  //   borderBottomLeftRadius: 5,
-  //   borderBottomRightRadius: 5,
-  // },
 });

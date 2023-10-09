@@ -12,6 +12,7 @@ import Brands from '../../../screens/appFlow/Brands'
 import AllMembers from '../../../screens/appFlow/AllMembers'
 import UserDetails from '../../../screens/appFlow/UserDetails'
 import UserCollection from '../../../screens/appFlow/UserCollection'
+import ManageAccount from '../../../screens/appFlow/ManageAccount'
 
 const Stack = createNativeStackNavigator()
 const HomeStack = () => {
@@ -27,6 +28,7 @@ const HomeStack = () => {
         <Stack.Screen name='AllMembers' component={AllMembers} />
         <Stack.Screen name='UserDetails' component={UserDetails} />
         <Stack.Screen name='UserCollection' component={UserCollection} />
+        <Stack.Screen name='ManageAccount' component={ManageAccount} />
     </Stack.Navigator>
   )
 }

@@ -96,7 +96,7 @@ export const AppStyles = StyleSheet.create({
   textinputcontainer: {
     marginTop: responsiveHeight(1),
     height: responsiveHeight(6),
-    width: responsiveWidth(90),
+    width: '95%',
     alignItems: 'center',
     borderWidth: responsiveWidth(0.2),
     borderRadius: responsiveWidth(2),
@@ -106,6 +106,16 @@ export const AppStyles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   touchable: {
+    borderTopLeftRadius: scale(6),
+    borderBottomLeftRadius: scale(6),
+    justifyContent: 'center',
+    alignItems: 'center',
+    flex: 1,
+    height: '100%',
+  },
+  touchable1: {
+    borderTopRightRadius: scale(6),
+    borderBottomRightRadius: scale(6),
     justifyContent: 'center',
     alignItems: 'center',
     flex: 1,
@@ -203,5 +213,53 @@ export const AppStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: responsiveHeight(1.2),
+  },
+  margin: {
+    marginTop: responsiveHeight(3),
+    marginLeft: responsiveWidth(5),
+  },
+  touchText: {
+    color: Colors.blackText,
+    fontSize: fontSize.h3,
+    fontFamily: fontFamily.LatoBold,
+  },
+  button1: {
+    height: '100%',
+    width: '40%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderBottomWidth:scale(0.5) ,
+    borderTopWidth: scale(0.5),
+    borderLeftWidth: scale(0.5),
+    borderRightWidth: scale(0.5),
+  },
+
+  container: {
+    height: responsiveHeight(8),
+    width: '95%',
+    marginTop: 10,
+  },
+  dropdown: {
+    backgroundColor: 'white',
+    borderColor: '#B6BBC8',
+    borderWidth: 1,
+    borderRadius: 5,
+    zIndex: 1000, 
+  },
+  itemStyle: {
+    justifyContent: 'flex-start',
+    paddingLeft: 10,
+  },
+  labelStyle: {
+    fontSize: fontSize.h3,
+    color: Colors.blackText,
+    fontFamily: fontFamily.LatoBold,
+  },
+  dropDown: {
+    backgroundColor: 'white',
+    borderColor: '#B6BBC8',
+    borderWidth: 1,
+    borderBottomLeftRadius: 5,
+    borderBottomRightRadius: 5,
   },
 });

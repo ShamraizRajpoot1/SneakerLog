@@ -24,7 +24,7 @@ import {scale} from 'react-native-size-matters';
 import AddSneakers from '../../../components/AddSneakers';
 import CollectionHeader from '../../../components/CollectionHeader';
 import SearchBar from '../../../components/SearchBar';
-import { Collection } from '../../../components/Modals';
+import { ShareApp } from '../../../components/Modals';
 
 const data = [
   {id: 1, name: 'Product 1', price: 10, image: appImages.product1},
@@ -48,14 +48,21 @@ const Collections = ({navigation}) => {
   const Search = () => {
     navigation.navigate('SearchSneaker');
   };
+  const details = () => {
+    navigation.navigate('ProductDetails');
+  };
+  const [share, setShare] = useState(false)
   const [filter, setFilter] = useState(false);
+  const Share = () =>{
+    setShare(prevShare => !prevShare)
+  }
   const Filter = () => {
     setFilter(prevFilter => !prevFilter);
   };
   const [sneaker, setSneaker] = useState('');
   const renderItem = ({item, index}) => (
     <View>
-      <TouchableOpacity style={AppStyles.collection}>
+      <TouchableOpacity style={AppStyles.collection} onPress={details} >
         <View style={{flexDirection: 'row', alignItems: 'center'}}>
           <Image source={item.image} style={AppStyles.productImage} />
           <Text style={styles.name}>{item.name}</Text>
@@ -123,7 +130,7 @@ const Collections = ({navigation}) => {
                       </Text>
                     </View>
                     <View style={styles.iconContaier}>
-                      <TouchableOpacity>
+                      <TouchableOpacity onPress={Share}>
                         <Image
                           style={[
                             styles.icon,
@@ -172,9 +179,10 @@ const Collections = ({navigation}) => {
                     />
                   ) : (
                     <View style={{alignSelf:'center'}}>
-                      <Text style={tyles.emptyText}>No Sneaker</Text>
+                      <Text style={AppStyles.emptyText}>No Sneaker</Text>
                     </View>
                   )}
+                  {share && <ShareApp isVisible={share} onBackdropPress={Share} /> }
                 </View>
               </>
             )}

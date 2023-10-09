@@ -35,6 +35,9 @@ const EditProfile = ({navigation}) => {
   const brands = () => {
     navigation.navigate('Brands');
   };
+  const manage = () => {
+    navigation.navigate('ManageAccount');
+  };
   return (
     <>
       <Header onPress={back} />
@@ -56,7 +59,7 @@ const EditProfile = ({navigation}) => {
             <View>
               <View style={styles.margin}>
                 <Text style={AppStyles.field}>MANAGE ACCOUNT</Text>
-                <TouchableOpacity
+                <TouchableOpacity onPress={manage}
                   style={[
                     container,
                     {flexDirection: 'row', justifyContent: 'space-between'},

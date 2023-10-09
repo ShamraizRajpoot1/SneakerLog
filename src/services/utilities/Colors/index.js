@@ -11,7 +11,7 @@ export const Colors ={
     lebal: '#fff',
     loginText: '#e3e1dc',
     forgot : '#D9173B',
-    blackText: '#6c6c6c',
+    blackText: 'rgba(0,0,0,0.5)',
     border1: '#B6BBC8',
     bordor2:'#362636',
     barBackground: '#D9173B',

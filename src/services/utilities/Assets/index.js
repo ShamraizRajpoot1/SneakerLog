@@ -58,6 +58,8 @@ pvt: require('../../../assets/Icons/pvt.png'),
 upload: require('../../../assets/Icons/vector.png'),
 filter: require('../../../assets/Icons/filter.png'),
 clear: require('../../../assets/Icons/clear.png'),
+delete: require('../../../assets/Icons/delete.png'),
+edit: require('../../../assets/Icons/edit.png'),
 }
 
 export { appImages, appIcons}
