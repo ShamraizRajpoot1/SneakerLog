@@ -7,7 +7,7 @@ import {AppStyles} from '../../services/utilities/AppStyles'
 import { Colors } from '../../services/utilities/Colors';
 import { fontSize } from '../../services/utilities/Fonts';
 
-const CollectionHeader = () => {
+const CollectionHeader = (props) => {
 
     const row = {
         ...AppStyles.row2,
@@ -33,7 +33,7 @@ const CollectionHeader = () => {
     </View>
     <View
       style={[styles.textContainer, {width: responsiveWidth(17)}]}>
-      <TouchableOpacity>
+      <TouchableOpacity onPress={props.onPress}>
         <Image
           style={{width: scale(20), height: scale(25), marginRight:responsiveWidth(5)}}
           source={appIcons.download}

@@ -51,6 +51,9 @@ const Collections = ({navigation}) => {
   const details = () => {
     navigation.navigate('ProductDetails');
   };
+  const Collection = () => {
+    navigation.navigate('ChoseCollection');
+  };
   const [share, setShare] = useState(false)
   const [filter, setFilter] = useState(false);
   const Share = () =>{
@@ -92,7 +95,7 @@ const Collections = ({navigation}) => {
             contentContainerStyle={[AppStyles.contentContainer]}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}>
-            <CollectionHeader />
+            <CollectionHeader onPress={Collection}/>
             {data.length === 0 ? (
               <View>
                 <View style={styles.textContainer}>

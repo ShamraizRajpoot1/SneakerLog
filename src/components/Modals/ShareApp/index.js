@@ -58,35 +58,34 @@ import {
     modalContent: {
       backgroundColor: Colors.fieldBackground,
       width: responsiveScreenWidth(100),
-      borderTopRightRadius: scale(25),
-      borderTopLeftRadius: scale(25),
+      borderTopRightRadius: scale(15),
+      borderTopLeftRadius: scale(15),
       justifyContent: 'space-between',
-      paddingHorizontal:'2.5%'
+      paddingHorizontal:'5%'
     },
     modaltxt: {
-      fontSize: fontSize.h2,
+      fontSize: fontSize.h3,
       fontFamily: fontFamily.LatoHeavy,
       fontWeight: 'bold',
       color: Colors.text3,
-      marginLeft: responsiveScreenWidth(4.5),
-      marginTop: responsiveScreenHeight(3),
-      marginBottom: responsiveScreenHeight(2.5)
+      marginTop: responsiveScreenHeight(2.5),
+      marginBottom: responsiveScreenHeight(2)
     },
     textContainer:{
       width:'100%',
-      height: responsiveScreenHeight(6),
+      height: responsiveScreenHeight(5),
       borderWidth: responsiveScreenWidth(0.15),
-      borderRadius: scale(10),
+      borderRadius: scale(6),
       alignItems:'center',
       justifyContent:'center',
       marginBottom:responsiveScreenHeight(2),
-      borderColor: Colors.bordor2,
+      borderColor: Colors.border1,
     },
     text:{
       fontSize: fontSize.h1,
       fontFamily: fontFamily.LatoBold,
       color: Colors.blue, 
-      opacity: 0.5
+      opacity: 0.7
     }
    
   });

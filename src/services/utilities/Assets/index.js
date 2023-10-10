@@ -60,6 +60,8 @@ filter: require('../../../assets/Icons/filter.png'),
 clear: require('../../../assets/Icons/clear.png'),
 delete: require('../../../assets/Icons/delete.png'),
 edit: require('../../../assets/Icons/edit.png'),
+rular: require('../../../assets/Icons/rular.png'),
+
 }
 
 export { appImages, appIcons}

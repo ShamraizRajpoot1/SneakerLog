@@ -8,21 +8,29 @@ import {
   Image,
   TouchableOpacity,
 } from 'react-native';
-import React from 'react';
+import React,{useState} from 'react';
 import {AppStyles} from '../../../services/utilities/AppStyles';
 import Header from '../../../components/Header';
 import {Colors} from '../../../services/utilities/Colors';
 import {fontFamily, fontSize} from '../../../services/utilities/Fonts';
 import {
   responsiveHeight,
+  responsiveScreenHeight,
+  responsiveScreenWidth,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
 import ProfileHead from '../../../components/ProfileHead';
 import {appIcons} from '../../../services/utilities/Assets';
 import {scale} from 'react-native-size-matters';
 import Input from '../../../components/Input';
+import { Size } from '../../../components/Modals';
 
 const EditProfile = ({navigation}) => {
+  const [size, setSize] = useState('')
+  const [sizeModal, setSizeModal] = useState(false);
+  const toggleModal = () =>{
+    setSizeModal(prevModal => !prevModal)
+  }
   const container = {
     ...AppStyles.inputcontainer,
     height: responsiveHeight(5),
@@ -133,13 +141,11 @@ const EditProfile = ({navigation}) => {
               </View>
               <View style={[styles.margin]}>
                 <Text style={[AppStyles.field]}>SNEAKER SIZE</Text>
-                <Input
-                  placeholder={'7.5'}
-                  width={responsiveWidth(45)}
-                  align={true}
-                  maxLength={5}
-                />
+                <TouchableOpacity onPress={toggleModal} style={styles.sizeContainer}>
+                <Text style={[AppStyles.fvrtText,{color: Colors.text3}]}>{size}</Text>
+              </TouchableOpacity>
               </View>
+              {sizeModal && <Size onBackdropPress={toggleModal} onChange={setSize} /> }
             </View>
           </ScrollView>
         </TouchableWithoutFeedback>
@@ -215,5 +221,14 @@ const styles = StyleSheet.create({
   arrowimage:{
     width: scale(15),
     height: scale(10)
+  },
+  sizeContainer:{
+    marginTop:responsiveScreenHeight(1),
+    width:responsiveScreenWidth(45),
+    alignItems:'center',
+    justifyContent:'center',
+    borderWidth: scale(1),
+    height: responsiveScreenHeight(5),
+    borderRadius: scale(3),
   }
 });

@@ -5,8 +5,9 @@ import {
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   ScrollView,
+  TouchableOpacity,
 } from 'react-native';
-import React from 'react';
+import React,{useState} from 'react';
 import Header from '../../../components/Header';
 import {AppStyles} from '../../../services/utilities/AppStyles';
 import {fontFamily, fontSize} from '../../../services/utilities/Fonts';
@@ -16,8 +17,14 @@ import {
 } from 'react-native-responsive-dimensions';
 import {Colors} from '../../../services/utilities/Colors';
 import Input from '../../../components/Input';
+import {scale} from 'react-native-size-matters';
+import Delete from '../../../components/Modals/Delete';
 
 const ManageAccount = ({navigation}) => {
+    const [deleteModal, setDeleteModal] = useState(false)
+    const toggleModal = () =>{
+        setDeleteModal(prevModal => !prevModal)
+    }
   const back = () => {
     navigation.goBack();
   };
@@ -37,7 +44,13 @@ const ManageAccount = ({navigation}) => {
             <View style={styles.container}>
               <Text style={styles.heading}>MANAGE ACCOUNT</Text>
               <Text
-                style={[AppStyles.field, {fontSize: fontSize.usernameText}]}>
+                style={[
+                  AppStyles.field,
+                  {
+                    fontSize: fontSize.usernameText,
+                    marginTop: responsiveScreenHeight(4),
+                  },
+                ]}>
                 DISABLE/ENABLE MY ACCOUNT
               </Text>
               <Text style={styles.infoText}>
@@ -62,12 +75,30 @@ const ManageAccount = ({navigation}) => {
                 DISABLE/ENABLE MY ACCOUNT
               </Text>
 
-              <Text style={styles.infoText}>
+              <Text style={[styles.infoText,{marginBottom: responsiveScreenHeight(4)}]}>
                 Disabling your account will hide your Collections and Profile
                 until you reactivate your account.Enabling your account will
                 make your Collections and Profile visible
               </Text>
-              
+              <View style={[styles.button, {borderWidth: null}]}>
+                <Text style={styles.buttonText}>Disable Account</Text>
+              </View>
+              <Text
+                style={[
+                  AppStyles.field,
+                  {
+                    fontSize: fontSize.usernameText,
+                    marginTop: responsiveScreenHeight(6),
+                  },
+                ]}>
+                DELETE ACCOUNT
+              </Text>
+              <TouchableOpacity style={[styles.button, {backgroundColor: null}]} onPress={toggleModal}>
+                <Text style={[styles.buttonText, {color: Colors.blue}]}>
+                  Yes
+                </Text>
+              </TouchableOpacity>
+              {deleteModal && <Delete isVisible={deleteModal} onBackdropPress={toggleModal}/>}
             </View>
           </ScrollView>
         </TouchableWithoutFeedback>
@@ -94,5 +125,19 @@ const styles = StyleSheet.create({
     color: Colors.text3,
     marginTop: responsiveScreenHeight(1),
     marginBottom: responsiveScreenHeight(5),
+  },
+  button: {
+    width: '95%',
+    height: responsiveScreenHeight(5),
+    borderWidth: scale(0.7),
+    backgroundColor: Colors.barBackground,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: scale(6),
+  },
+  buttonText: {
+    color: Colors.lebal,
+    fontSize: fontSize.h3,
+    fontFamily: fontFamily.LatoBold,
   },
 });

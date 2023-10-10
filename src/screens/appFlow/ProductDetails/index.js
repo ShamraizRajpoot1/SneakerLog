@@ -26,6 +26,7 @@ import AddSneakers from '../../../components/AddSneakers';
 import CollectionHeader from '../../../components/CollectionHeader';
 import SearchBar from '../../../components/SearchBar';
 import ProductEdit from '../../../components/Modals/ProductEdit';
+import { DeleteProduct } from '../../../components/Modals';
 
 const data = [
   {
@@ -74,6 +75,10 @@ const data = [
 
 const ProductDetails = ({navigation}) => {
   const [productEdit, setProductEdit] = useState(false);
+  const [deleteProduct, setDeleteProduct] = useState(false)
+  const deleteToggle = () =>{
+    setDeleteProduct(prev => !prev)
+  }
   const toggle = () => {
     setProductEdit(prev => !prev);
   };
@@ -83,6 +88,9 @@ const ProductDetails = ({navigation}) => {
 
   const profile = () => {
     navigation.navigate('Profile');
+  };
+  const Collection = () => {
+    navigation.navigate('ChoseCollection');
   };
   const renderItem = ({item, index}) => (
     <View style={styles.container}>
@@ -95,7 +103,7 @@ const ProductDetails = ({navigation}) => {
           <TouchableOpacity onPress={toggle}>
             <Image style={styles.icon} source={appIcons.edit} />
           </TouchableOpacity>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={deleteToggle}>
             <Image style={styles.icon} source={appIcons.delete} />
           </TouchableOpacity>
         </View>
@@ -185,7 +193,7 @@ const ProductDetails = ({navigation}) => {
             contentContainerStyle={[AppStyles.contentContainer]}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}>
-            <CollectionHeader />
+            <CollectionHeader onPress={Collection}/>
             <View style={{marginLeft: responsiveScreenWidth(5)}}>
               <FlatList
                 data={data}
@@ -193,6 +201,7 @@ const ProductDetails = ({navigation}) => {
                 horizontal
                 keyExtractor={item => item.id.toString()}
               />
+              {deleteProduct && <DeleteProduct onBackdropPress={deleteToggle} />}
               {productEdit && <ProductEdit isVisible={productEdit} onBackdropPress={toggle}/>}
             </View>
           </ScrollView>

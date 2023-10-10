@@ -1,4 +1,7 @@
 import AddCollection from "./AddCollection";
 import ShareApp from "./ShareApp";
 import ProductEdit from "./ProductEdit";
-export{AddCollection, ShareApp, ProductEdit }
+import Size from "./Size";
+import Delete from "./Delete";
+import DeleteProduct from "./DeleteProduct";
+export{AddCollection, ShareApp, ProductEdit, Size, Delete, DeleteProduct }
