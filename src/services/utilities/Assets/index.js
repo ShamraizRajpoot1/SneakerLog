@@ -64,7 +64,7 @@ rular: require('../../../assets/Icons/rular.png'),
 threeDots : require('../../../assets/Icons/threeDots.png'),
 heart : require('../../../assets/Icons/heart.png'),
 heartFill : require('../../../assets/Icons/heartFill.png'),
-
+arrow : require('../../../assets/Icons/downArrow.png')
 }
 
 export { appImages, appIcons}

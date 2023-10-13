@@ -15,6 +15,8 @@ import {Colors} from '../../../services/utilities/Colors';
 import {fontFamily, fontSize} from '../../../services/utilities/Fonts';
 import {
   responsiveHeight,
+  responsiveScreenHeight,
+  responsiveScreenWidth,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
 import ProfileHead from '../../../components/ProfileHead';
@@ -24,7 +26,7 @@ import Input from '../../../components/Input';
 import Dropdown from '../../../components/Dropdown';
 import DropDownPicker from 'react-native-dropdown-picker';
 import CollectionHeader from '../../../components/CollectionHeader';
-import { CollectionModal } from '../../../components/Modals';
+import {CollectionModal, Size} from '../../../components/Modals';
 
 const Sneakers = ({navigation}) => {
   const [selectedValue, setSelectedValue] = useState('');
@@ -36,7 +38,7 @@ const Sneakers = ({navigation}) => {
     ...AppStyles.touchable,
     borderTopLeftRadius: 0,
     borderBottomLeftRadius: 0,
-  }
+  };
   const row = {
     ...AppStyles.row2,
     borderBottomWidth: responsiveWidth(0.2),
@@ -47,13 +49,23 @@ const Sneakers = ({navigation}) => {
   const Profile = () => {
     navigation.navigate('Profile');
   };
-  const [collection,setCollection] = useState(false);
-  const toggle = () =>{
-    setCollection(prev => !prev)
-  }
+  const [collection, setCollection] = useState(false);
+  const [sizemodal, setSizemodal] = useState(false);
+  const toggle = () => {
+    setCollection(prev => !prev);
+  };
+
+  const sizeToggle = () => {
+    setSizemodal(prev => !prev);
+  };
+  const sizeGuide = () => {
+    navigation.navigate('SizeGuide', {size});
+  };
+  const [size, setSize] = useState('');
+  // const [sizee, size] = useState('')
   return (
     <>
-      <Header Image={true} onPress={back} options={true} press={Profile}/>
+      <Header Image={true} onPress={back} options={true} press={Profile} />
 
       <KeyboardAvoidingView
         style={{flex: 1}}
@@ -90,8 +102,29 @@ const Sneakers = ({navigation}) => {
               <Input />
             </View>
             <View style={AppStyles.margin}>
-              <Text style={AppStyles.field}>SNEAKER SIZE</Text>
-              <Input />
+              <Text style={[AppStyles.field]}>SNEAKER SIZE</Text>
+              <TouchableOpacity
+                onPress={sizeToggle}
+                style={styles.sizeContainer}>
+                <Text
+                  style={[
+                    AppStyles.fvrtText,
+                    {color: Colors.text3, marginVertical: 0, width: '90%'},
+                  ]}>
+                  {size}
+                </Text>
+                <View
+                  style={{
+                    width: '5%',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                  <Image
+                    style={{width: scale(12), height: scale(15)}}
+                    source={appIcons.arrow}
+                  />
+                </View>
+              </TouchableOpacity>
             </View>
             <View style={AppStyles.margin}>
               <Text style={AppStyles.field}>CONDITION</Text>
@@ -102,7 +135,7 @@ const Sneakers = ({navigation}) => {
                 <TouchableOpacity
                   style={[
                     AppStyles.touchable,
-                    {backgroundColor: Colors.barBackground},
+                    {backgroundColor: Colors.barBackground,},
                   ]}>
                   <Text style={[AppStyles.touchText, {color: Colors.lebal}]}>
                     Used
@@ -119,58 +152,84 @@ const Sneakers = ({navigation}) => {
               <Input />
             </View>
             <View style={AppStyles.margin}>
-            <Text style={AppStyles.field}>QUANTITY</Text>
-              <View style={[AppStyles.row2, {marginTop:responsiveHeight(1), height: responsiveHeight(6), marginLeft: 0,}]}>
-                <TouchableOpacity style={[AppStyles.button1,{borderRadius: scale(5),}]}>
+              <Text style={AppStyles.field}>QUANTITY</Text>
+              <View
+                style={[
+                  AppStyles.row2,
+                  {
+                    marginTop: responsiveHeight(1),
+                    height: responsiveHeight(6),
+                    marginLeft: 0,
+                  },
+                ]}>
+                <TouchableOpacity
+                  style={[AppStyles.button1, {borderRadius: scale(5)}]}>
                   <Text style={[AppStyles.plus, {color: Colors.blackText}]}>
                     -
                   </Text>
                 </TouchableOpacity>
-                <Text style={[AppStyles.touchText, {alignSelf: 'center'}]}>1</Text>
+                <Text style={[AppStyles.touchText, {alignSelf: 'center'}]}>
+                  1
+                </Text>
                 <TouchableOpacity
                   style={[
                     AppStyles.button1,
-                    {backgroundColor: Colors.barBackground,borderRadius: scale(5)},
+                    {
+                      backgroundColor: Colors.barBackground,
+                      borderRadius: scale(5),
+                    },
                   ]}>
-                  <Text style={[AppStyles.plus,{color:Colors.lebal}]}>
-                    +
-                  </Text>
+                  <Text style={[AppStyles.plus, {color: Colors.lebal}]}>+</Text>
                 </TouchableOpacity>
               </View>
             </View>
             <View style={AppStyles.margin}>
-        <Text style={AppStyles.field}>SNEAKER STATUS</Text>
-        <DropDownPicker
-          items={items.map((item) => ({
-            label: item,
-            value: item,
-          }))}
-          defaultValue={selectedValue}
-          containerStyle={AppStyles.container}
-          style={AppStyles.dropdown}
-          itemStyle={AppStyles.itemStyle}
-          labelStyle={AppStyles.labelStyle}
-          dropDownStyle={AppStyles.dropDown}
-          onChangeItem={(item) => setSelectedValue(item.value)}
-        />
-        {collection && <CollectionModal /> }
-      </View>
-                </ScrollView>
-
+              <Text style={AppStyles.field}>SNEAKER STATUS</Text>
+              <DropDownPicker
+                items={items.map(item => ({
+                  label: item,
+                  value: item,
+                }))}
+                defaultValue={selectedValue}
+                containerStyle={AppStyles.container}
+                style={AppStyles.dropdown}
+                itemStyle={AppStyles.itemStyle}
+                labelStyle={AppStyles.labelStyle}
+                dropDownStyle={AppStyles.dropDown}
+                onChangeItem={item => setSelectedValue(item.value)}
+              />
+              {collection && <CollectionModal onBackdropPress={toggle} onPress={toggle} />}
+              {sizemodal && (
+                <Size
+                  onBackdropPress={sizeToggle}
+                  onChange={setSize}
+                  onPress={sizeGuide}
+                />
+              )}
+            </View>
+          </ScrollView>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
-      <View style={[AppStyles.textinputcontainer,{width:'100%', borderRadius: 0,  height:responsiveHeight(8),marginTop: 0}]}>
-                <TouchableOpacity style={[AppStyles.touchable]} >
-                  <Text style={[styles.touchText,{color: Colors.blue}]}>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[touchable,{backgroundColor: Colors.barBackground,}
-                  ]}>
-                  <Text style={[styles.touchText, {color: Colors.lebal}]}>
-                    Add to Collection
-                  </Text>
-                </TouchableOpacity>
-              </View>
+      <View
+        style={[
+          AppStyles.textinputcontainer,
+          {
+            width: '100%',
+            borderRadius: 0,
+            height: responsiveHeight(8),
+            marginTop: 0,
+          },
+        ]}>
+        <TouchableOpacity style={[AppStyles.touchable]}>
+          <Text style={[styles.touchText, {color: Colors.blue}]}>Cancel</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[touchable, {backgroundColor: Colors.barBackground}]}>
+          <Text style={[styles.touchText, {color: Colors.lebal}]}>
+            Add to Collection
+          </Text>
+        </TouchableOpacity>
+      </View>
     </>
   );
 };
@@ -181,6 +240,17 @@ const styles = StyleSheet.create({
   textContainer: {
     alignItems: 'center',
   },
+  sizeContainer: {
+    marginTop: responsiveScreenHeight(1),
+    width: responsiveScreenWidth(90),
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: scale(0.7),
+    height: responsiveScreenHeight(5),
+    borderRadius: scale(3),
+    borderColor: Colors.border1,
+    flexDirection:'row'
+  },
   text: {
     color: Colors.blackText,
     fontSize: fontSize.h3,
@@ -190,7 +260,7 @@ const styles = StyleSheet.create({
     fontSize: fontSize.lebal,
     color: Colors.blue,
   },
- 
+
   camtext: {
     fontSize: fontSize.lebal,
     color: Colors.blackText,

@@ -24,7 +24,7 @@ import {scale} from 'react-native-size-matters';
 import AddSneakers from '../../../components/AddSneakers';
 import CollectionHeader from '../../../components/CollectionHeader';
 import SearchBar from '../../../components/SearchBar';
-import { ShareApp } from '../../../components/Modals';
+import { CollectionModal, ShareApp } from '../../../components/Modals';
 
 const data = [
   {id: 1, name: 'Product 1', price: 10, image: appImages.product1},
@@ -56,6 +56,10 @@ const Collections = ({navigation}) => {
   };
   const [share, setShare] = useState(false)
   const [filter, setFilter] = useState(false);
+  const [collection, setCollection] = useState(false);
+  const toggle = () => {
+    setCollection(prev => !prev);
+  };
   const Share = () =>{
     setShare(prevShare => !prevShare)
   }
@@ -95,7 +99,7 @@ const Collections = ({navigation}) => {
             contentContainerStyle={[AppStyles.contentContainer]}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}>
-            <CollectionHeader onPress={Collection}/>
+             <CollectionHeader onPress={toggle} />
             {data.length === 0 ? (
               <View>
                 <View style={styles.textContainer}>
@@ -107,6 +111,7 @@ const Collections = ({navigation}) => {
                   </Text>
                 </View>
                 <AddSneakers onPress={Sneakers} press={Search} />
+                {collection && <CollectionModal onBackdropPress={toggle} onPress={toggle} />}
               </View>
             ) : (
               <>
@@ -185,6 +190,7 @@ const Collections = ({navigation}) => {
                       <Text style={AppStyles.emptyText}>No Sneaker</Text>
                     </View>
                   )}
+                  {collection && <CollectionModal onBackdropPress={toggle} onPress={toggle} />}
                   {share && <ShareApp isVisible={share} onBackdropPress={Share} /> }
                 </View>
               </>

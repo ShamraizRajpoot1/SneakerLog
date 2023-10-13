@@ -20,7 +20,7 @@ const CollectionHeader = (props) => {
       };
   return (
     <View style={row}>
-    <TouchableOpacity onPress={props.onPress}
+    <TouchableOpacity 
       style={[styles.textContainer, {width: responsiveWidth(17)}]}>
       <Image
         style={{width: scale(25), height: scale(25),marginLeft:responsiveWidth(5)}}

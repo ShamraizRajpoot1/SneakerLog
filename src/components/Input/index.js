@@ -1,4 +1,4 @@
-import {StyleSheet, Text, View, TextInput} from 'react-native';
+import {StyleSheet, Text, View, TextInput, Image} from 'react-native';
 import React from 'react';
 import {Colors} from '../../services/utilities/Colors';
 import {fontFamily, fontSize} from '../../services/utilities/Fonts';
@@ -10,6 +10,7 @@ import {
 import {AppStyles} from '../../services/utilities/AppStyles';
 import {Picker} from '@react-native-picker/picker';
 import {scale} from 'react-native-size-matters';
+import { appIcons } from '../../services/utilities/Assets';
 
 const Input = props => {
   const container = {
@@ -17,6 +18,7 @@ const Input = props => {
     borderWidth: scale(6),
     alignItems: props.align ? 'center' : null,
     width: props.width ? props.width : '95%',
+    flexDirection: 'row',
   };
 const input ={
   ...styles.input,
@@ -37,6 +39,7 @@ const input ={
         editable={props.editable}
         maxLength={props.maxLength}
       />
+      
     </View>
   );
 };
