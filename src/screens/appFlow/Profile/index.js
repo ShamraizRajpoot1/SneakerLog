@@ -28,6 +28,13 @@ const Profile = ({navigation}) => {
   const edit = () => {
     navigation.navigate('EditProfile');
   };
+  const container = {
+    ...AppStyles.inputcontainer,
+    height: responsiveHeight(5),
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: scale(3),
+  };
   return (
     <>
       <Header Image={true} onPress={back} />
@@ -46,15 +53,15 @@ const Profile = ({navigation}) => {
               <Image style={styles.image} source={appIcons.profile} />
             </View>
             <View>
-              <View style={styles.margin}>
+              <View style={AppStyles.marginVerticals}>
                 <Text style={styles.field}>NAME</Text>
                 <Text style={styles.textValue}>Shamraiz</Text>
               </View>
-              <View style={styles.margin}>
+              <View style={AppStyles.marginVerticals}>
                 <Text style={styles.field}>USERNAME</Text>
                 <Text style={styles.textValue}>shamraiz</Text>
               </View>
-              <View style={styles.margin}>
+              <View style={AppStyles.marginVerticals}>
                 <View style={{flexDirection: 'row'}}>
                   <Text style={styles.field}>EMAIL</Text>
                   <View style={styles.privateContainer}>
@@ -63,7 +70,7 @@ const Profile = ({navigation}) => {
                 </View>
                 <Text style={styles.textValue}>shamraiz@gmail.com</Text>
               </View>
-              <View style={styles.margin}>
+              <View style={AppStyles.marginVerticals}>
                 <View style={{flexDirection: 'row'}}>
                   <Text style={styles.field}>Phone</Text>
                   <View style={styles.privateContainer}>
@@ -73,7 +80,7 @@ const Profile = ({navigation}) => {
 
                 <Text style={styles.textValue}>03000000000</Text>
               </View>
-              <View style={styles.margin}>
+              <View style={AppStyles.marginVerticals}>
                 <View style={styles.textinputcontainer}>
                   <TouchableOpacity
                     style={[
@@ -92,13 +99,25 @@ const Profile = ({navigation}) => {
                   </TouchableOpacity>
                 </View>
               </View>
-              <View style={styles.margin}>
+              <View style={AppStyles.marginVerticals}>
                 <Text style={styles.field}>FAVORITE SNEAKER BRANDS</Text>
                 <Text style={styles.textValue}>No Brands Selected</Text>
               </View>
-              <View style={styles.margin}>
+              <View style={AppStyles.marginVerticals}>
                 <Text style={styles.field}>SNEAKER SIZE</Text>
                 <Text style={styles.textValue}>No Size Selected</Text>
+              </View>
+              <View style={AppStyles.marginVerticals}>
+                <TouchableOpacity 
+                  style={[
+                    container,
+                    {flexDirection: 'row', justifyContent: 'space-between'},
+                  ]}>
+                  <View style={{width: '80%', alignItems:'center',marginLeft:'10%'}}>
+                    <Text style={styles.editText}>Log Out</Text>
+                  </View>
+                  
+                </TouchableOpacity>
               </View>
             </View>
           </ScrollView>
@@ -134,10 +153,7 @@ const styles = StyleSheet.create({
     fontSize: fontSize.userName,
     color: Colors.username,
   },
-  margin: {
-    marginVertical: responsiveHeight(3),
-    marginLeft: responsiveWidth(5),
-  },
+  
   private: {
     fontSize: fontSize.fieldText,
     fontFamily: fontFamily.LatoMedium,
@@ -176,5 +192,10 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.fieldBackground,
     flexDirection: 'row',
     justifyContent: 'space-between',
+  },
+  editText: {
+    color: Colors.blue,
+    fontFamily: fontFamily.LatoBold,
+    fontSize: fontSize.h1,
   },
 });

@@ -15,6 +15,7 @@ import Header from '../../../components/Header';
 import {Colors} from '../../../services/utilities/Colors';
 import {fontFamily, fontSize} from '../../../services/utilities/Fonts';
 import {
+  responsiveFontSize,
   responsiveHeight,
   responsiveScreenHeight,
   responsiveScreenWidth,
@@ -22,11 +23,9 @@ import {
 } from 'react-native-responsive-dimensions';
 import {appIcons, appImages} from '../../../services/utilities/Assets';
 import {scale} from 'react-native-size-matters';
-import AddSneakers from '../../../components/AddSneakers';
 import CollectionHeader from '../../../components/CollectionHeader';
-import SearchBar from '../../../components/SearchBar';
 import ProductEdit from '../../../components/Modals/ProductEdit';
-import { DeleteProduct } from '../../../components/Modals';
+import {DeleteProduct} from '../../../components/Modals';
 
 const data = [
   {
@@ -41,7 +40,7 @@ const data = [
     size: '5.5',
     status: 'want',
     estimatedPrice: 756,
-    quantity: 6,
+    quantity: 5,
   },
   {
     id: 2,
@@ -69,16 +68,16 @@ const data = [
     size: '5.5',
     status: 'want',
     estimatedPrice: 756,
-    quantity: 6,
+    quantity: 7,
   },
 ];
 
 const ProductDetails = ({navigation}) => {
   const [productEdit, setProductEdit] = useState(false);
-  const [deleteProduct, setDeleteProduct] = useState(false)
-  const deleteToggle = () =>{
-    setDeleteProduct(prev => !prev)
-  }
+  const [deleteProduct, setDeleteProduct] = useState(false);
+  const deleteToggle = () => {
+    setDeleteProduct(prev => !prev);
+  };
   const toggle = () => {
     setProductEdit(prev => !prev);
   };
@@ -168,10 +167,7 @@ const ProductDetails = ({navigation}) => {
           <View style={{width: '28%'}}>
             <Text style={styles.name}>QUANTITY</Text>
             <Text style={styles.names}>
-              {item.quantity.length === 0
-                ? '-'
-                : `
-              ${item.quantity}`}
+              {item.quantity.length === 0 ? '-' : `${item.quantity}`}
             </Text>
           </View>
         </View>
@@ -193,7 +189,7 @@ const ProductDetails = ({navigation}) => {
             contentContainerStyle={[AppStyles.contentContainer]}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}>
-            <CollectionHeader onPress={Collection}/>
+            <CollectionHeader onPress={Collection} />
             <View style={{marginLeft: responsiveScreenWidth(5)}}>
               <FlatList
                 data={data}
@@ -201,8 +197,12 @@ const ProductDetails = ({navigation}) => {
                 horizontal
                 keyExtractor={item => item.id.toString()}
               />
-              {deleteProduct && <DeleteProduct onBackdropPress={deleteToggle} />}
-              {productEdit && <ProductEdit isVisible={productEdit} onBackdropPress={toggle}/>}
+              {deleteProduct && (
+                <DeleteProduct onBackdropPress={deleteToggle} />
+              )}
+              {productEdit && (
+                <ProductEdit isVisible={productEdit} onBackdropPress={toggle} />
+              )}
             </View>
           </ScrollView>
         </TouchableWithoutFeedback>
@@ -224,7 +224,8 @@ const styles = StyleSheet.create({
   },
   nameContainer: {
     height: responsiveScreenHeight(8),
-    borderBottomWidth: responsiveScreenWidth(0.1),
+    borderBottomWidth: scale(0.7),
+    borderColor: Colors.border1 ,
     width: '100%',
     flexDirection: 'row',
     padding: responsiveWidth(2),
@@ -242,15 +243,16 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   name: {
-    color: Colors.blackText,
-    fontSize: fontSize.usernameText,
+    color: Colors.username,
     fontFamily: fontFamily.LatoBold,
+    fontSize: fontSize.usernameText,
+    fontWeight: 'normal',
   },
   names: {
-    color: Colors.text3,
+    color: Colors.text2,
     fontFamily: fontFamily.LatoBold,
-    fontSize: fontSize.usernameText,
-    marginTop: responsiveScreenHeight(0.2),
+    fontSize: fontSize.pDetail,
+    fontWeight: 'normal',
   },
   imageContainer: {
     height: '40%',

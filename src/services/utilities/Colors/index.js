@@ -1,5 +1,6 @@
 export const Colors ={
     backgroud1: '#362636',
+    background2:'rgba(182, 187, 200, 0.2)',
     fieldBackground : '#FFF',
     fbBackground : '#4267B2',
     privateBg: '#362636',
@@ -7,6 +8,8 @@ export const Colors ={
     text: '#e3e1dc',
     text2: '#121212',
     text3: 'black',
+    text4: 'gray',
+    text5: '#cecbd5',
     toggleText: 'rgba(255, 255, 255, 0.7)',
     lebal: '#fff',
     loginText: '#e3e1dc',

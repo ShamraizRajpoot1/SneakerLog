@@ -23,6 +23,8 @@ import {scale} from 'react-native-size-matters';
 import Input from '../../../components/Input';
 import Dropdown from '../../../components/Dropdown';
 import DropDownPicker from 'react-native-dropdown-picker';
+import CollectionHeader from '../../../components/CollectionHeader';
+import { CollectionModal } from '../../../components/Modals';
 
 const Sneakers = ({navigation}) => {
   const [selectedValue, setSelectedValue] = useState('');
@@ -30,6 +32,11 @@ const Sneakers = ({navigation}) => {
   const back = () => {
     navigation.goBack();
   };
+  const touchable = {
+    ...AppStyles.touchable,
+    borderTopLeftRadius: 0,
+    borderBottomLeftRadius: 0,
+  }
   const row = {
     ...AppStyles.row2,
     borderBottomWidth: responsiveWidth(0.2),
@@ -40,6 +47,10 @@ const Sneakers = ({navigation}) => {
   const Profile = () => {
     navigation.navigate('Profile');
   };
+  const [collection,setCollection] = useState(false);
+  const toggle = () =>{
+    setCollection(prev => !prev)
+  }
   return (
     <>
       <Header Image={true} onPress={back} options={true} press={Profile}/>
@@ -54,28 +65,7 @@ const Sneakers = ({navigation}) => {
             contentContainerStyle={[AppStyles.contentContainer]}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}>
-            <View style={row}>
-              <TouchableOpacity
-                style={[styles.textContainer, {width: responsiveWidth(20)}]}>
-                <Image
-                  style={{width: scale(25), height: scale(25),marginLeft:responsiveWidth(5)}}
-                  source={appIcons.star}
-                />
-              </TouchableOpacity>
-              <View
-                style={[styles.textContainer, {width: responsiveWidth(60)}]}>
-                <Text style={[styles.text]}>Shoes</Text>
-              </View>
-              <View
-                style={[styles.textContainer, {width: responsiveWidth(20)}]}>
-                <TouchableOpacity>
-                  <Image
-                    style={{width: scale(20), height: scale(25), marginRight:responsiveWidth(5)}}
-                    source={appIcons.download}
-                  />
-                </TouchableOpacity>
-              </View>
-            </View>
+            <CollectionHeader onPress={toggle} />
             <View
               style={[
                 AppStyles.addCollection,
@@ -163,9 +153,10 @@ const Sneakers = ({navigation}) => {
           dropDownStyle={AppStyles.dropDown}
           onChangeItem={(item) => setSelectedValue(item.value)}
         />
+        {collection && <CollectionModal /> }
       </View>
                 </ScrollView>
-          
+
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
       <View style={[AppStyles.textinputcontainer,{width:'100%', borderRadius: 0,  height:responsiveHeight(8),marginTop: 0}]}>
@@ -173,9 +164,7 @@ const Sneakers = ({navigation}) => {
                   <Text style={[styles.touchText,{color: Colors.blue}]}>Cancel</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={[
-                    AppStyles.touchable,
-                    {backgroundColor: Colors.barBackground},
+                  style={[touchable,{backgroundColor: Colors.barBackground,}
                   ]}>
                   <Text style={[styles.touchText, {color: Colors.lebal}]}>
                     Add to Collection

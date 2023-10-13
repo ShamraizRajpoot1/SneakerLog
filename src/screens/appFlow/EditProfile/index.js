@@ -8,7 +8,7 @@ import {
   Image,
   TouchableOpacity,
 } from 'react-native';
-import React,{useState} from 'react';
+import React,{useState, useEffect} from 'react';
 import {AppStyles} from '../../../services/utilities/AppStyles';
 import Header from '../../../components/Header';
 import {Colors} from '../../../services/utilities/Colors';
@@ -36,6 +36,7 @@ const EditProfile = ({navigation}) => {
     height: responsiveHeight(5),
     alignItems: 'center',
     justifyContent: 'center',
+    borderRadius: scale(3),
   };
   const back = () => {
     navigation.goBack();
@@ -46,6 +47,11 @@ const EditProfile = ({navigation}) => {
   const manage = () => {
     navigation.navigate('ManageAccount');
   };
+  const sizeGuide = () =>{
+    navigation.navigate('SizeGuide',{size})
+   
+  }
+  
   return (
     <>
       <Header onPress={back} />
@@ -65,7 +71,7 @@ const EditProfile = ({navigation}) => {
               <Text style={styles.imageText}>Change Profile Photo</Text>
             </TouchableOpacity>
             <View>
-              <View style={styles.margin}>
+              <View style={AppStyles.marginVerticals}>
                 <Text style={AppStyles.field}>MANAGE ACCOUNT</Text>
                 <TouchableOpacity onPress={manage}
                   style={[
@@ -80,15 +86,15 @@ const EditProfile = ({navigation}) => {
                   </View>
                 </TouchableOpacity>
               </View>
-              <View style={styles.margin}>
+              <View style={AppStyles.marginVerticals}>
                 <Text style={AppStyles.field}>NAME</Text>
                 <Input placeholder={'Name'} />
               </View>
-              <View style={styles.margin}>
+              <View style={AppStyles.marginVerticals}>
                 <Text style={AppStyles.field}>USERNAME</Text>
                 <Input placeholder={'UserName'} />
               </View>
-              <View style={styles.margin}>
+              <View style={AppStyles.marginVerticals}>
                 <View style={{flexDirection: 'row'}}>
                   <Text style={AppStyles.field}>EMAIL</Text>
                   <View style={styles.privateContainer}>
@@ -97,7 +103,7 @@ const EditProfile = ({navigation}) => {
                 </View>
                 <Input editable={false} placeholder={'shamraiz@gmail.com'} />
               </View>
-              <View style={styles.margin}>
+              <View style={AppStyles.marginVerticals}>
                 <View style={{flexDirection: 'row'}}>
                   <Text style={AppStyles.field}>Phone</Text>
                   <View style={styles.privateContainer}>
@@ -107,7 +113,7 @@ const EditProfile = ({navigation}) => {
 
                 <Input editable={false} placeholder={'03003565295'} />
               </View>
-              <View style={styles.margin}>
+              <View style={AppStyles.marginVerticals}>
                 
                 <View style={AppStyles.textinputcontainer}>
                   <TouchableOpacity
@@ -127,7 +133,7 @@ const EditProfile = ({navigation}) => {
                   </TouchableOpacity>
                 </View>
               </View>
-              <View style={[styles.margin, {marginLeft: 0}]}>
+              <View style={[AppStyles.marginVerticals, {marginLeft: 0}]}>
                 <Text style={[AppStyles.field, {marginLeft: '5%'}]}>
                   FAVORITE SNEAKER BRANDS
                 </Text>
@@ -139,13 +145,25 @@ const EditProfile = ({navigation}) => {
                   </Text>
                 </TouchableOpacity>
               </View>
-              <View style={[styles.margin]}>
+              <View style={[AppStyles.marginVerticals]}>
                 <Text style={[AppStyles.field]}>SNEAKER SIZE</Text>
                 <TouchableOpacity onPress={toggleModal} style={styles.sizeContainer}>
-                <Text style={[AppStyles.fvrtText,{color: Colors.text3}]}>{size}</Text>
+                <Text style={[AppStyles.fvrtText,{color: Colors.text3,marginVertical:0}]}>{size}</Text>
               </TouchableOpacity>
               </View>
-              {sizeModal && <Size onBackdropPress={toggleModal} onChange={setSize} /> }
+              <View style={AppStyles.marginVerticals}>
+                <TouchableOpacity 
+                  style={[
+                    container,
+                    {flexDirection: 'row', justifyContent: 'space-between'},
+                  ]}>
+                  <View style={{width: '80%', alignItems:'center',marginLeft:'10%'}}>
+                    <Text style={styles.editText}>Log Out</Text>
+                  </View>
+                  
+                </TouchableOpacity>
+              </View>
+              {sizeModal && <Size onBackdropPress={toggleModal} onChange={setSize} onPress={sizeGuide}/> }
             </View>
           </ScrollView>
         </TouchableWithoutFeedback>
@@ -168,21 +186,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: '100%',
   },
-  textValue: {
-    fontFamily: fontFamily.LatoMedium,
-    fontWeight: 'normal',
-    fontSize: fontSize.h1,
-    color: '#121212',
-  },
   field: {
     fontFamily: fontFamily.LatoHeavy,
     fontWeight: 'normal',
     fontSize: fontSize.userName,
     color: Colors.username,
-  },
-  margin: {
-    marginVertical: responsiveHeight(3),
-    marginLeft: responsiveWidth(5),
   },
   private: {
     fontSize: fontSize.fieldText,

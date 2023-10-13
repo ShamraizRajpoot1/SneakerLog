@@ -262,4 +262,8 @@ export const AppStyles = StyleSheet.create({
     borderBottomLeftRadius: 5,
     borderBottomRightRadius: 5,
   },
+  marginVerticals: {
+    marginVertical: responsiveHeight(3),
+    marginLeft: responsiveWidth(5),
+  },
 });

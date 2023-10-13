@@ -70,18 +70,20 @@ const Size = (props) => {
   const numColumns = 4;
   const numRows = Math.ceil(data.length / numColumns);
 
-  // Function to handle size selection
   const handleSizeSelection = (size) => {
     setSelectedSize(size);
-    // Call the onChange prop with the selected size
     if (props.onChange) {
       props.onChange(size);
     }
-    // Call the onBackdropPress prop
     if (props.onBackdropPress) {
       props.onBackdropPress();
     }
   };
+
+  const sizeGuide = () =>{
+    props.onPress();
+    
+  }
 
   return (
     <Modal
@@ -104,7 +106,7 @@ const Size = (props) => {
                   marginRight: responsiveScreenWidth(5),
                 }}>
                 <Image style={styles.rular} source={appIcons.rular} />
-                <TouchableOpacity>
+                <TouchableOpacity onPress={sizeGuide}>
                   <Text
                     style={[
                       AppStyles.labelStyle,
@@ -162,10 +164,11 @@ const styles = StyleSheet.create({
   modalContent: {
     backgroundColor: Colors.fieldBackground,
     width: responsiveScreenWidth(100),
-    height: responsiveScreenHeight(90),
+    height: responsiveScreenHeight(94),
     borderTopRightRadius: scale(6),
     borderTopLeftRadius: scale(6),
     padding: responsiveScreenWidth(5),
+    paddingBottom: responsiveScreenHeight(5)
   },
   modaltxt: {
     fontSize: fontSize.h2,
@@ -181,14 +184,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   textContainer: {
-    height: responsiveScreenHeight(8),
+    height: responsiveScreenHeight(7.8),
     width: responsiveScreenHeight(8),
     borderWidth: responsiveScreenWidth(0.15),
-    borderRadius: scale(4),
+    borderRadius: scale(2),
     alignItems: 'center',
     justifyContent: 'center',
     borderColor: Colors.bordor2,
-    margin: responsiveScreenWidth(2),
+    marginHorizontal: responsiveScreenWidth(2.2),
+    marginVertical: responsiveScreenHeight(1)
   },
   text: {
     fontSize: fontSize.h3,

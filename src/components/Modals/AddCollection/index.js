@@ -22,7 +22,7 @@ import Input from '../../Input';
 
 const AddCollection = props => {
   const [isEnabled, setIsEnabled] = useState(false);
-  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+  const toggleSwitch = () => {setIsEnabled(previousState => !previousState);}
   return (
     <Modal
       transparent={true}
@@ -41,8 +41,8 @@ const AddCollection = props => {
             <Text style={styles.privatetext}>PRIVATE</Text>
             <Switch
               trackColor={{false: '#767577', true: '#00FF7F'}}
-              thumbColor={isEnabled ? '#08CF6E' : 'FFFFFF'}
-              ios_backgroundColor="#3e3e3e"
+              color={isEnabled ? '#08CF6E' : 'FFFFFF'}
+              //color={'#08CF6E'}
               onValueChange={toggleSwitch}
               value={isEnabled}
             />

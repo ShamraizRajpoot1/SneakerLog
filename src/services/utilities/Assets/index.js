@@ -61,6 +61,9 @@ clear: require('../../../assets/Icons/clear.png'),
 delete: require('../../../assets/Icons/delete.png'),
 edit: require('../../../assets/Icons/edit.png'),
 rular: require('../../../assets/Icons/rular.png'),
+threeDots : require('../../../assets/Icons/threeDots.png'),
+heart : require('../../../assets/Icons/heart.png'),
+heartFill : require('../../../assets/Icons/heartFill.png'),
 
 }
 
