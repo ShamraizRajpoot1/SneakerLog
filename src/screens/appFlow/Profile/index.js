@@ -8,7 +8,7 @@ import {
   Image,
   TouchableOpacity,
 } from 'react-native';
-import React from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import {AppStyles} from '../../../services/utilities/AppStyles';
 import Header from '../../../components/Header';
 import {Colors} from '../../../services/utilities/Colors';
@@ -20,8 +20,35 @@ import {
 import ProfileHead from '../../../components/ProfileHead';
 import {appIcons} from '../../../services/utilities/Assets';
 import {scale} from 'react-native-size-matters';
-
+import { AuthContext } from '../../../navigation/AuthProvider';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import firestore from '@react-native-firebase/firestore';
 const Profile = ({navigation}) => {
+
+  const {logout, user} = useContext(AuthContext)
+  const [userData, setUserData] = useState(null);
+
+  if (userData && !userData.gender) {
+    userData.gender = 'Male';
+  }
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const docId = user.uid; 
+        const userDoc = await firestore().collection('Users').doc(docId).get();
+        if (userDoc.exists) {
+          setUserData({ Id: userDoc.id, ...userDoc.data() });
+        } else {
+          console.log('No such document!');
+        }
+      } catch (error) {
+        console.error('Error fetching user data: ', error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
   const back = () => {
     navigation.goBack();
   };
@@ -35,31 +62,41 @@ const Profile = ({navigation}) => {
     justifyContent: 'center',
     borderRadius: scale(3),
   };
+  const Logout = async () => {
+    try {
+      
+      await AsyncStorage.removeItem('Token');
+      logout()
+      navigation.navigate("Auth", { screen: "Login" }); 
+      } catch (error) {
+      console.error('Error getting Token from AsyncStorage:', error);
+    }
+  };
   return (
-    <>
+    <View style={{flex:1, backgroundColor:Colors.background}}>
       <Header Image={true} onPress={back} />
       <ProfileHead edit={true} onPress={edit} />
       <KeyboardAvoidingView
-        style={{flex: 1}}
+        style={{flex: 1, backgroundColor:Colors.background}}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -500}>
         <TouchableWithoutFeedback>
           <ScrollView
             style={{flex: 1}}
             contentContainerStyle={[AppStyles.contentContainer]}
-            keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}>
+              { userData && ( <View>
             <View style={styles.imageContainer}>
               <Image style={styles.image} source={appIcons.profile} />
             </View>
             <View>
               <View style={AppStyles.marginVerticals}>
                 <Text style={styles.field}>NAME</Text>
-                <Text style={styles.textValue}>Shamraiz</Text>
+                <Text style={styles.textValue}>{userData.name}</Text>
               </View>
               <View style={AppStyles.marginVerticals}>
                 <Text style={styles.field}>USERNAME</Text>
-                <Text style={styles.textValue}>shamraiz</Text>
+                <Text style={styles.textValue}>{userData.userName}</Text>
               </View>
               <View style={AppStyles.marginVerticals}>
                 <View style={{flexDirection: 'row'}}>
@@ -68,7 +105,7 @@ const Profile = ({navigation}) => {
                     <Text style={styles.private}>Private</Text>
                   </View>
                 </View>
-                <Text style={styles.textValue}>shamraiz@gmail.com</Text>
+                <Text style={styles.textValue}>{userData.email}</Text>
               </View>
               <View style={AppStyles.marginVerticals}>
                 <View style={{flexDirection: 'row'}}>
@@ -78,26 +115,50 @@ const Profile = ({navigation}) => {
                   </View>
                 </View>
 
-                <Text style={styles.textValue}>03000000000</Text>
+                <Text style={styles.textValue}>{userData.phone}</Text>
               </View>
               <View style={AppStyles.marginVerticals}>
-                <View style={styles.textinputcontainer}>
-                  <TouchableOpacity
-                    style={[
-                      styles.touchable,
-                      {backgroundColor: Colors.barBackground},
-                    ]}>
-                    <Text style={[styles.touchText, {color: Colors.lebal}]}>
-                      Male
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={[styles.touchable]}>
-                    <Text style={[styles.touchText]}>Female</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={[styles.touchable]}>
-                    <Text style={[styles.touchText]}>Other</Text>
-                  </TouchableOpacity>
-                </View>
+              <View style={styles.textinputcontainer}>
+            <View
+              style={[
+                styles.touchable,
+                {
+                  backgroundColor:
+                    userData.gender === 'Male' ? Colors.barBackground : '',
+                },
+              ]}
+            >
+              <Text style={[styles.touchText, { color: userData.gender === 'Male' ? Colors.lebal : Colors.text2 }]}>
+                Male
+              </Text>
+            </View>
+            <View
+              style={[
+                styles.touchable,
+                {
+                  backgroundColor:
+                    userData.gender === 'Female' ? Colors.barBackground : '',
+                },
+              ]}
+            >
+              <Text style={[styles.touchText, { color: userData.gender === 'Female' ? Colors.lebal : Colors.text2 }]}>
+                Female
+              </Text>
+            </View>
+            <View
+              style={[
+                styles.touchable,
+                {
+                  backgroundColor:
+                    userData.gender === 'Others' ? Colors.barBackground : '',
+                },
+              ]}
+            >
+              <Text style={[styles.touchText, { color: userData.gender === 'Other' ? Colors.lebal : Colors.text2 }]}>
+                Other
+              </Text>
+            </View>
+          </View>
               </View>
               <View style={AppStyles.marginVerticals}>
                 <Text style={styles.field}>FAVORITE SNEAKER BRANDS</Text>
@@ -108,7 +169,7 @@ const Profile = ({navigation}) => {
                 <Text style={styles.textValue}>No Size Selected</Text>
               </View>
               <View style={AppStyles.marginVerticals}>
-                <TouchableOpacity 
+                <TouchableOpacity onPress={Logout}
                   style={[
                     container,
                     {flexDirection: 'row', justifyContent: 'space-between'},
@@ -120,10 +181,11 @@ const Profile = ({navigation}) => {
                 </TouchableOpacity>
               </View>
             </View>
+            </View>)}
           </ScrollView>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
-    </>
+    </View>
   );
 };
 

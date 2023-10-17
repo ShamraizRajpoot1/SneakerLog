@@ -90,7 +90,7 @@ const Collections = ({navigation}) => {
       <Header Image={true} onPress={back} options={true} press={profile} />
 
       <KeyboardAvoidingView
-        style={{flex: 1}}
+        style={{flex: 1,backgroundColor:Colors.background}}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -500}>
         <TouchableWithoutFeedback>

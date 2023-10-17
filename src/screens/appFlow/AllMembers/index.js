@@ -94,16 +94,18 @@ const AllMembers = ({navigation}) => {
           ))}
         </ScrollView>
       </View>
-
+<View style={{backgroundColor: Colors.background,}}>
       <SearchBar
         Text={'Search Members'}
         value={member}
         onChangeText={setMember}
       />
+      </View>
       <View style={{flex: 1}}>
         <TouchableWithoutFeedback>
           <ScrollView
-            style={{marginHorizontal: responsiveWidth(5)}}
+          showsVerticalScrollIndicator={false}
+            style={{marginHorizontal: responsiveWidth(5),backgroundColor: Colors.background,}}
             contentContainerStyle={[AppStyles.contentContainer]}>
             {selectedComponent}
           </ScrollView>
@@ -120,17 +122,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     width: '100%',
     height: '6%',
+    backgroundColor: Colors.background,
   },
   optionsContainer: {
     height: '100%',
     flexDirection: 'row',
     marginHorizontal: responsiveWidth(3),
     marginTop: responsiveHeight(2),
+    backgroundColor: Colors.background,
   },
   optionItem: {
     alignItems: 'center',
     marginHorizontal: responsiveWidth(3.5),
     width: responsiveScreenWidth(18.5),
+    backgroundColor: Colors.background,
   },
   selectedOption: {},
   optionText: {

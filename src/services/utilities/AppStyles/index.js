@@ -194,7 +194,7 @@ export const AppStyles = StyleSheet.create({
   },
   userHorizontalText: {
     fontSize: fontSize.userName,
-    fontFamily: fontFamily.LatoBold,
+    fontFamily: fontFamily.LatoRegular,
     marginTop: responsiveHeight(1.3),
     color: Colors.blackText,
   },

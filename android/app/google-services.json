@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "103872340778",
+    "project_id": "sneakerlog-c74f6",
+    "storage_bucket": "sneakerlog-c74f6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:103872340778:android:8494bf82eae95f8a117453",
+        "android_client_info": {
+          "package_name": "com.sneakerlog"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA0rETFuR_BtjDbD5R2XAESEPGBPo8nR6g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

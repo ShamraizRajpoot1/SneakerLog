@@ -95,8 +95,7 @@ const Size = (props) => {
         activeOpacity={1}
         onPress={props.onBackdropPress}>
         <View style={styles.modalContent}>
-          <ScrollView contentContainerStyle={styles.scrollViewContainer}>
-            <View style={styles.row}>
+        <View style={styles.row}>
               <Text style={[AppStyles.labelStyle, { fontSize: fontSize.lebal }]}>
                 Select Sneaker Size
               </Text>
@@ -117,6 +116,8 @@ const Size = (props) => {
                 </TouchableOpacity>
               </View>
             </View>
+          <ScrollView contentContainerStyle={styles.scrollViewContainer}>
+            
 
             {Array.from({ length: numRows }).map((_, rowIndex) => (
               <View key={rowIndex} style={styles.rowContainer}>
@@ -141,10 +142,11 @@ const Size = (props) => {
                   ))}
               </View>
             ))}
-            <TouchableOpacity style={styles.bottonContainer} onPress={props.onBackdropPress}>
+            
+          </ScrollView>
+          <TouchableOpacity style={styles.bottonContainer} onPress={props.onBackdropPress}>
               <Text style={styles.cancel}>Cancel</Text>
             </TouchableOpacity>
-          </ScrollView>
         </View>
       </TouchableOpacity>
     </Modal>
@@ -156,36 +158,37 @@ export default Size;
 const styles = StyleSheet.create({
   modalContainer: {
     width: '100%',
-    height: '100%',
+    height: '92.5%',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
     backgroundColor: Colors.modalBackground,
   },
   modalContent: {
     backgroundColor: Colors.fieldBackground,
     width: responsiveScreenWidth(100),
-    height: responsiveScreenHeight(94),
+    height: "97%",
     borderTopRightRadius: scale(6),
     borderTopLeftRadius: scale(6),
     padding: responsiveScreenWidth(5),
-    paddingBottom: responsiveScreenHeight(5)
+    paddingBottom: responsiveScreenHeight(1)
   },
   modaltxt: {
     fontSize: fontSize.h2,
     fontFamily: fontFamily.LatoHeavy,
     fontWeight: 'bold',
     color: Colors.text3,
-    marginBottom: responsiveScreenHeight(2.5),
+    //marginBottom: responsiveScreenHeight(2.5),
   },
   scrollViewContainer: {
     flexGrow: 1,
+    alignItems:'center'
   },
   rowContainer: {
     flexDirection: 'row',
   },
   textContainer: {
-    height: responsiveScreenHeight(7.8),
-    width: responsiveScreenHeight(8),
+    height: responsiveHeight(8),
+    width: responsiveWidth(17),
     borderWidth: responsiveScreenWidth(0.15),
     borderRadius: scale(2),
     alignItems: 'center',
@@ -208,16 +211,18 @@ const styles = StyleSheet.create({
     marginRight: responsiveScreenWidth(2),
   },
   row: {
+    marginLeft: responsiveScreenHeight(1),
+    marginTop: responsiveHeight(0.5),
     flexDirection: 'row',
     justifyContent: 'space-between',
-    height: responsiveScreenHeight(6),
+    height: responsiveScreenHeight(5),
   },
   bottonContainer: {
     alignItems: 'center',
     justifyContent: 'center',
     borderTopWidth: scale(1),
     borderColor: Colors.border1,
-    height: responsiveScreenHeight(7),
+    height: responsiveScreenHeight(6),
   },
   cancel: {
     color: Colors.blue,

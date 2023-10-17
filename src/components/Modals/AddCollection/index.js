@@ -40,8 +40,8 @@ const AddCollection = props => {
           <View style={styles.row}>
             <Text style={styles.privatetext}>PRIVATE</Text>
             <Switch
-              trackColor={{false: '#767577', true: '#00FF7F'}}
-              color={isEnabled ? '#08CF6E' : 'FFFFFF'}
+              trackColor={{false: '#767577', true: '#83e7b6'}}
+              color={isEnabled ? '#08cb6b' : 'FFFFFF'}
               //color={'#08CF6E'}
               onValueChange={toggleSwitch}
               value={isEnabled}

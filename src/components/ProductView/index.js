@@ -84,7 +84,7 @@
     if (props.vertical) {
       return (
         <FlatList
-          showsHorizontalScrollIndicator={false}
+          showsVerticalScrollIndicator={false}
           horizontal={false} 
           numColumns={2} 
           scrollEnabled={false}
@@ -242,7 +242,7 @@
     cardview2: {
       height: responsiveHeight(15),
       width: responsiveWidth(40),
-      backgroundColor: Colors.fieldBackground,
+      backgroundColor: Colors.searchBackground,
       borderWidth: scale(1),
       borderColor: Colors.border1,
       borderRadius: scale(7),

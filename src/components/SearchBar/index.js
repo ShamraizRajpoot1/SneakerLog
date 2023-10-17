@@ -38,6 +38,7 @@ export default SearchBar;
 
 const styles = StyleSheet.create({
   search: {
+    backgroundColor:Colors.searchBackground,
     marginTop: responsiveScreenHeight(3),
     width: '90%',
     height: responsiveScreenHeight(6),

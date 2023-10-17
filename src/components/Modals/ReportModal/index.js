@@ -75,14 +75,10 @@ const ReportModal = props => {
             </TouchableOpacity>
             <TouchableOpacity style={[styles.button, {backgroundColor: null}]}>
               <Text style={[styles.buttonText, {color: Colors.blue}]}>
-                Unfollow {'<UserName>'}{' '}
+                Close
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.button, {backgroundColor: null}]}>
-              <Text style={[styles.buttonText, {color: Colors.blue}]}>
-                Block Post
-              </Text>
-            </TouchableOpacity>
+           
           </View>
         )}
          </View>
@@ -130,7 +126,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: scale(6),
-    marginBottom: responsiveHeight(5),
+    marginBottom: responsiveHeight(2.5),
   },
   buttonText: {
     color: Colors.lebal,

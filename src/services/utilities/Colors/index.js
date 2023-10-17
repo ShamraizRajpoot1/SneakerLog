@@ -1,6 +1,8 @@
 export const Colors ={
+    background: '#f6f7fb',
     backgroud1: '#362636',
     background2:'rgba(182, 187, 200, 0.2)',
+    searchBackground: '#ffffff',
     fieldBackground : '#FFF',
     fbBackground : '#4267B2',
     privateBg: '#362636',
@@ -21,7 +23,7 @@ export const Colors ={
     fieldText : '#757575',
     disabledButton : 'rgba(217, 23, 59,0.4)',
     username: '#6C6C6C',
-    follow: 'red',
+    follow: '#D9173B',
     blue: '#589BE9',
     modalBackground: 'rgba(0,0,0,.7)'
 }

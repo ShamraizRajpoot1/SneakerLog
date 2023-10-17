@@ -34,7 +34,8 @@ brand23 : require('../../../assets/Images/SneakerBrands/puma.png'),
 brand24 : require('../../../assets/Images/SneakerBrands/reebok.png'),
 brand25 : require('../../../assets/Images/SneakerBrands/saucony.png'),
 brand26 : require('../../../assets/Images/SneakerBrands/Skechers.png'),
-brand27 : require('../../../assets/Images/SneakerBrands/timberland.png')
+brand27 : require('../../../assets/Images/SneakerBrands/timberland.png'),
+splash : require('../../../assets/Images/splash.png')
 }
 const appIcons = {
 eye : require('../../../assets/Icons/eye.png'),
@@ -64,7 +65,9 @@ rular: require('../../../assets/Icons/rular.png'),
 threeDots : require('../../../assets/Icons/threeDots.png'),
 heart : require('../../../assets/Icons/heart.png'),
 heartFill : require('../../../assets/Icons/heartFill.png'),
-arrow : require('../../../assets/Icons/downArrow.png')
+arrow : require('../../../assets/Icons/downArrow.png'),
+tickgreen :  require('../../../assets/Icons/tickgreen.png'),
+cross :  require('../../../assets/Icons/cross.png'),
 }
 
 export { appImages, appIcons}

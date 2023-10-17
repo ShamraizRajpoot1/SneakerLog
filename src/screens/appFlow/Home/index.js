@@ -133,7 +133,7 @@ const Home = ({navigation}) => {
                     styles.product,
                     {marginTop: responsiveScreenHeight(-2)},
                   ]}>
-                  <View style={AppStyles.row2}>
+                  <View style={[AppStyles.row2,]}>
                     <Text style={AppStyles.fvrtText}>MEMBERS</Text>
                     <TouchableOpacity onPress={AllMembers}>
                       <Text
@@ -150,7 +150,7 @@ const Home = ({navigation}) => {
                 <Text
                   style={[
                     AppStyles.fvrtText,
-                    {marginLeft: '5%', marginTop: responsiveScreenHeight(3)},
+                    {marginLeft: '5%', marginTop: responsiveScreenHeight(2)},
                   ]}>
                   UPCOMING EVENTS
                 </Text>

@@ -1,105 +1,74 @@
-import React from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {View, Text, Image, FlatList, TouchableOpacity} from 'react-native';
-import {
-  responsiveWidth,
-  responsiveHeight,
-} from 'react-native-responsive-dimensions';
-import {appImages} from '../../../services/utilities/Assets';
+import {responsiveWidth} from 'react-native-responsive-dimensions';
 import {Colors} from '../../../services/utilities/Colors';
-import { AppStyles } from '../../../services/utilities/AppStyles';
+import {AppStyles} from '../../../services/utilities/AppStyles';
+import firestore from '@react-native-firebase/firestore';
+import {AuthContext} from '../../../navigation/AuthProvider';
+import {appIcons} from '../../../services/utilities/Assets';
 
 const Sent = props => {
-  const Users = [
-    {
-      Id: '1',
-      name: 'User 1',
-      profileImage: appImages.member1,
-      username: 'user1',
-    },
-    {
-      Id: '2',
-      name: 'User 2',
-      profileImage: appImages.member2,
-      username: 'user2',
-    },
-    {
-      Id: '3',
-      name: 'User 3',
-      profileImage: appImages.member3,
-      username: 'user3',
-    },
-    {
-      Id: '4',
-      name: 'User 1',
-      profileImage: appImages.member1,
-      username: 'user1',
-    },
-    {
-      Id: '5',
-      name: 'User 2',
-      profileImage: appImages.member2,
-      username: 'user2',
-    },
-    {
-      Id: '6',
-      name: 'User 3',
-      profileImage: appImages.member3,
-      username: 'user3',
-    },
-    {
-      Id: '7',
-      name: 'User 3',
-      profileImage: appImages.member3,
-      username: 'user3',
-    },
-    {
-      Id: '8',
-      name: 'User 1',
-      profileImage: appImages.member1,
-      username: 'user1',
-    },
-    {
-      Id: '9',
-      name: 'User 2',
-      profileImage: appImages.member2,
-      username: 'user2',
-    },
-    {
-      Id: '10',
-      name: 'User 3',
-      profileImage: appImages.member3,
-      username: 'user3',
-    },
-    {
-      Id: '11',
-      name: 'User 3',
-      profileImage: appImages.member3,
-      username: 'user3',
-    },
-    {
-      Id: '12',
-      name: 'User 3',
-      profileImage: appImages.member3,
-      username: 'user3',
-    },
-    {
-      Id: '13',
-      name: 'User 3',
-      profileImage: appImages.member3,
-      username: 'user3',
-    },
-  ];
-  
- 
+  const {user} = useContext(AuthContext);
+  const [sentData, setSentData] = useState([]);
 
-  const loggedInUser = {
-    Id: '2',
-    name: 'User 2',
-    profileImage: 'https://example.com/user2.jpg',
-    username: 'user2',
+  useEffect(() => {
+    const fetchSentData = async () => {
+      try {
+        const userDoc = await firestore()
+          .collection('Users')
+          .doc(user.uid)
+          .get();
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          if (userData.sent) {
+            setSentData(userData.sent);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching sent data: ', error);
+      }
+    };
+
+    fetchSentData();
+  }, [user.uid]);
+  const handleWithDraw = async selectedUser => {
+    try {
+      const selectedUserId = selectedUser.Id;
+      const userDocRef = firestore().collection('Users').doc(user.uid);
+      const selectedUserDocRef = firestore()
+        .collection('Users')
+        .doc(selectedUserId);
+
+      const currentUserDoc = await userDocRef.get();
+      const currentUserData = currentUserDoc.data();
+
+      console.log('Current user data:', currentUserData); // Log currentUserData
+
+      if (currentUserData && currentUserData.name && currentUserData.userName) {
+        const {name: currentUserName, userName: currentUserUserName} =
+          currentUserData;
+
+        await selectedUserDocRef.update({
+          sent: firestore.FieldValue.arrayRemove({
+            Id: user.uid,
+            name: currentUserName,
+            userName: currentUserUserName,
+            //Image: currentUserProfileImage,
+          }),
+        });
+
+        await userDocRef.update({
+          sent: firestore.FieldValue.arrayRemove(selectedUser),
+        });
+
+        console.log('Data removed successfully');
+      } else {
+        console.error('Current user data is undefined or incomplete');
+      }
+    } catch (error) {
+      console.error('Error handling withdrawal: ', error);
+    }
   };
-
-  const displayedUsers = Users;
 
   return (
     <FlatList
@@ -108,34 +77,36 @@ const Sent = props => {
       horizontal={false}
       scrollEnabled={false}
       keyExtractor={item => item.Id}
-      data={displayedUsers.filter(item => item.Id !== loggedInUser.Id)}
+      data={sentData}
       renderItem={({item, index}) => {
         return (
-          <TouchableOpacity
-            style={AppStyles.userContainer}>
+          <TouchableOpacity style={AppStyles.userContainer}>
             <Image
-              source={item.profileImage ? item.profileImage : appImages.member3}
+              source={
+                item.profileImage ? {uri: item.profileImage} : appIcons.profile
+              }
               style={AppStyles.memberimage}
             />
             <View style={{flex: 1}}>
               <View style={{marginLeft: responsiveWidth(2)}}>
                 <Text numberOfLines={1} style={AppStyles.userText}>
-                  {item.username}
+                  {item.name}
                 </Text>
                 <Text numberOfLines={1} style={AppStyles.additionalText}>
-                  Additional Info
+                  {item.userName}
                 </Text>
               </View>
             </View>
-            <TouchableOpacity >
+            <TouchableOpacity onPress={() => handleWithDraw(item)}>
               <Text
                 numberOfLines={1}
-                style={[AppStyles.userHorizontalText, {color: Colors.blackText}]}>
+                style={[
+                  AppStyles.userHorizontalText,
+                  {color: Colors.blackText},
+                ]}>
                 WITHDRAW
               </Text>
             </TouchableOpacity>
-            
-            
           </TouchableOpacity>
         );
       }}
@@ -144,6 +115,3 @@ const Sent = props => {
 };
 
 export default Sent;
-const styles = {
-  
-};

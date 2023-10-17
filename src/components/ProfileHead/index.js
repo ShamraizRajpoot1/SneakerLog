@@ -4,12 +4,11 @@ import {AppStyles} from '../../services/utilities/AppStyles';
 import {Colors} from '../../services/utilities/Colors';
 import {fontFamily, fontSize} from '../../services/utilities/Fonts';
 import {responsiveWidth} from 'react-native-responsive-dimensions';
-import {appIcons, appImages} from '../../services/utilities/Assets';
 
 const ProfileHead = props => {
   return (
     <>
-      <View style={AppStyles.row}>
+      <View style={[AppStyles.row,{backgroundColor:Colors.background}]}>
         <TouchableOpacity
           style={[styles.textContainer, {width: responsiveWidth(20)}]}
           onPress={props.cancelPress}>
@@ -40,6 +39,7 @@ export default ProfileHead;
 const styles = StyleSheet.create({
   textContainer: {
     alignItems: 'center',
+    
   },
   text: {
     color: Colors.text2,

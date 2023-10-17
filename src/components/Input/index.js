@@ -19,6 +19,7 @@ const Input = props => {
     alignItems: props.align ? 'center' : null,
     width: props.width ? props.width : '95%',
     flexDirection: 'row',
+    borderColor: Colors.border1,
   };
 const input ={
   ...styles.input,

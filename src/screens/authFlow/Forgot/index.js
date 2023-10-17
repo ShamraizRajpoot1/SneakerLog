@@ -5,24 +5,18 @@ import {
     KeyboardAvoidingView,
     TouchableWithoutFeedback,
     ScrollView,
-    TouchableOpacity,
-    Image
   } from 'react-native';
   import React from 'react';
   import {AppStyles} from '../../../services/utilities/AppStyles';
   import {Colors} from '../../../services/utilities/Colors';
   import Header from '../../../components/Header';
   import InputField from '../../../components/InputField';
-  import {scale} from 'react-native-size-matters';
   import {
     responsiveScreenHeight,
     responsiveWidth,
-    responsiveFontSize,
     responsiveHeight,
   } from 'react-native-responsive-dimensions';
   import Button from '../../../components/Button';
-  import { fontSize } from '../../../services/utilities/Fonts';
-  import { appIcons } from '../../../services/utilities/Assets';
   
   const Forgot = ({navigation}) => {
     const back = () =>{

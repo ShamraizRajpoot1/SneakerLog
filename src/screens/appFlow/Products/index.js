@@ -31,7 +31,8 @@ import ProductView from '../../../components/ProductView';
           keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -500}>
           <TouchableWithoutFeedback>
           <ScrollView
-            style={{flex: 1}}
+          showsVerticalScrollIndicator={false}
+            style={{flex: 1, backgroundColor:Colors.background}}
             contentContainerStyle={[AppStyles.contentContainer]}
             keyboardShouldPersistTaps="handled">
                   <Text style={[AppStyles.fvrtText,{marginLeft:responsiveScreenWidth(5)}]}>RELEASE DATES</Text>

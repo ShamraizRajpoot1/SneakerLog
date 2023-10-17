@@ -53,7 +53,7 @@ const EditProfile = ({navigation}) => {
   }
   
   return (
-    <>
+    <View style={{flex:1, backgroundColor:Colors.background}}>
       <Header onPress={back} />
       <ProfileHead cancel={true} update={true} cancelPress={back} updatePress={back}/>
       <KeyboardAvoidingView
@@ -168,7 +168,7 @@ const EditProfile = ({navigation}) => {
           </ScrollView>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
-    </>
+    </View>
   );
 };
 

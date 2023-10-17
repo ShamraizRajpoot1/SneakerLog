@@ -1,107 +1,121 @@
-import React from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {View, Text, Image, FlatList, TouchableOpacity} from 'react-native';
 import {
   responsiveWidth,
   responsiveHeight,
 } from 'react-native-responsive-dimensions';
-import {appImages} from '../../../services/utilities/Assets';
-import {scale} from 'react-native-size-matters';
-import {fontFamily, fontSize} from '../../../services/utilities/Fonts';
+import {appIcons, appImages} from '../../../services/utilities/Assets';
 import {Colors} from '../../../services/utilities/Colors';
-import { AppStyles } from '../../../services/utilities/AppStyles';
+import {AppStyles} from '../../../services/utilities/AppStyles';
+import firestore from '@react-native-firebase/firestore';
+import {AuthContext} from '../../../navigation/AuthProvider';
 
 const Received = props => {
-  const Users = [
-    {
-      Id: '1',
-      name: 'User 1',
-      profileImage: appImages.member1,
-      username: 'user1',
-    },
-    {
-      Id: '2',
-      name: 'User 2',
-      profileImage: appImages.member2,
-      username: 'user2',
-    },
-    {
-      Id: '3',
-      name: 'User 3',
-      profileImage: appImages.member3,
-      username: 'user3',
-    },
-    {
-      Id: '4',
-      name: 'User 1',
-      profileImage: appImages.member1,
-      username: 'user1',
-    },
-    {
-      Id: '5',
-      name: 'User 2',
-      profileImage: appImages.member2,
-      username: 'user2',
-    },
-    {
-      Id: '6',
-      name: 'User 3',
-      profileImage: appImages.member3,
-      username: 'user3',
-    },
-    {
-      Id: '7',
-      name: 'User 3',
-      profileImage: appImages.member3,
-      username: 'user3',
-    },
-    {
-      Id: '8',
-      name: 'User 1',
-      profileImage: appImages.member1,
-      username: 'user1',
-    },
-    {
-      Id: '9',
-      name: 'User 2',
-      profileImage: appImages.member2,
-      username: 'user2',
-    },
-    {
-      Id: '10',
-      name: 'User 3',
-      profileImage: appImages.member3,
-      username: 'user3',
-    },
-    {
-      Id: '11',
-      name: 'User 3',
-      profileImage: appImages.member3,
-      username: 'user3',
-    },
-    {
-      Id: '12',
-      name: 'User 3',
-      profileImage: appImages.member3,
-      username: 'user3',
-    },
-    {
-      Id: '13',
-      name: 'User 3',
-      profileImage: appImages.member3,
-      username: 'user3',
-    },
-  ];
-  
- 
+  const {user} = useContext(AuthContext);
+  const [receivedUsers, setReceivedUsers] = useState([]);
+  const handleAccept = async selectedUser => {
+    try {
+      const selectedUserId = selectedUser.Id;
+      const userDocRef = firestore().collection('Users').doc(user.uid);
+      const selectedUserDocRef = firestore()
+        .collection('Users')
+        .doc(selectedUserId);
 
-  const loggedInUser = {
-    Id: '2',
-    name: 'User 2',
-    profileImage: 'https://example.com/user2.jpg',
-    username: 'user2',
+      const userDoc = await userDocRef.get();
+      const currentUserData = userDoc.data();
+
+      const currentUserName = currentUserData.name || '';
+      const currentUserUserName = currentUserData.userName || '';
+      const currentUserProfileImage = currentUserData.profileImage || '';
+
+      await userDocRef.update({
+        followersData: firestore.FieldValue.arrayUnion(selectedUser),
+      });
+
+      await userDocRef.update({
+        received: firestore.FieldValue.arrayRemove(selectedUser),
+      });
+
+      await selectedUserDocRef.update({
+        sent: firestore.FieldValue.arrayRemove({
+          Id: user.uid,
+          name: currentUserName,
+          userName: currentUserUserName,
+          Image: currentUserProfileImage,
+        }),
+      });
+
+      await selectedUserDocRef.update({
+        followingData: firestore.FieldValue.arrayUnion({
+          Id: user.uid,
+          name: currentUserName,
+          userName: currentUserUserName,
+          Image: currentUserProfileImage,
+        }),
+      });
+    } catch (error) {
+      console.error('Error handling accept: ', error);
+    }
+  };
+  const handleDecline = async selectedUser => {
+    try {
+      const selectedUserId = selectedUser.Id;
+      const userDocRef = firestore().collection('Users').doc(user.uid);
+      const selectedUserDocRef = firestore()
+        .collection('Users')
+        .doc(selectedUserId);
+
+      // Fetch current user data
+      const currentUserDoc = await userDocRef.get();
+      const currentUserData = currentUserDoc.data();
+      const {
+        name: currentUserName,
+        userName: currentUserUserName,
+        Image: currentUserProfileImage,
+      } = currentUserData;
+
+      // Remove from received in current user's document
+      await userDocRef.update({
+        received: firestore.FieldValue.arrayRemove(selectedUser),
+      });
+
+      // Remove from sent in selected user's document
+      await selectedUserDocRef.update({
+        sent: firestore.FieldValue.arrayRemove({
+          Id: user.uid,
+          name: currentUserName,
+          userName: currentUserUserName,
+          Image: currentUserProfileImage,
+        }),
+      });
+
+      // Log success message
+      console.log('Data removed successfully');
+    } catch (error) {
+      console.error('Error handling decline: ', error);
+    }
   };
 
-  const displayedUsers = Users;
+  useEffect(() => {
+    const fetchReceivedUsers = async () => {
+      try {
+        const userDoc = await firestore()
+          .collection('Users')
+          .doc(user.uid)
+          .get();
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          if (userData.received) {
+            setReceivedUsers(userData.received);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching received users: ', error);
+      }
+    };
+
+    fetchReceivedUsers();
+  }, [user.uid]);
 
   return (
     <FlatList
@@ -110,40 +124,43 @@ const Received = props => {
       horizontal={false}
       scrollEnabled={false}
       keyExtractor={item => item.Id}
-      data={displayedUsers.filter(item => item.Id !== loggedInUser.Id)}
+      data={receivedUsers}
       renderItem={({item, index}) => {
         return (
-          <TouchableOpacity
-            style={AppStyles.userContainer}>
+          <TouchableOpacity style={AppStyles.userContainer}>
             <Image
-              source={item.profileImage ? item.profileImage : appImages.member3}
+              source={item.profileImage ? item.profileImage : appIcons.profile}
               style={AppStyles.memberimage}
             />
             <View style={{flex: 1}}>
-              <View style={{marginLeft: responsiveWidth(2)}}>
+              <View style={{marginLeft: responsiveWidth(4)}}>
                 <Text numberOfLines={1} style={AppStyles.userText}>
-                  {item.username}
+                  {item.name}
                 </Text>
-                <Text numberOfLines={1} style={AppStyles.additionalText}>
-                  Additional Info
+                <Text numberOfLines={1} style={[AppStyles.additionalText]}>
+                  {item.userName}
                 </Text>
               </View>
             </View>
-            <TouchableOpacity  style={{marginRight: responsiveWidth(5)}}>
+            <TouchableOpacity
+              onPress={() => handleDecline(item)}
+              style={{marginRight: responsiveWidth(5)}}>
               <Text
                 numberOfLines={1}
-                style={[AppStyles.userHorizontalText, {color: Colors.blackText}]}>
+                style={[
+                  AppStyles.userHorizontalText,
+                  {color: Colors.blackText},
+                ]}>
                 DECLINE
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => handleAccept(item)}>
               <Text
                 numberOfLines={1}
                 style={[AppStyles.userHorizontalText, {color: Colors.follow}]}>
                 ACCEPT
               </Text>
             </TouchableOpacity>
-            
           </TouchableOpacity>
         );
       }}
@@ -152,6 +169,3 @@ const Received = props => {
 };
 
 export default Received;
-const styles = {
-  
-};
