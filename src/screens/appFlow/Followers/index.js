@@ -1,108 +1,115 @@
-import React from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import {View, Text, Image, FlatList, TouchableOpacity} from 'react-native';
 import {
   responsiveWidth,
   responsiveHeight,
 } from 'react-native-responsive-dimensions';
-import {appImages} from '../../../services/utilities/Assets';
-import {scale} from 'react-native-size-matters';
-import {fontFamily, fontSize} from '../../../services/utilities/Fonts';
+import {appImages} from '../../../services/utilities/Assets'
 import {Colors} from '../../../services/utilities/Colors';
 import { AppStyles } from '../../../services/utilities/AppStyles';
+import firestore from '@react-native-firebase/firestore';
+import { AuthContext } from '../../../navigation/AuthProvider';
 
 const Followers = props => {
-  const Users = [
-    {
-      Id: '1',
-      name: 'User 1',
-      profileImage: appImages.member1,
-      username: 'user1',
-    },
-    {
-      Id: '2',
-      name: 'User 2',
-      profileImage: appImages.member2,
-      username: 'user2',
-    },
-    {
-      Id: '3',
-      name: 'User 3',
-      profileImage: appImages.member3,
-      username: 'user3',
-    },
-    {
-      Id: '4',
-      name: 'User 1',
-      profileImage: appImages.member1,
-      username: 'user1',
-    },
-    {
-      Id: '5',
-      name: 'User 2',
-      profileImage: appImages.member2,
-      username: 'user2',
-    },
-    {
-      Id: '6',
-      name: 'User 3',
-      profileImage: appImages.member3,
-      username: 'user3',
-    },
-    {
-      Id: '7',
-      name: 'User 3',
-      profileImage: appImages.member3,
-      username: 'user3',
-    },
-    {
-      Id: '8',
-      name: 'User 1',
-      profileImage: appImages.member1,
-      username: 'user1',
-    },
-    {
-      Id: '9',
-      name: 'User 2',
-      profileImage: appImages.member2,
-      username: 'user2',
-    },
-    {
-      Id: '10',
-      name: 'User 3',
-      profileImage: appImages.member3,
-      username: 'user3',
-    },
-    {
-      Id: '11',
-      name: 'User 3',
-      profileImage: appImages.member3,
-      username: 'user3',
-    },
-    {
-      Id: '12',
-      name: 'User 3',
-      profileImage: appImages.member3,
-      username: 'user3',
-    },
-    {
-      Id: '13',
-      name: 'User 3',
-      profileImage: appImages.member3,
-      username: 'user3',
-    },
-  ];
-  
- 
+  const {user} = useContext(AuthContext)
+  const displayedUsers = props.data
+  const [loggedInUserData, setLoggedInUserData] = useState({
+    name: '',
+    userName: '',
+    Image: '',
+    Id: '',
+  });
+  useEffect(() => {
+    const fetchLoggedInUserData = async () => {
+      try {
+        const userDoc = await firestore().collection('Users').doc(user.uid).get();
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          setLoggedInUserData({
+            Id: user.uid,
+            name: userData.name, 
+            userName: userData.userName, 
+            Image: userData.profileImage || '', 
+          });
+        } else {
+          console.log('No user data found for the specified ID');
+        }
+      } catch (error) {
+        console.error('Error fetching user data: ', error);
+      }
+    };
 
-  const loggedInUser = {
-    Id: '2',
-    name: 'User 2',
-    profileImage: 'https://example.com/user2.jpg',
-    username: 'user2',
+    fetchLoggedInUserData();
+  }, [user.uid]);
+  const handleFollow = (selectedUser) => {
+    const userData = {
+      name: selectedUser.name || '',
+      userName: selectedUser.userName || '',
+      Id: selectedUser.Id || '',
+      Image: selectedUser.profileImage || '',
+    };
+
+    
+
+    const selectedUserRef = firestore().collection('Users').doc(selectedUser.Id);
+    const userRef = firestore().collection('Users').doc(user.uid);
+
+    selectedUserRef
+      .update({
+        received: firestore.FieldValue.arrayUnion(loggedInUserData),
+      })
+      .then(() => {
+        console.log('User data added successfully to selected user: ', loggedInUserData);
+       // setInviteSentUsers([...inviteSentUsers, selectedUser.Id]);
+      })
+      .catch((error) => {
+        console.error('Error adding user data to selected user: ', error);
+      });
+
+    userRef
+      .update({
+        sent: firestore.FieldValue.arrayUnion(userData),
+      })
+      .then(() => {
+        console.log('User data added successfully: ', userData);
+      })
+      .catch((error) => {
+        console.error('Error adding user data: ', error);
+      });
   };
+  const handleRemove = async (selectedUser) => {
+    try {
+      const selectedUserId = selectedUser.Id;
+      const userDocRef = firestore().collection('Users').doc(user.uid);
+      const selectedUserDocRef = firestore()
+        .collection('Users')
+        .doc(selectedUserId);
 
-  const displayedUsers = Users;
+      const userDoc = await userDocRef.get();
+      const currentUserData = userDoc.data();
 
+      const currentUserName = currentUserData.name || '';
+      const currentUserUserName = currentUserData.userName || '';
+      const currentUserProfileImage = currentUserData.profileImage || '';
+  
+      await userDocRef.update({
+        followersData: firestore.FieldValue.arrayRemove(selectedUser),
+      });
+  
+      await selectedUserDocRef.update({
+        followingData: firestore.FieldValue.arrayRemove({
+          Id: user.uid,
+          name: currentUserName,
+          userName: currentUserUserName,
+          Image: currentUserProfileImage,
+        }),
+      });
+  
+      console.log('Data removed successfully');
+    } catch (error) {
+      console.error('Error handling decline: ', error);
+    }
+  };
   return (
     <FlatList
       showsVerticalScrollIndicator={false}
@@ -110,7 +117,7 @@ const Followers = props => {
       horizontal={false}
       scrollEnabled={false}
       keyExtractor={item => item.Id}
-      data={displayedUsers.filter(item => item.Id !== loggedInUser.Id)}
+      data={displayedUsers}
       renderItem={({item, index}) => {
         return (
           <TouchableOpacity
@@ -122,21 +129,21 @@ const Followers = props => {
             <View style={{flex: 1}}>
               <View style={{marginLeft: responsiveWidth(2)}}>
                 <Text numberOfLines={1} style={AppStyles.userText}>
-                  {item.username}
+                  {item.name}
                 </Text>
                 <Text numberOfLines={1} style={AppStyles.additionalText}>
-                  Additional Info
+                  {item.userName}
                 </Text>
               </View>
             </View>
-            <TouchableOpacity  style={{marginRight: responsiveWidth(5)}}>
+            <TouchableOpacity  style={{marginRight: responsiveWidth(5)}} onPress={() => handleFollow(item)}>
               <Text
                 numberOfLines={1}
                 style={[AppStyles.userHorizontalText, {color: Colors.follow}]}>
                 FOLLOWING
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity >
+            <TouchableOpacity  onPress={() => handleRemove(item)}>
               <Text
                 numberOfLines={1}
                 style={[AppStyles.userHorizontalText, {color: Colors.blackText}]}>

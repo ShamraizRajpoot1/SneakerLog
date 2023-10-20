@@ -25,7 +25,13 @@ const UserView = (props) => {
       try {
         const userDoc = await firestore().collection('Users').doc(user.uid).get();
         if (userDoc.exists) {
-          setLoggedInUserData({ Id: userDoc.id, ...userDoc.data() });
+          const userData = userDoc.data();
+          setLoggedInUserData({
+            Id: user.uid,
+            name: userData.name, 
+            userName: userData.userName, 
+            Image: userData.profileImage || '', 
+          });
         } else {
           console.log('No user data found for the specified ID');
         }
@@ -90,7 +96,6 @@ const UserView = (props) => {
     selectedUserRef
       .update({
         received: firestore.FieldValue.arrayUnion(loggedInUserData),
-        receivedCount: firestore.FieldValue.increment(1),
       })
       .then(() => {
         console.log('User data added successfully to selected user: ', loggedInUserData);
@@ -103,7 +108,7 @@ const UserView = (props) => {
     userRef
       .update({
         sent: firestore.FieldValue.arrayUnion(userData),
-        sentCount: firestore.FieldValue.increment(1),
+        //sentCount: firestore.FieldValue.increment(1),
       })
       .then(() => {
         console.log('User data added successfully: ', userData);
@@ -123,7 +128,7 @@ const UserView = (props) => {
     fontSize: fontSize.usernameText,
   };
 
-  const displayedUsers = props.sliceSize ? users.slice(0, props.sliceSize) : users;
+  const displayedUsers = props.sliceSize ? props.members.slice(0, props.sliceSize) : props.members;
 
   return (
     <FlatList
@@ -132,7 +137,7 @@ const UserView = (props) => {
       horizontal={!props.vertical}
       scrollEnabled={!props.vertical}
       keyExtractor={(item) => item.userId}
-      data={displayedUsers.filter((item) => item.userId !== user.uid)}
+      data={displayedUsers}
       renderItem={({ item, index }) => {
         const isUserInvited = inviteSentUsers.includes(item.Id);
         return (

@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import {AppStyles} from '../../../services/utilities/AppStyles';
 import {Colors} from '../../../services/utilities/Colors';
 import Header from '../../../components/Header';
@@ -27,9 +27,30 @@ import UserView from '../../../components/UserView';
 import EventsView from '../../../components/EventsView';
 import {AddCollection} from '../../../components/Modals';
 import Comunity from '../Community';
+import firestore from '@react-native-firebase/firestore';
+import { AuthContext } from '../../../navigation/AuthProvider';
 
 const Home = ({navigation}) => {
+  const {user} = useContext(AuthContext)
+  const [users, setUsers] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const usersCollection = await firestore().collection('Users').get();
+        const fetchedUsers = [];
+        usersCollection.forEach((doc) => {
+          fetchedUsers.push({ Id: doc.id, ...doc.data() });
+        });
+        setUsers(fetchedUsers);
+      } catch (error) {
+        console.error('Error fetching users: ', error);
+      }
+    };
+
+    fetchData();
+  }, []);
+  
   const toggleCollection = () => {
     setModalVisible(prev => !prev);
   };
@@ -37,7 +58,7 @@ const Home = ({navigation}) => {
     navigation.navigate('Profile');
   };
   const AllMembers = () => {
-    navigation.navigate('AllMembers');
+    navigation.navigate('AllMembers',{users});
   };
   const EventsDetail = () => {
     navigation.navigate('EventsDetail');
@@ -145,7 +166,7 @@ const Home = ({navigation}) => {
                       </Text>
                     </TouchableOpacity>
                   </View>
-                  <UserView onPress={details} />
+                  <UserView onPress={details} members={users}/>
                 </View>
                 <Text
                   style={[

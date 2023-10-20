@@ -18,7 +18,7 @@ const SearchBar = (props) => {
       <Image source={appIcons.searchEvents} />
       <TextInput
         style={AppStyles.input}
-        placeholder={props.Text}
+        placeholder={props.placeholder}
         placeholderTextColor={Colors.fieldText}
         keyboardType="default"
         value={props.value}

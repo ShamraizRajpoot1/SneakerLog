@@ -9,28 +9,10 @@ import {appIcons} from '../../../services/utilities/Assets';
 
 const Sent = props => {
   const {user} = useContext(AuthContext);
-  const [sentData, setSentData] = useState([]);
-
+  const [data, setData] = useState(props.data);
   useEffect(() => {
-    const fetchSentData = async () => {
-      try {
-        const userDoc = await firestore()
-          .collection('Users')
-          .doc(user.uid)
-          .get();
-        if (userDoc.exists) {
-          const userData = userDoc.data();
-          if (userData.sent) {
-            setSentData(userData.sent);
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching sent data: ', error);
-      }
-    };
-
-    fetchSentData();
-  }, [user.uid]);
+    setData(props.data); 
+  }, [props.data]);
   const handleWithDraw = async selectedUser => {
     try {
       const selectedUserId = selectedUser.Id;
@@ -42,11 +24,10 @@ const Sent = props => {
       const currentUserDoc = await userDocRef.get();
       const currentUserData = currentUserDoc.data();
 
-      console.log('Current user data:', currentUserData); // Log currentUserData
+      console.log('Current user data:', currentUserData); 
 
       if (currentUserData && currentUserData.name && currentUserData.userName) {
-        const {name: currentUserName, userName: currentUserUserName} =
-          currentUserData;
+        const {name: currentUserName, userName: currentUserUserName} = currentUserData;
 
         await selectedUserDocRef.update({
           sent: firestore.FieldValue.arrayRemove({
@@ -65,11 +46,11 @@ const Sent = props => {
       } else {
         console.error('Current user data is undefined or incomplete');
       }
+     
     } catch (error) {
       console.error('Error handling withdrawal: ', error);
     }
   };
-
   return (
     <FlatList
       showsVerticalScrollIndicator={false}
@@ -77,7 +58,7 @@ const Sent = props => {
       horizontal={false}
       scrollEnabled={false}
       keyExtractor={item => item.Id}
-      data={sentData}
+      data={data}
       renderItem={({item, index}) => {
         return (
           <TouchableOpacity style={AppStyles.userContainer}>
