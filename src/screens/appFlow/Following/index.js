@@ -56,13 +56,21 @@ const Following = props => {
       keyExtractor={item => item.Id}
       data={displayedUsers}
       renderItem={({item, index}) => {
+        if (item.Id === user.uid) {
+          return null; 
+        }
+        const handlePress = () => props.onPress(item.Id);
         return (
           <TouchableOpacity
-            style={AppStyles.userContainer}>
-            <Image
-              source={item.profileImage ? item.profileImage : appIcons.profile}
-              style={AppStyles.memberimage}
-            />
+            style={AppStyles.userContainer} onPress={handlePress}>
+            {item.profileImage ? (
+                    <Image
+                    style={AppStyles.memberimage}
+                      source={{uri: item.profileImage}}
+                    />
+                  ) : (
+                    <Image style={AppStyles.memberimage} source={appIcons.profile} />
+                  )}
             <View style={{flex: 1}}>
               <View style={{marginLeft: responsiveWidth(2)}}>
                 <Text numberOfLines={1} style={AppStyles.userText}>

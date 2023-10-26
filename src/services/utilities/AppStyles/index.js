@@ -105,6 +105,18 @@ export const AppStyles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
+  brandlist:{
+    height: responsiveHeight(6),
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: 3,
+    borderColor: '#B6BBC8',
+    marginLeft: responsiveWidth(5),
+    marginTop: responsiveHeight(1),
+    backgroundColor: '#FFF',
+    width: responsiveWidth(12),
+  },
   touchable: {
     borderTopLeftRadius: scale(6),
     borderBottomLeftRadius: scale(6),
@@ -157,8 +169,9 @@ export const AppStyles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   productImage: {
+    marginVertical:responsiveHeight(1),
     width: responsiveWidth(12),
-    height: responsiveWidth(15),
+    height: responsiveHeight(5),
     resizeMode: 'center',
   },
   priceContainer: {

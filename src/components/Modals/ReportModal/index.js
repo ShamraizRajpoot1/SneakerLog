@@ -35,7 +35,7 @@ const ReportModal = props => {
         activeOpacity={1}
         onPress={props.onBackdropPress}>
        
-          <View style={styles.modalContent}>
+          <View style={styles.modalContent} onStartShouldSetResponder={() => true}>
           {props.report ? ( <View>
               <View style={{marginTop: responsiveScreenHeight(1)}}>
                 <Text style={styles.privatetext}>Report</Text>

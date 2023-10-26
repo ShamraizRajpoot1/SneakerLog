@@ -60,14 +60,20 @@ const Sent = props => {
       keyExtractor={item => item.Id}
       data={data}
       renderItem={({item, index}) => {
+        if (item.Id === user.uid) {
+          return null; 
+        }
+        const handlePress = () => props.onPress(item.Id);
         return (
-          <TouchableOpacity style={AppStyles.userContainer}>
-            <Image
-              source={
-                item.profileImage ? {uri: item.profileImage} : appIcons.profile
-              }
-              style={AppStyles.memberimage}
-            />
+          <TouchableOpacity style={AppStyles.userContainer} onPress={handlePress}>
+            {item.Image ? (
+                    <Image
+                    style={AppStyles.memberimage}
+                      source={{uri: item.Image}}
+                    />
+                  ) : (
+                    <Image style={AppStyles.memberimage} source={appIcons.profile} />
+                  )}
             <View style={{flex: 1}}>
               <View style={{marginLeft: responsiveWidth(2)}}>
                 <Text numberOfLines={1} style={AppStyles.userText}>

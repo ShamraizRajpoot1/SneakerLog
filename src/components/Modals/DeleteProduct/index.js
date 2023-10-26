@@ -32,7 +32,7 @@ import {
           style={styles.modalContainer}
           activeOpacity={1}
           onPress={props.onBackdropPress}>
-          <View style={styles.modalContent}>
+          <View style={styles.modalContent} onStartShouldSetResponder={() => true}>
             
            <View style={{alignItems:'center',justifyContent:'center',}}>
               <Text style={[styles.privatetext,{fontFamily:fontFamily.LatoBold}]}>Are you sure?</Text>

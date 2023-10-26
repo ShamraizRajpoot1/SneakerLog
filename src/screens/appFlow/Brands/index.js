@@ -3,8 +3,7 @@ import React from 'react'
 import BrandView from '../../../components/BrandView'
 import Header from '../../../components/Header'
 import { AppStyles } from '../../../services/utilities/AppStyles'
-import { fontFamily } from '../../../services/utilities/Fonts'
-import { responsiveHeight } from 'react-native-responsive-dimensions'
+import { Colors } from '../../../services/utilities/Colors'
 
 const Brands = ({navigation}) => {
     const back = () => {
@@ -22,7 +21,7 @@ const Brands = ({navigation}) => {
             contentContainerStyle={[AppStyles.contentContainer]}
             keyboardShouldPersistTaps="handled">
                 
-      <BrandView vertical={true}/>
+      <BrandView vertical={true} back={back}/>
       </ScrollView>
       </TouchableWithoutFeedback>
       </KeyboardAvoidingView>

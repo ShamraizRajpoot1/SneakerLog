@@ -2,9 +2,8 @@ import React, { useContext, useState, useEffect } from 'react';
 import {View, Text, Image, FlatList, TouchableOpacity} from 'react-native';
 import {
   responsiveWidth,
-  responsiveHeight,
 } from 'react-native-responsive-dimensions';
-import {appImages} from '../../../services/utilities/Assets'
+import {appIcons, appImages} from '../../../services/utilities/Assets'
 import {Colors} from '../../../services/utilities/Colors';
 import { AppStyles } from '../../../services/utilities/AppStyles';
 import firestore from '@react-native-firebase/firestore';
@@ -12,6 +11,8 @@ import { AuthContext } from '../../../navigation/AuthProvider';
 
 const Followers = props => {
   const {user} = useContext(AuthContext)
+  const [inviteSentUsers, setInviteSentUsers] = useState([]);
+  const [isFollowing, setIsFollowing] = useState([]);
   const displayedUsers = props.data
   const [loggedInUserData, setLoggedInUserData] = useState({
     name: '',
@@ -20,27 +21,47 @@ const Followers = props => {
     Id: '',
   });
   useEffect(() => {
-    const fetchLoggedInUserData = async () => {
+    const checkIfInviteSent = async () => {
       try {
         const userDoc = await firestore().collection('Users').doc(user.uid).get();
         if (userDoc.exists) {
           const userData = userDoc.data();
-          setLoggedInUserData({
-            Id: user.uid,
-            name: userData.name, 
-            userName: userData.userName, 
-            Image: userData.profileImage || '', 
-          });
-        } else {
-          console.log('No user data found for the specified ID');
+          if (userData.sent && userData.sent.length > 0) {
+            const updatedInvitedSentUsers = userData.sent.map((sentUser) => sentUser.Id);
+            setInviteSentUsers(updatedInvitedSentUsers);
+          }
+          if (userData.followingData && userData.followingData.length > 0) {
+            const updatedFollowing = userData.followingData.map((followingUser) => followingUser.Id);
+            setIsFollowing(updatedFollowing);
+          }
         }
       } catch (error) {
-        console.error('Error fetching user data: ', error);
+        console.error('Error checking if invite sent: ', error);
       }
     };
-
-    fetchLoggedInUserData();
+    checkIfInviteSent();
   }, [user.uid]);
+  useEffect(() => {
+    const userDocRef = firestore().collection('Users').doc(user.uid);
+  
+    const unsubscribe = userDocRef.onSnapshot((doc) => {
+      if (doc.exists) {
+        const userData = doc.data();
+        setLoggedInUserData({
+          Id: user.uid,
+          name: userData.name,
+          userName: userData.userName,
+          Image: userData.profileImage || '',
+        });
+      } else {
+        console.log('No user data found for the specified ID');
+      }
+    });
+  
+    // Unsubscribe from the listener when the component is unmounted
+    return () => unsubscribe();
+  }, [user.uid]);
+  
   const handleFollow = (selectedUser) => {
     const userData = {
       name: selectedUser.name || '',
@@ -60,7 +81,7 @@ const Followers = props => {
       })
       .then(() => {
         console.log('User data added successfully to selected user: ', loggedInUserData);
-       // setInviteSentUsers([...inviteSentUsers, selectedUser.Id]);
+        setInviteSentUsers([...inviteSentUsers, selectedUser.Id]);
       })
       .catch((error) => {
         console.error('Error adding user data to selected user: ', error);
@@ -109,7 +130,7 @@ const Followers = props => {
     } catch (error) {
       console.error('Error handling decline: ', error);
     }
-  };
+  }; 
   return (
     <FlatList
       showsVerticalScrollIndicator={false}
@@ -119,13 +140,23 @@ const Followers = props => {
       keyExtractor={item => item.Id}
       data={displayedUsers}
       renderItem={({item, index}) => {
+        if (item.Id === user.uid) {
+          return null; 
+        }
+        const isUserInvited = inviteSentUsers.includes(item.Id);
+        const following = isFollowing.includes(item.Id);
+        const handlePress = () => props.onPress(item.Id);
         return (
           <TouchableOpacity
-            style={AppStyles.userContainer}>
-            <Image
-              source={item.profileImage ? item.profileImage : appImages.member3}
-              style={AppStyles.memberimage}
-            />
+            style={AppStyles.userContainer} onPress={handlePress}>
+           {item.Image ? (
+                    <Image
+                    style={AppStyles.memberimage}
+                      source={{uri: item.Image}}
+                    />
+                  ) : (
+                    <Image style={AppStyles.memberimage} source={appIcons.profile} />
+                  )}
             <View style={{flex: 1}}>
               <View style={{marginLeft: responsiveWidth(2)}}>
                 <Text numberOfLines={1} style={AppStyles.userText}>
@@ -136,13 +167,25 @@ const Followers = props => {
                 </Text>
               </View>
             </View>
-            <TouchableOpacity  style={{marginRight: responsiveWidth(5)}} onPress={() => handleFollow(item)}>
-              <Text
-                numberOfLines={1}
-                style={[AppStyles.userHorizontalText, {color: Colors.follow}]}>
-                FOLLOWING
-              </Text>
-            </TouchableOpacity>
+            {following ? (
+              <View>
+                <Text numberOfLines={1}  style={{marginRight: responsiveWidth(5)}}>
+                  FOLLOWING
+                </Text>
+              </View>
+            ) : isUserInvited ? (
+              <View  style={{marginRight: responsiveWidth(5)}}>
+                <Text numberOfLines={1} style={[AppStyles.userHorizontalText]}>
+                  Invite Sent
+                </Text>
+              </View>
+            ) : (
+              <TouchableOpacity  style={{marginRight: responsiveWidth(5)}} onPress={() => handleFollow(item)}>
+                <Text numberOfLines={1} style={[AppStyles.userHorizontalText, { color: Colors.follow }]}>
+                  FOLLOW
+                </Text>
+              </TouchableOpacity>
+            )}
             <TouchableOpacity  onPress={() => handleRemove(item)}>
               <Text
                 numberOfLines={1}

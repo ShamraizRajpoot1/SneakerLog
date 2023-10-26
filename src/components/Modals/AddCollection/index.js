@@ -6,10 +6,9 @@ import {
   TouchableOpacity,
   Switch,
 } from 'react-native';
-import React, {useState} from 'react';
-import InputField from '../../InputField';
-import {Colors} from '../../../services/utilities/Colors';
-import {fontFamily, fontSize} from '../../../services/utilities/Fonts';
+import React, { useState, useContext } from 'react';
+import { Colors } from '../../../services/utilities/Colors';
+import { fontFamily, fontSize } from '../../../services/utilities/Fonts';
 import {
   responsiveFontSize,
   responsiveHeight,
@@ -17,32 +16,73 @@ import {
   responsiveScreenWidth,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import {scale} from 'react-native-size-matters';
+import { scale } from 'react-native-size-matters';
 import Input from '../../Input';
+import { AuthContext } from '../../../navigation/AuthProvider';
+import firestore from '@react-native-firebase/firestore';
 
-const AddCollection = props => {
+const AddCollection = (props) => {
+  const { user } = useContext(AuthContext);
   const [isEnabled, setIsEnabled] = useState(false);
-  const toggleSwitch = () => {setIsEnabled(previousState => !previousState);}
+  const [collectionName, setCollectionName] = useState('');
+  const toggleSwitch = () => {
+    setIsEnabled((previousState) => !previousState);
+  };
+
+  const handleButtonClick = () => {
+    createNewDoc();
+    props.onBackdropPress();
+  };
+  const createNewDoc = async () => {
+    const userId = user.uid;
+
+    try {
+      console.log('Collection Name:', collectionName);
+
+      if (!collectionName || collectionName.trim() === '') {
+        console.error('Collection name cannot be empty');
+        return;
+      }
+
+      const collectionRef = firestore().collection('Collections');
+
+      const docData = {
+        collectionName: collectionName,
+        isPrivate: isEnabled,
+        userId: userId,
+      };
+
+      await collectionRef.add(docData);
+    } catch (error) {
+      console.error('Error adding document: ', error);
+    }
+  };
+
   return (
     <Modal
       transparent={true}
-      visible={props.isVisible}
-      onRequestClose={props.onBackdropPress}>
+      onRequestClose={props.onBackdropPress}
+      onBackdropPress={props.onBackdropPress}
+    >
       <TouchableOpacity
-        style={styles.modalContainer}
-        activeOpacity={1}
-        onPress={props.onBackdropPress}>
-        <View style={styles.modalContent}>
+      style={styles.modalContainer}
+      activeOpacity={1}
+      onPress={props.onBackdropPress}
+    >
+        <View style={styles.modalContent} onStartShouldSetResponder={() => true}>
           <Text style={styles.modaltxt}>NEW COLLECTION NAME</Text>
-          <View style={{alignItems:'center',width:'95%'}}>
-          <Input family={true} margin={true} />
+          <View style={{ alignItems: 'center', width: '95%' }}>
+            <Input
+              family={true}
+              margin={true}
+              onChangeText={(text) => setCollectionName(text)}
+            />
           </View>
           <View style={styles.row}>
             <Text style={styles.privatetext}>PRIVATE</Text>
             <Switch
-              trackColor={{false: '#767577', true: '#83e7b6'}}
-              color={isEnabled ? '#08cb6b' : 'FFFFFF'}
-              //color={'#08CF6E'}
+              trackColor={{ false: '#767577', true: '#83e7b6' }}
+              thumbColor={isEnabled ? '#08cb6b' : 'FFFFFF'}
               onValueChange={toggleSwitch}
               value={isEnabled}
             />
@@ -55,15 +95,21 @@ const AddCollection = props => {
                 borderTopWidth: responsiveScreenWidth(0.1),
                 marginBottom: responsiveHeight(1),
               },
-            ]}>
-            <TouchableOpacity onPress={props.onPress}
+            ]}
+          >
+            <TouchableOpacity
+              onPress={props.onBackdropPress}
               style={[
                 styles.textContainer,
-                {borderRightWidth: responsiveScreenHeight(0.1)},
-              ]}>
+                { borderRightWidth: responsiveScreenHeight(0.1) },
+              ]}
+            >
               <Text style={styles.text}>Cancel</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.textContainer} onPress={props.onPress}>
+            <TouchableOpacity
+              style={styles.textContainer}
+              onPress={handleButtonClick}
+            >
               <Text style={styles.text}>Create</Text>
             </TouchableOpacity>
           </View>
@@ -77,8 +123,7 @@ export default AddCollection;
 
 const styles = StyleSheet.create({
   modalContainer: {
-    width: '100%',
-    height: '93%',
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: Colors.modalBackground,
@@ -86,9 +131,10 @@ const styles = StyleSheet.create({
   modalContent: {
     backgroundColor: Colors.fieldBackground,
     width: responsiveScreenWidth(86),
+    height: responsiveScreenHeight(30), // Adjust the height as needed
     borderRadius: scale(6),
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    alignItems: 'center', // Align the content horizontally
+    justifyContent: 'center', // Align the content vertically
   },
   modaltxt: {
     fontSize: fontSize.h1,

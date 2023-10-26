@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
   FlatList,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useState,useEffect} from 'react';
 import {AppStyles} from '../../../services/utilities/AppStyles';
 import Header from '../../../components/Header';
 import {Colors} from '../../../services/utilities/Colors';
@@ -25,14 +25,39 @@ import AddSneakers from '../../../components/AddSneakers';
 import CollectionHeader from '../../../components/CollectionHeader';
 import SearchBar from '../../../components/SearchBar';
 import { CollectionModal, ShareApp } from '../../../components/Modals';
+import firestore from '@react-native-firebase/firestore';
 
-const data = [
-  {id: 1, name: 'Product 1', price: 10, image: appImages.product1},
-  {id: 2, name: 'Product 2', price: 20, image: appImages.product2},
-  {id: 3, name: 'Product 3', price: 30, image: appImages.product3},
-];
 
-const Collections = ({navigation}) => {
+const Collections = ({navigation, route}) => {
+  
+  const [data, setSneakersData] = useState([]);
+  const [selectedId, setSelectedId] = useState(null);
+  const selectedCollection = selectedId ? selectedId : route.params.selectedCollection;
+ 
+  useEffect(() => {
+    const fetchFirestoreData = async () => {
+      try {
+        if (selectedCollection) {
+          const selectedCollectionId = selectedCollection.id;
+          const collectionRef = firestore().collection('Collections').doc(selectedCollectionId);
+          const doc = await collectionRef.get();
+
+          if (doc.exists) {
+            const data = doc.data();
+            const sneakers = data.sneakers || [];
+            setSneakersData(sneakers);
+          } else {
+            console.log('No such document!');
+            setSneakersData([]);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching Firestore data: ', error);
+      }
+    };
+
+    fetchFirestoreData();
+  }, [route.params.selectedCollection, selectedId]);
   const back = () => {
     navigation.goBack();
   };
@@ -48,11 +73,16 @@ const Collections = ({navigation}) => {
   const Search = () => {
     navigation.navigate('SearchSneaker');
   };
-  const details = () => {
-    navigation.navigate('ProductDetails');
+  const details = (item, index) => {
+    navigation.navigate('ProductDetails', {
+      selectedCollection: selectedCollection,
+      selectedItem: item,
+      selectedIndex: index,
+    });
   };
-  const Collection = () => {
-    navigation.navigate('ChoseCollection');
+  const setCollectionId = (selectedItem) => {
+    setCollection(prev => !prev);
+    setSelectedId(selectedItem);
   };
   const [share, setShare] = useState(false)
   const [filter, setFilter] = useState(false);
@@ -69,10 +99,10 @@ const Collections = ({navigation}) => {
   const [sneaker, setSneaker] = useState('');
   const renderItem = ({item, index}) => (
     <View>
-      <TouchableOpacity style={AppStyles.collection} onPress={details} >
+      <TouchableOpacity style={AppStyles.collection} onPress={() => details(item, index)} >
         <View style={{flexDirection: 'row', alignItems: 'center'}}>
-          <Image source={item.image} style={AppStyles.productImage} />
-          <Text style={styles.name}>{item.name}</Text>
+          <Image source={{uri :item.image}} style={AppStyles.productImage} />
+          <Text style={styles.name}>{item.sneakerName}</Text>
         </View>
         <View style={AppStyles.priceContainer}>
           <Text>${item.price}</Text>
@@ -83,7 +113,7 @@ const Collections = ({navigation}) => {
     </View>
   );
   const filteredData = data.filter(item =>
-    item.name.toLowerCase().includes(sneaker.toLowerCase()),
+    item.sneakerName.toLowerCase().includes(sneaker.toLowerCase()),
   );
   return (
     <>
@@ -99,7 +129,7 @@ const Collections = ({navigation}) => {
             contentContainerStyle={[AppStyles.contentContainer]}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}>
-             <CollectionHeader onPress={toggle} />
+             <CollectionHeader name={selectedCollection.name}  onPress={toggle} />
             {data.length === 0 ? (
               <View>
                 <View style={styles.textContainer}>
@@ -111,7 +141,7 @@ const Collections = ({navigation}) => {
                   </Text>
                 </View>
                 <AddSneakers onPress={Sneakers} press={Search} />
-                {collection && <CollectionModal onBackdropPress={toggle} onPress={toggle} />}
+                {collection && <CollectionModal onBackdropPress={toggle} onPress={setCollectionId} />}
               </View>
             ) : (
               <>
@@ -179,18 +209,18 @@ const Collections = ({navigation}) => {
                 )}
                 <View style={[AppStyles.collectionContainer, {marginTop: 0}]}>
                   {filteredData.length > 0 ? (
-                    <FlatList
-                      scrollEnabled={false}
-                      data={filteredData}
-                      renderItem={renderItem}
-                      keyExtractor={item => item.id.toString()}
-                    />
+                   <FlatList
+                   scrollEnabled={false}
+                   data={filteredData}
+                   renderItem={renderItem}
+                   keyExtractor={(item, index) => index.toString()}
+                 />
                   ) : (
                     <View style={{alignSelf:'center'}}>
                       <Text style={AppStyles.emptyText}>No Sneaker</Text>
                     </View>
                   )}
-                  {collection && <CollectionModal onBackdropPress={toggle} onPress={toggle} />}
+                  {collection && <CollectionModal onBackdropPress={toggle} onPress={setCollectionId} />}
                   {share && <ShareApp isVisible={share} onBackdropPress={Share} /> }
                 </View>
               </>

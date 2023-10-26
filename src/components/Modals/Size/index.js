@@ -94,7 +94,7 @@ const Size = (props) => {
         style={styles.modalContainer}
         activeOpacity={1}
         onPress={props.onBackdropPress}>
-        <View style={styles.modalContent}>
+        <View style={styles.modalContent} onStartShouldSetResponder={() => true}>
         <View style={styles.row}>
               <Text style={[AppStyles.labelStyle, { fontSize: fontSize.lebal }]}>
                 Select Sneaker Size
@@ -128,13 +128,13 @@ const Size = (props) => {
                       key={item.toString()}
                       style={[
                         styles.textContainer,
-                        item === selectedSize && styles.selectedSize,
+                        item === props.value && styles.selectedSize,
                       ]}
                       onPress={() => handleSizeSelection(item)}>
                       <Text
                         style={[
                           styles.text,
-                          item === selectedSize && styles.selectedSize,
+                          item === props.value && styles.selectedSize,
                         ]}>
                         {item}
                       </Text>

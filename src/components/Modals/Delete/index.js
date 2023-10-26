@@ -32,7 +32,7 @@ import {
           style={styles.modalContainer}
           activeOpacity={1}
           onPress={props.onBackdropPress}>
-          <View style={styles.modalContent}>
+          <View style={styles.modalContent} onStartShouldSetResponder={() => true}>
             
            <View style={{alignItems:'center',justifyContent:'center',marginTop: responsiveScreenHeight(3)}}>
               <Text style={styles.privatetext}>ARE YOU SURE YOU</Text>

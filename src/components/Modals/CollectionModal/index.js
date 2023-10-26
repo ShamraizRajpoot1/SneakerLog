@@ -8,7 +8,7 @@ import {
   FlatList,
   Image,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useState, useContext, useEffect} from 'react';
 import InputField from '../../InputField';
 import {Colors} from '../../../services/utilities/Colors';
 import {fontFamily, fontSize} from '../../../services/utilities/Fonts';
@@ -20,34 +20,90 @@ import {
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
 import {scale} from 'react-native-size-matters';
-import { AppStyles } from '../../../services/utilities/AppStyles';
-import { appIcons } from '../../../services/utilities/Assets';
+import {AppStyles} from '../../../services/utilities/AppStyles';
+import {appIcons} from '../../../services/utilities/Assets';
+import {AuthContext} from '../../../navigation/AuthProvider';
+import firestore from '@react-native-firebase/firestore';
 
 const CollectionModal = props => {
-  const data = [
-    { id: 1, name: 'Collection 1', sneaker: 2, price: 10, image: appIcons.star, isPrivate: false },
-    { id: 2, name: 'Collection 2', sneaker: 2, price: 20, image: appIcons.star, isPrivate: true },
-    { id: 4, name: 'Collection 3', sneaker: 2, price: 30, image: appIcons.star, isPrivate: true },
-    { id: 5, name: 'Collection 3', sneaker: 2, price: 30, image: appIcons.star, isPrivate: false },
-    { id: 6, name: 'Collection 3', sneaker: 2, price: 30, image: appIcons.star, isPrivate: false },
-    { id: 7, name: 'Collection 3', sneaker: 2, price: 30, image: appIcons.star, isPrivate: true },
-    { id: 8, name: 'Collection 3', sneaker: 9, price: 30, image: appIcons.star, isPrivate: false },
-    { id: 9, name: 'Collection 3', sneaker: 2, price: 30, image: appIcons.star, isPrivate: true },
-    { id: 10, name: 'Collection 3', sneaker: 2, price: 30, image: appIcons.star, isPrivate: false },
-    { id: 11, name: 'Collection 3', sneaker: 2, price: 30, image: appIcons.star, isPrivate: true },
-    { id: 12, name: 'Collection 3', sneaker: 5, price: 30, image: appIcons.star, isPrivate: false },
-    { id: 13, name: 'Collection 3', sneaker: 2, price: 30, image: appIcons.star, isPrivate: true },
-  ];
+  const {user} = useContext(AuthContext);
+  const [collections, setCollections] = useState([]);
+  const [userCollection, setUserCollection] = useState([]);
+
+  useEffect(() => {
+    const fetchCollections = async () => {
+      try {
+        const userIdToQuery = props.data ? props.data[0].userId : null;
+        console.log('userIdToQuery:', userIdToQuery);
+        const collectionRef = firestore().collection('Collections');
+        collectionRef
+          .where('userId', '==', userIdToQuery)
+          .onSnapshot(snapshot => {
+            const fetchedCollections = [];
+            snapshot.forEach(doc => {
+              const data = doc.data();
+              const {collectionName, isPrivate, sneakers} = data;
+             
+              const sneakerCount = sneakers ? sneakers.length : 0;
+              if (!isPrivate) {
+                fetchedCollections.push({
+                  id: doc.id,
+                  name: collectionName,
+                  isPrivate: isPrivate,
+                  sneakerCount: sneakerCount,
+                });
+              }
+            });
+
+            setUserCollection(fetchedCollections);
+          });
+      } catch (error) {
+        console.error('Error fetching collections: ', error);
+      }
+    };
+
+    fetchCollections();
+  }, [props.data]);
+  useEffect(() => {
+    const fetchCollections = async () => {
+      try {
+        const userId = user.uid;
+
+        const collectionRef = firestore().collection('Collections');
+        collectionRef.where('userId', '==', userId).onSnapshot(snapshot => {
+          const fetchedCollections = [];
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            const {collectionName, isPrivate, sneakers} = data;
+            const sneakerCount = sneakers ? sneakers.length : 0;
+            fetchedCollections.push({
+              id: doc.id,
+              name: collectionName,
+              isPrivate: isPrivate,
+              sneakerCount: sneakerCount,
+            });
+          });
+
+          setCollections(fetchedCollections);
+        });
+      } catch (error) {
+        console.error('Error fetching collections: ', error);
+      }
+    };
+
+    fetchCollections();
+  }, [user.uid]);
   const renderItem = ({item, index}) => (
     <View>
-      <TouchableOpacity onPress={props.onPress}
+      <TouchableOpacity
+        onPress={() => props.onPress(item)}
         style={[
           AppStyles.collection,
           {marginHorizontal: responsiveScreenWidth(5)},
         ]}>
         <View style={{flexDirection: 'row', alignItems: 'center'}}>
           <Image
-            source={item.image}
+            source={appIcons.star}
             style={{
               width: scale(25),
               height: scale(25),
@@ -58,22 +114,28 @@ const CollectionModal = props => {
             <Text style={styles.name}>{item.name}</Text>
             <View style={{flexDirection: 'row'}}>
               <Text style={styles.sneakerCount}>
-                {item.sneaker} Sneakers in Collection
+                {item.sneakerCount} Sneakers in Collection
               </Text>
               {item.isPrivate && (
-              <Image
-                source={appIcons.pvt}
-                style={{width: scale(18), height: scale(18), marginLeft: responsiveWidth(2)}}
-              />)}
+                <Image
+                  source={appIcons.pvt}
+                  style={{
+                    width: scale(18),
+                    height: scale(18),
+                    marginLeft: responsiveWidth(2),
+                  }}
+                />
+              )}
             </View>
           </View>
         </View>
 
         <Image style={AppStyles.arrowRight} source={appIcons.arrowRight} />
       </TouchableOpacity>
-      {index < data.length - 1 && (
-        <View style={[AppStyles.line, {marginHorizontal: 0}]} />
-      )}
+      
+      {index < (props.data ? userCollection.length  : collections.length) && (
+  <View style={[AppStyles.line]} />
+)}
     </View>
   );
   return (
@@ -85,17 +147,28 @@ const CollectionModal = props => {
         style={styles.modalContainer}
         activeOpacity={1}
         onPress={props.onBackdropPress}>
-        <View style={styles.modalContent}>
+        <View
+          style={styles.modalContent}
+          onStartShouldSetResponder={() => true}>
           <View style={styles.titleContainer}>
             <Text style={styles.title}>My Collections</Text>
           </View>
-          <View style={{flex:1}}>
-          <FlatList
-          showsVerticalScrollIndicator={false}
-                data={data}
+          <View style={{flex: 1}}>
+            {props.data ? (
+              <FlatList
+                showsVerticalScrollIndicator={false}
+                data={userCollection}
                 renderItem={renderItem}
                 keyExtractor={item => item.id.toString()}
               />
+            ) : (
+              <FlatList
+                showsVerticalScrollIndicator={false}
+                data={collections}
+                renderItem={renderItem}
+                keyExtractor={item => item.id.toString()}
+              />
+            )}
           </View>
         </View>
       </TouchableOpacity>
@@ -132,6 +205,6 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.LatoBold,
     fontWeight: 'bold',
     fontSize: fontSize.h4,
-    color: Colors.blackText
+    color: Colors.blackText,
   },
 });

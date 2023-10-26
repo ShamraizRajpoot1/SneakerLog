@@ -7,7 +7,7 @@ import {
   ScrollView,
   FlatList,
 } from 'react-native';
-import React,{useEffect} from 'react';
+import React, {useEffect} from 'react';
 import Header from '../../../components/Header';
 import {AppStyles} from '../../../services/utilities/AppStyles';
 import {fontFamily, fontSize} from '../../../services/utilities/Fonts';
@@ -18,8 +18,8 @@ import {
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
 import {Colors} from '../../../services/utilities/Colors';
-
-const SizeGuide = ({navigation}) => {
+const SizeGuide = ({navigation, route}) => {
+  const sneakerSize = route.params?.sneakerSize;
   const data = [
     {
       value1: 3.5,
@@ -212,19 +212,57 @@ const SizeGuide = ({navigation}) => {
     fontSize: fontSize.lebal,
   };
   useEffect(() => {
-    navigation.getParent().setOptions({ tabBarStyle: { display: 'none' } })
-    return()=>{
-        navigation.getParent().setOptions({ tabBarStyle: {
-            height: responsiveScreenHeight(7),
-              display: 'flex',
-              backgroundColor: Colors.barBackground
-            } })
-    }
-});
+    navigation.getParent().setOptions({tabBarStyle: {display: 'none'}});
+    return () => {
+      navigation.getParent().setOptions({
+        tabBarStyle: {
+          height: responsiveScreenHeight(7),
+          display: 'flex',
+          backgroundColor: Colors.barBackground,
+        },
+      });
+    };
+  });
+
+  const renderItem = ({ item, index }) => {
+    const isItemSelected = item.value1 === sneakerSize;
+    return (
+      <View
+        style={[
+          styles.rowContainer,
+         
+          {
+            
+            backgroundColor: isItemSelected  ? Colors.barBackground :
+              index % 2 === 0 ? Colors.fieldBackground : Colors.background2,
+            borderBottomLeftRadius: index === data.length - 1 ? responsiveWidth(1.9) : 0,
+            borderBottomRightRadius: index === data.length - 1 ? responsiveWidth(1.9) : 0,
+            borderBottomWidth: index === data.length - 1 ? 0 : 1,
+          },
+        ]}
+      >
+        <View style={styles.textContainer}>
+          <Text style={[styles.cellText,{color: isItemSelected && Colors.lebal}]}>{item.value1}</Text>
+        </View>
+        <View style={styles.textContainer}>
+          <Text style={[styles.cellText,{color: isItemSelected && Colors.lebal}]}>{item.value2}</Text>
+        </View>
+        <View style={styles.textContainer}>
+          <Text style={[styles.cellText,{color: isItemSelected && Colors.lebal}]}>{item.value3}</Text>
+        </View>
+        <View style={styles.textContainer}>
+          <Text style={[styles.cellText,{color: isItemSelected && Colors.lebal}]}>{item.value4}</Text>
+        </View>
+        <View style={styles.textContainer}>
+          <Text style={[styles.cellText,{color: isItemSelected && Colors.lebal}]}>{item.value5}</Text>
+        </View>
+      </View>
+    );
+  };
 
   return (
     <>
-      <Header Image={true} onPress={back}/>
+      <Header Image={true} onPress={back} />
       <KeyboardAvoidingView
         style={{flex: 1}}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -271,43 +309,7 @@ const SizeGuide = ({navigation}) => {
                   scrollEnabled={false}
                   data={data}
                   keyExtractor={(item, index) => index.toString()}
-                  renderItem={({item, index}) => (
-                    <View
-                      style={[
-                        styles.rowContainer,
-                        {
-                          backgroundColor:
-                            index % 2 === 0
-                              ? Colors.fieldBackground
-                              : Colors.background2,
-                          borderBottomLeftRadius:
-                            index === data.length - 1
-                              ? responsiveWidth(1.9)
-                              : 0,
-                          borderBottomRightRadius:
-                            index === data.length - 1
-                              ? responsiveWidth(1.9)
-                              : 0,
-                          borderBottomWidth: index === data.length - 1 ? 0 : 1,
-                        },
-                      ]}>
-                      <View style={styles.textContainer}>
-                        <Text style={styles.cellText}>{item.value1}</Text>
-                      </View>
-                      <View style={styles.textContainer}>
-                        <Text style={styles.cellText}>{item.value2}</Text>
-                      </View>
-                      <View style={styles.textContainer}>
-                        <Text style={styles.cellText}>{item.value3}</Text>
-                      </View>
-                      <View style={styles.textContainer}>
-                        <Text style={styles.cellText}>{item.value4}</Text>
-                      </View>
-                      <View style={styles.textContainer}>
-                        <Text style={styles.cellText}>{item.value5}</Text>
-                      </View>
-                    </View>
-                  )}
+                  renderItem={renderItem}
                 />
               </View>
             </View>
@@ -324,6 +326,10 @@ const styles = StyleSheet.create({
   contentContainer: {
     paddingHorizontal: responsiveScreenWidth(5),
     paddingTop: responsiveScreenHeight(3),
+  },
+  selectedSize: {
+    backgroundColor: Colors.barBackground,
+    color: Colors.lebal,
   },
   guideContainer: {
     width: responsiveWidth(90),
@@ -352,21 +358,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    
+
     borderBottomWidth: 1,
     borderBottomColor: Colors.border1,
   },
   cellText: {
     fontSize: fontSize.fieldText,
     fontFamily: fontFamily.LatoBold,
-    color:Colors.text2
+    color: Colors.text2,
   },
-  textContainer:{
-    width: responsiveWidth(18), 
+  textContainer: {
+    width: responsiveWidth(18),
     height: responsiveHeight(6),
-    alignItems:'center',
-    justifyContent:'center',
+    alignItems: 'center',
+    justifyContent: 'center',
     borderRightWidth: 1,
     borderColor: Colors.border1,
-  }
+  },
 });

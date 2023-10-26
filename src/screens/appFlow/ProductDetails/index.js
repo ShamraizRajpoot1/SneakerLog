@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
   FlatList,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {AppStyles} from '../../../services/utilities/AppStyles';
 import Header from '../../../components/Header';
 import {Colors} from '../../../services/utilities/Colors';
@@ -26,55 +26,58 @@ import {scale} from 'react-native-size-matters';
 import CollectionHeader from '../../../components/CollectionHeader';
 import ProductEdit from '../../../components/Modals/ProductEdit';
 import {DeleteProduct} from '../../../components/Modals';
+import firestore from '@react-native-firebase/firestore';
 
-const data = [
-  {
-    id: 1,
-    name: 'Product 1',
-    price: '',
-    image: appImages.product1,
-    colorway: 'dark',
-    year: 2023,
-    condition: 'good',
-    style: '554-56',
-    size: '5.5',
-    status: 'want',
-    estimatedPrice: 756,
-    quantity: 5,
-  },
-  {
-    id: 2,
-    name: 'Product 2',
-    price: 20,
-    image: appImages.product2,
-    colorway: 'dark',
-    year: 2023,
-    condition: 'good',
-    style: '554-56',
-    size: '5.5',
-    status: 'want',
-    estimatedPrice: 756,
-    quantity: 6,
-  },
-  {
-    id: 3,
-    name: 'Product 3',
-    price: 30,
-    image: appImages.product3,
-    colorway: 'dark',
-    year: 2023,
-    condition: 'good',
-    style: '554-56',
-    size: '5.5',
-    status: 'want',
-    estimatedPrice: 756,
-    quantity: 7,
-  },
-];
 
-const ProductDetails = ({navigation}) => {
+const ProductDetails = ({navigation,route}) => {
   const [productEdit, setProductEdit] = useState(false);
   const [deleteProduct, setDeleteProduct] = useState(false);
+  const [data, setData] = useState([]);
+  const selectedCollection = route.params.selectedCollection
+  const selectedIndex = route.params.selectedIndex;
+  useEffect(() => {
+    const fetchFirestoreData = async () => {
+      try {
+        if (route.params.selectedCollection) {
+          const selectedCollectionId = route.params.selectedCollection.id;
+          const collectionRef = firestore()
+            .collection('Collections')
+            .doc(selectedCollectionId);
+          const doc = await collectionRef.get();
+  
+          if (doc.exists) {
+            const data = doc.data();
+            if (data && data.sneakers) {
+              const sneakersData = data.sneakers.map(sneaker => ({
+                id: sneaker.id || '',
+                name: sneaker.sneakerName || '',
+                price: sneaker.price || '',
+                image: sneaker.image || '',
+                colorway: sneaker.colorway || '',
+                year: sneaker.year || 2023,
+                condition: sneaker.condition || '',
+                style: sneaker.style || '',
+                size: sneaker.size || '',
+                status: sneaker.status || '',
+                estimatedPrice: sneaker.estimatedPrice || '',
+                quantity: sneaker.quantity || '',
+              }));
+              setData(sneakersData);
+            } else {
+              console.log('Sneakers data not found.');
+            }
+          } else {
+            console.log('No such document!');
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching Firestore data: ', error);
+      }
+    };
+  
+    fetchFirestoreData();
+  }, [route.params.selectedCollection]);
+  
   const deleteToggle = () => {
     setDeleteProduct(prev => !prev);
   };
@@ -108,7 +111,7 @@ const ProductDetails = ({navigation}) => {
         </View>
       </View>
       <View style={styles.imageContainer}>
-        <Image source={item.image} style={styles.image} />
+        <Image source={{uri: item.image}} style={styles.image} />
       </View>
       <View style={styles.detailContainer}>
         <Text style={styles.name}>COLORWAY</Text>
@@ -180,7 +183,7 @@ const ProductDetails = ({navigation}) => {
       <Header Image={true} onPress={back} options={true} press={profile} />
 
       <KeyboardAvoidingView
-        style={{flex: 1, backgroundColor:Colors.background}}
+        style={{flex: 1, backgroundColor: Colors.background}}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -500}>
         <TouchableWithoutFeedback>
@@ -189,14 +192,24 @@ const ProductDetails = ({navigation}) => {
             contentContainerStyle={[AppStyles.contentContainer]}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}>
-            <CollectionHeader onPress={Collection} />
+            <CollectionHeader name={selectedCollection.name} onPress={Collection} />
             <View style={{marginLeft: responsiveScreenWidth(5)}}>
-              <FlatList
-                data={data}
-                renderItem={renderItem}
-                horizontal
-                keyExtractor={item => item.id.toString()}
-              />
+            {data.length > 0 ? (
+                <FlatList
+                  data={data}
+                  horizontal
+                  renderItem={renderItem}
+                  keyExtractor={(item) => item.name.toString()}
+                  initialScrollIndex={selectedIndex}
+              getItemLayout={(data, index) => ({
+                length: responsiveWidth(80), // your item's height
+                offset: responsiveWidth(90) * index,
+                index,
+              })}
+                />
+              ) : (
+                <Text>No data available</Text>
+              )}
               {deleteProduct && (
                 <DeleteProduct onBackdropPress={deleteToggle} />
               )}
@@ -225,7 +238,7 @@ const styles = StyleSheet.create({
   nameContainer: {
     height: responsiveScreenHeight(8),
     borderBottomWidth: scale(0.7),
-    borderColor: Colors.border1 ,
+    borderColor: Colors.border1,
     width: '100%',
     flexDirection: 'row',
     padding: responsiveWidth(2),

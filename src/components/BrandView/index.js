@@ -1,134 +1,185 @@
-import React, { useState } from 'react';
-import { View, Text, Image, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
-import { responsiveHeight, responsiveWidth } from 'react-native-responsive-dimensions';
-import { appImages } from '../../services/utilities/Assets';
-import { fontFamily, fontSize } from '../../services/utilities/Fonts';
-import { Colors } from '../../services/utilities/Colors';
-import { scale } from 'react-native-size-matters';
-import { AppStyles } from '../../services/utilities/AppStyles';
+import React, {useState, useEffect, useContext} from 'react';
+import {
+  View,
+  Text,
+  Image,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
+import {
+  responsiveHeight,
+  responsiveScreenHeight,
+  responsiveScreenWidth,
+  responsiveWidth,
+} from 'react-native-responsive-dimensions';
+import {appImages} from '../../services/utilities/Assets';
+import {fontFamily, fontSize} from '../../services/utilities/Fonts';
+import {Colors} from '../../services/utilities/Colors';
+import {scale} from 'react-native-size-matters';
+import {AppStyles} from '../../services/utilities/AppStyles';
+import firestore from '@react-native-firebase/firestore';
+import {AuthContext} from '../../navigation/AuthProvider';
 
-const BrandView = (props) => {
-  const [Releasedata] = useState([
-    {
-      name: 'Converse Aeon Active CX',
-      releaseDate: '2023-04-12',
-      image: appImages.brand1,
-    },
-    {
-      name: 'Converse Aeon Active C',
-      releaseDate: '2023-04-12',
-      image: appImages.brand2,
-    },
-    {
-        name: 'Converse Aeon Active ',
-        releaseDate: '2023-04-12',
-        image: appImages.brand3,
-      },
-      {
-        name: 'Converse Aeon Active 5',
-        releaseDate: '2023-04-12',
-        image: appImages.brand4,
-      },
-      {
-        name: 'Converse Aeon Active 4',
-        releaseDate: '2023-04-12',
-        image: appImages.brand5,
-      },
-      {
-        name: 'Converse Aeon Active CX5',
-        releaseDate: '2023-04-12',
-        image: appImages.brand6,
-      },
-      {
-        name: 'Converse Aeon Active C7X',
-        releaseDate: '2023-04-12',
-        image: appImages.brand7,
-      },
-      {
-        name: 'Converse Aeon Active 54',
-        releaseDate: '2023-04-12',
-        image: appImages.brand8,
-      },
-      {
-        name: 'Converse Aeon Active CXh',
-        releaseDate: '2023-04-12',
-        image: appImages.brand9,
-      },
-      {
-        name: 'Converse Aeon Active CX4',
-        releaseDate: '2023-04-12',
-        image: appImages.brand10,
-      },
-      {
-        name: 'Converse Aeon Active ChX',
-        releaseDate: '2023-04-12',
-        image: appImages.brand11,
-      },
-      {
-        name: 'Converse Aeon Active CfX',
-        releaseDate: '2023-04-12',
-        image: appImages.brand12,
-      },
-      {
-        name: 'Converse Aeon Active CgX',
-        releaseDate: '2023-04-12',
-        image: appImages.brand13,
-      },
-      {
-        name: 'Converse Aeon Active CjX',
-        releaseDate: '2023-04-12',
-        image: appImages.brand14,
-      },
-      {
-        name: 'Converse Aeon Active CXs',
-        releaseDate: '2023-04-12',
-        image: appImages.brand15,
-      },
-      {
-        name: 'Converse Aeon Active CXdf',
-        releaseDate: '2023-04-12',
-        image: appImages.brand16,
-      },
-      {
-        name: 'Converse Aeon Active CXf',
-        releaseDate: '2023-04-12',
-        image: appImages.brand17,
-      },
-      {
-        name: 'Converse Aeon Active CXfd',
-        releaseDate: '2023-04-12',
-        image: appImages.brand18,
-      },
-
-  ]);
-
+const BrandView = props => {
+  const [data, setData] = useState([]);
+  const [userBrandList, setUserBrandList] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
+  const {user} = useContext(AuthContext);
+  const continueTextColor =
+  selectedItems.every((item) =>
+    userBrandList.some((brand) => brand.id === item.id)
+  ) && selectedItems.length === userBrandList.length
+    ? 'gray'
+    : Colors.forgot; 
+  useEffect(() => {
+    const fetchBrandsData = async () => {
+      try {
+        const brandsCollection = firestore().collection('Brands');
+        const snapshot = await brandsCollection.get();
 
-  const displayedData = props.sliceSize ? Releasedata.slice(0, props.sliceSize) : Releasedata;
+        if (snapshot.empty) {
+          console.log('No matching documents.');
+          return;
+        }
 
-  const handleItemPress = (item) => {
-    if (selectedItems.includes(item)) {
-      setSelectedItems(selectedItems.filter((selectedItem) => selectedItem !== item));
+        let data = [];
+        snapshot.forEach(doc => {
+          data.push(doc.data());
+        });
+
+        setData(data);
+      } catch (error) {
+        console.error('Error fetching brands data: ', error);
+      }
+    };
+
+    const fetchUserData = async () => {
+      try {
+        const userDocRef = firestore().collection('Users').doc(user.uid);
+        const userDoc = await userDocRef.get();
+
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          const brandList = userData.brandlist || [];
+          setUserBrandList(brandList);
+
+          setSelectedItems(brandList);
+        } else {
+          console.log('No such document!');
+        }
+      } catch (error) {
+        console.error('Error fetching user data: ', error);
+      }
+    };
+
+    fetchBrandsData();
+    fetchUserData();
+  }, [user]);
+
+  const handleItemPress = item => {
+    const newSelectedItems = [...selectedItems];
+
+    const index = newSelectedItems.findIndex(
+      selectedItem => selectedItem.id === item.id,
+    );
+    if (index !== -1) {
+      newSelectedItems.splice(index, 1);
     } else {
-      setSelectedItems([...selectedItems, item]);
+      newSelectedItems.push(item);
     }
+
+    setSelectedItems(newSelectedItems);
+  };
+  const handleButtonClick = () => {
+    handleContinuePress();
+   props.back();
+  };
+  const handleContinuePress = async () => {
+    try {
+      const userDocRef = firestore().collection('Users').doc(user.uid);
+      const updatedBrandList = [];
+      selectedItems.forEach(item => {
+        updatedBrandList.push({
+          name: item.name,
+          id: item.id,
+          image: item.image,
+        });
+      });
+
+      await userDocRef.update({
+        brandlist: updatedBrandList,
+      });
+      console.log('Brand list updated successfully:', updatedBrandList);
+      setUserBrandList(updatedBrandList);
+    } catch (error) {
+      console.error('Error updating brand list:', error);
+    }
+  };
+
+  const renderItem = ({item, index}) => {
+    const isSelected = selectedItems.some(
+      selectedItem => selectedItem.id === item.id,
+    );
+    const isUserBrandSelected = userBrandList.some(
+      brand => brand.id === item.id,
+    );
+
+    return (
+      <TouchableOpacity
+        style={[
+          styles.itemContainer,
+          {borderColor: isSelected ? 'red' : Colors.border1},
+        ]}
+        onPress={() => handleItemPress(item)}>
+        <View
+          style={[
+            styles.cardview2,
+            {alignItems: 'center', justifyContent: 'center'},
+          ]}>
+          <View style={{alignItems: 'center', justifyContent: 'center', width:'100%',height:'100%'}}>
+            {item.image ? (
+              <Image
+                style={styles.productimage}
+                source={{uri: item.image}}
+                onError={() => {
+                  console.log('Error loading image:', item.image);
+                }}
+              />
+            ) : null}
+          </View>
+          
+        </View>
+      </TouchableOpacity>
+    );
   };
 
   return (
     <View style={styles.container}>
-      <View style={[AppStyles.row2, { marginTop: responsiveWidth(1) }]}>
+      <View style={[AppStyles.row2, {marginTop: responsiveWidth(1)}]}>
         <Text style={AppStyles.fvrtText}>SNEAKER BRANDS</Text>
-        <TouchableOpacity>
+        <TouchableOpacity
+          disabled={
+            selectedItems.every((item) =>
+              userBrandList.some((brand) => brand.id === item.id)
+            ) &&
+            selectedItems.length === userBrandList.length
+          }
+          onPress={handleButtonClick}>
           <Text
             style={[
               AppStyles.forgot,
               {
                 fontFamily: fontFamily.LatoBold,
-                color: selectedItems.length > 0 ? Colors.forgot : 'gray',
+                color: continueTextColor,
               },
             ]}
-            disabled={selectedItems.length === 0}
-          >
+            disabled={
+              selectedItems.every((item) =>
+                userBrandList.some((brand) => brand.id === item.id)
+              ) &&
+              selectedItems.length === userBrandList.length
+            }>
             Continue
           </Text>
         </TouchableOpacity>
@@ -138,27 +189,9 @@ const BrandView = (props) => {
         horizontal={false}
         numColumns={2}
         scrollEnabled={false}
-        data={displayedData}
-        keyExtractor={(item) => item.name}
-        renderItem={({ item, index }) => {
-          const isSelected = selectedItems.includes(item);
-
-          return (
-            <TouchableOpacity
-              style={[
-                styles.itemContainer,
-                { borderColor: isSelected ? 'red' : Colors.border1 },
-              ]}
-              onPress={() => handleItemPress(item)}
-            >
-              <View style={[styles.cardview2, { alignItems: 'center', justifyContent: 'center' }]}>
-                <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-                  <Image resizeMode="contain" source={item.image} style={styles.productimage} />
-                </View>
-              </View>
-            </TouchableOpacity>
-          );
-        }}
+        data={data}
+        keyExtractor={item => item.image}
+        renderItem={renderItem}
       />
     </View>
   );
@@ -176,16 +209,17 @@ const styles = StyleSheet.create({
     marginBottom: responsiveHeight(2),
     borderWidth: scale(1),
     borderRadius: scale(5),
-   
   },
   cardview2: {
-    width:responsiveWidth(43),
+    width: responsiveWidth(43),
     height: responsiveWidth(30),
     backgroundColor: Colors.fieldBackground,
     borderRadius: scale(5),
   },
   productimage: {
-    resizeMode: 'center',
+    height: responsiveHeight(12.5),
+    width: responsiveWidth(17.5),
+    resizeMode: 'contain',
   },
   datetext: {
     marginLeft: responsiveWidth(3),

@@ -87,9 +87,6 @@ const SignUp = ({navigation}) => {
           .then(async(user) => {
             const userCredential = await auth().signInWithEmailAndPassword(email, password);
             const userId = userCredential.user.uid;
-            console.log('====================================');
-            console.log(userId);
-            console.log('====================================');
             if (user) {
               firestore()
               .collection('Users')
@@ -100,16 +97,14 @@ const SignUp = ({navigation}) => {
                 name: name,
                 phone: phone,
                 userName: userName, 
-              
-                  
+                sneakerSize: '',
+                gender: '',
               })
               .then(async () => {
-                console.log('User Registered');
                 await AsyncStorage.setItem('Token', userId);
                 navigation.navigate('App');
               })
               .catch((error) => {
-                console.log('Something went wrong', error);
               });
             } else {
 

@@ -9,7 +9,7 @@ import {
   TouchableWithoutFeedback,
   ScrollView,
 } from 'react-native';
-import React,{useState} from 'react';
+import React, {useState, useContext, useEffect} from 'react';
 import {Colors} from '../../../services/utilities/Colors';
 import {
   responsiveScreenHeight,
@@ -21,47 +21,71 @@ import {fontFamily, fontSize} from '../../../services/utilities/Fonts';
 import Header from '../../../components/Header';
 import {AppStyles} from '../../../services/utilities/AppStyles';
 import {appIcons, appImages} from '../../../services/utilities/Assets';
-import { AddCollection } from '../../../components/Modals';
+import {AddCollection} from '../../../components/Modals';
+import firestore from '@react-native-firebase/firestore';
+import {AuthContext} from '../../../navigation/AuthProvider';
 
 const ChoseCollection = ({navigation}) => {
-    const collection= ()=> {
-        navigation.navigate('Collections')
-    }
-    const back = () => {
-      navigation.goBack();
+  const {user} = useContext(AuthContext);
+  const collection = selectedCollection => {
+    navigation.navigate('Collections', {selectedCollection});
+  };
+  const back = () => {
+    navigation.goBack();
+  };
+  const profile = () => {
+    navigation.navigate('Profile');
+  };
+  const [modalVisible, setModalVisible] = useState(false);
+  const toggleCollection = () => {
+    setModalVisible(prev => !prev);
+  };
+  const [collections, setCollections] = useState([]);
+  const [sneakerCount, setSneakerCount] = useState(0);
+
+  useEffect(() => {
+    const fetchCollections = async () => {
+      try {
+        const userId = user.uid;
+
+        const collectionRef = firestore().collection('Collections');
+        collectionRef.where('userId', '==', userId).onSnapshot((snapshot) => {
+          const fetchedCollections = [];
+          snapshot.forEach((doc) => {
+            const data = doc.data();
+            const { collectionName, isPrivate, sneakers, price } = data;
+            const sneakerCount = sneakers ? sneakers.length : 0; 
+            fetchedCollections.push({
+              id: doc.id,
+              name: collectionName,
+              sneakers: sneakers || [],
+              price: price,
+              isPrivate: isPrivate,
+              sneakerCount: sneakerCount, 
+            });
+          });
+
+          setCollections(fetchedCollections);
+        });
+      } catch (error) {
+        console.error('Error fetching collections: ', error);
+      }
     };
-    const profile = () => {
-      navigation.navigate('Profile');
-    };
-    const [modalVisible, setModalVisible] = useState(false);
-    const toggleCollection = () => {
-      setModalVisible(prev => !prev);
-    };
-    const data = [
-        { id: 1, name: 'Collection 1', sneaker: 2, price: 10, image: appIcons.star, isPrivate: false },
-        { id: 2, name: 'Collection 2', sneaker: 2, price: 20, image: appIcons.star, isPrivate: true },
-        { id: 4, name: 'Collection 3', sneaker: 2, price: 30, image: appIcons.star, isPrivate: true },
-        { id: 5, name: 'Collection 3', sneaker: 2, price: 30, image: appIcons.star, isPrivate: false },
-        { id: 6, name: 'Collection 3', sneaker: 2, price: 30, image: appIcons.star, isPrivate: false },
-        { id: 7, name: 'Collection 3', sneaker: 2, price: 30, image: appIcons.star, isPrivate: true },
-        { id: 8, name: 'Collection 3', sneaker: 9, price: 30, image: appIcons.star, isPrivate: false },
-        { id: 9, name: 'Collection 3', sneaker: 2, price: 30, image: appIcons.star, isPrivate: true },
-        { id: 10, name: 'Collection 3', sneaker: 2, price: 30, image: appIcons.star, isPrivate: false },
-        { id: 11, name: 'Collection 3', sneaker: 2, price: 30, image: appIcons.star, isPrivate: true },
-        { id: 12, name: 'Collection 3', sneaker: 5, price: 30, image: appIcons.star, isPrivate: false },
-        { id: 13, name: 'Collection 3', sneaker: 2, price: 30, image: appIcons.star, isPrivate: true },
-      ];
-      
+
+    fetchCollections();
+  }, [user.uid]);
+
   const renderItem = ({item, index}) => (
     <View>
-      <TouchableOpacity  onPress={collection}
+      <TouchableOpacity
+        onPress={() => collection(item)}
         style={[
           AppStyles.collection,
           {marginHorizontal: responsiveScreenWidth(5)},
         ]}>
         <View style={{flexDirection: 'row', alignItems: 'center'}}>
           <Image
-            source={item.image}
+            source={appIcons.star}
             style={{
               width: scale(25),
               height: scale(25),
@@ -72,20 +96,25 @@ const ChoseCollection = ({navigation}) => {
             <Text style={styles.name}>{item.name}</Text>
             <View style={{flexDirection: 'row'}}>
               <Text style={styles.sneakerCount}>
-                {item.sneaker} Sneakers in Collection
+                {item.sneakerCount} Sneakers in Collection
               </Text>
-              {item.isPrivate && (
-              <Image
-                source={appIcons.pvt}
-                style={{width: scale(18), height: scale(18), marginLeft: responsiveWidth(2)}}
-              />)}
+              {item.isPrivate === true && (
+                <Image
+                  source={appIcons.pvt}
+                  style={{
+                    width: scale(18),
+                    height: scale(18),
+                    marginLeft: responsiveWidth(2),
+                  }}
+                />
+              )}
             </View>
           </View>
         </View>
 
         <Image style={AppStyles.arrowRight} source={appIcons.arrowRight} />
       </TouchableOpacity>
-      {index < data.length - 1 && (
+      {index < collections.length - 1 && (
         <View style={[AppStyles.line, {marginHorizontal: 0}]} />
       )}
     </View>
@@ -102,39 +131,40 @@ const ChoseCollection = ({navigation}) => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -500}>
         <TouchableWithoutFeedback>
-            <>
-          <View style={styles.modalContent}>
-            <View style={styles.textContainer}>
-              <Text style={[styles.text]}>My Collections</Text>
-              <TouchableOpacity onPress={toggleCollection}>
-              <Text style={[styles.text, {color: Colors.forgot}]}>
-                New Collection
-              </Text>
-              </TouchableOpacity>
+          <>
+            <View style={styles.modalContent}>
+              <View style={styles.textContainer}>
+                <Text style={[styles.text]}>My Collections</Text>
+                <TouchableOpacity onPress={toggleCollection}>
+                  <Text style={[styles.text, {color: Colors.forgot}]}>
+                    New Collection
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={[AppStyles.contentContainer]}
+                keyboardShouldPersistTaps="handled">
+                <FlatList
+                  scrollEnabled={false}
+                  data={collections}
+                  renderItem={renderItem}
+                  keyExtractor={item => item.id.toString()}
+                />
+              </ScrollView>
             </View>
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={[AppStyles.contentContainer]}
-              keyboardShouldPersistTaps="handled">
-              <FlatList
-                scrollEnabled={false}
-                data={data}
-                renderItem={renderItem}
-                keyExtractor={item => item.id.toString()}
-              />
-            </ScrollView>
-
-          </View>
-         <View>
-         {modalVisible && (<AddCollection 
-            isVisible={modalVisible}
-            onBackdropPress={toggleCollection}
-            //onChangeText={}
-            //value={}
-            onPress={toggleCollection}
-            />)}
-         </View>
-         </>
+            <View>
+              {modalVisible && (
+                <AddCollection
+                  isVisible={modalVisible}
+                  onBackdropPress={toggleCollection}
+                  //onChangeText={}
+                  //value={}
+                  onPress={toggleCollection}
+                />
+              )}
+            </View>
+          </>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
     </>
@@ -173,12 +203,12 @@ const styles = StyleSheet.create({
   },
   name: {
     color: Colors.text3,
-    fontFamily:fontFamily.LatoBold,
+    fontFamily: fontFamily.LatoBold,
     marginLeft: responsiveWidth(4),
   },
   sneakerCount: {
     color: Colors.blackText,
-    
+
     marginLeft: responsiveWidth(4),
   },
 });

@@ -29,7 +29,7 @@ const CollectionHeader = (props) => {
     </TouchableOpacity>
     <View
       style={[styles.textContainer, {width: responsiveWidth(60)}]}>
-      <Text style={[styles.text]}>Shoes</Text>
+      <Text style={[styles.text]}>{props.name}</Text>
     </View>
     <View
       style={[styles.textContainer, {width: responsiveWidth(17)}]}>

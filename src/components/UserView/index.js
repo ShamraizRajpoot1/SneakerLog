@@ -139,10 +139,15 @@ const UserView = (props) => {
       keyExtractor={(item) => item.userId}
       data={displayedUsers}
       renderItem={({ item, index }) => {
+        if (item.Id === user.uid) {
+          return null; 
+        }
         const isUserInvited = inviteSentUsers.includes(item.Id);
+        const following = isFollowing.includes(item.Id);
+        const handlePress = () => props.onPress(item.Id);
         return (
           <TouchableOpacity
-            onPress={props.onPress}
+          onPress={handlePress}
             style={{
               flexDirection: props.vertical ? 'row' : 'column',
               alignItems: 'center',
@@ -152,7 +157,14 @@ const UserView = (props) => {
               marginRight: index + 1 === users.length && !props.vertical ? responsiveWidth(5) : responsiveWidth(3),
             }}
           >
-            <Image source={item.profileImage ? item.profileImage : appIcons.profile} style={memberimage} />
+            {item.profileImage ? (
+                    <Image
+                    style={memberimage}
+                      source={{uri: item.profileImage}}
+                    />
+                  ) : (
+                    <Image style={memberimage} source={appIcons.profile} />
+                  )}
             <View style={{ flex: 1 }}>
               {props.vertical && (
                 <View style={{ marginLeft: responsiveWidth(4) }}>
@@ -170,27 +182,25 @@ const UserView = (props) => {
                 </Text>
               )}
             </View>
-            {props.vertical && isUserInvited &&(
+            {props.vertical && following ? (
+              <View>
+                <Text numberOfLines={1} style={[AppStyles.userHorizontalText, { color: Colors.follow }]}>
+                  FOLLOWING
+                </Text>
+              </View>
+            ) : props.vertical && isUserInvited ? (
               <View>
                 <Text numberOfLines={1} style={[AppStyles.userHorizontalText]}>
                   Invite Sent
                 </Text>
               </View>
-            ) }
-            {props.vertical && !isUserInvited &&(
+            ) : ( props.vertical &&
               <TouchableOpacity onPress={() => handleFollow(item)}>
                 <Text numberOfLines={1} style={[AppStyles.userHorizontalText, { color: Colors.follow }]}>
                   FOLLOW
                 </Text>
               </TouchableOpacity>
             )}
-            {/* {props.vertical &&  isFollowing && !isUserInvited &&(
-              <View>
-                <Text numberOfLines={1} style={[AppStyles.userHorizontalText, { color: Colors.follow }]}>
-                  FOLLOWING
-                </Text>
-              </View>
-            )} */}
           </TouchableOpacity>
         );
       }}

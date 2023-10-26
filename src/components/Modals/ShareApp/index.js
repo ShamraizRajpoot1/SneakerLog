@@ -28,7 +28,7 @@ import {
           style={styles.modalContainer}
           activeOpacity={1}
           onPress={props.onBackdropPress}>
-          <View style={styles.modalContent}>
+          <View style={styles.modalContent} onStartShouldSetResponder={() => true}>
             <Text style={styles.modaltxt}>Share Collection to...</Text>
             <TouchableOpacity style={styles.textContainer}>
               <Text style={styles.text}>Messages</Text>

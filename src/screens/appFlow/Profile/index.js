@@ -7,8 +7,9 @@ import {
   ScrollView,
   Image,
   TouchableOpacity,
+  FlatList,
 } from 'react-native';
-import React, { useContext, useState, useEffect } from 'react';
+import React, {useContext, useState, useEffect} from 'react';
 import {AppStyles} from '../../../services/utilities/AppStyles';
 import Header from '../../../components/Header';
 import {Colors} from '../../../services/utilities/Colors';
@@ -20,34 +21,28 @@ import {
 import ProfileHead from '../../../components/ProfileHead';
 import {appIcons} from '../../../services/utilities/Assets';
 import {scale} from 'react-native-size-matters';
-import { AuthContext } from '../../../navigation/AuthProvider';
+import {AuthContext} from '../../../navigation/AuthProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import firestore from '@react-native-firebase/firestore';
 const Profile = ({navigation}) => {
-
-  const {logout, user} = useContext(AuthContext)
+  const {logout, user} = useContext(AuthContext);
   const [userData, setUserData] = useState(null);
 
   if (userData && !userData.gender) {
-    userData.gender = 'Male';
+    userData.gender = '';
   }
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const docId = user.uid; 
-        const userDoc = await firestore().collection('Users').doc(docId).get();
-        if (userDoc.exists) {
-          setUserData({ Id: userDoc.id, ...userDoc.data() });
-        } else {
-          console.log('No such document!');
-        }
-      } catch (error) {
-        console.error('Error fetching user data: ', error);
-      }
-    };
+    const docId = user.uid;
+    const docRef = firestore().collection('Users').doc(docId);
 
-    fetchUserData();
-  }, []);
+    const unsubscribe = docRef.onSnapshot(doc => {
+      if (doc.exists) {
+        setUserData({Id: doc.id, ...doc.data()});
+      } else {
+      }
+    });
+    return () => unsubscribe();
+  }, [user]);
 
   const back = () => {
     navigation.goBack();
@@ -64,20 +59,19 @@ const Profile = ({navigation}) => {
   };
   const Logout = async () => {
     try {
-      
       await AsyncStorage.removeItem('Token');
-      logout()
-      navigation.navigate("Auth", { screen: "Login" }); 
-      } catch (error) {
+      logout();
+      navigation.navigate('Auth', {screen: 'Login'});
+    } catch (error) {
       console.error('Error getting Token from AsyncStorage:', error);
     }
   };
   return (
-    <View style={{flex:1, backgroundColor:Colors.background}}>
+    <View style={{flex: 1, backgroundColor: Colors.background}}>
       <Header Image={true} onPress={back} />
       <ProfileHead edit={true} onPress={edit} />
       <KeyboardAvoidingView
-        style={{flex: 1, backgroundColor:Colors.background}}
+        style={{flex: 1, backgroundColor: Colors.background}}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -500}>
         <TouchableWithoutFeedback>
@@ -85,103 +79,186 @@ const Profile = ({navigation}) => {
             style={{flex: 1}}
             contentContainerStyle={[AppStyles.contentContainer]}
             showsVerticalScrollIndicator={false}>
-              { userData && ( <View>
-            <View style={styles.imageContainer}>
-              <Image style={styles.image} source={appIcons.profile} />
-            </View>
-            <View>
-              <View style={AppStyles.marginVerticals}>
-                <Text style={styles.field}>NAME</Text>
-                <Text style={styles.textValue}>{userData.name}</Text>
-              </View>
-              <View style={AppStyles.marginVerticals}>
-                <Text style={styles.field}>USERNAME</Text>
-                <Text style={styles.textValue}>{userData.userName}</Text>
-              </View>
-              <View style={AppStyles.marginVerticals}>
-                <View style={{flexDirection: 'row'}}>
-                  <Text style={styles.field}>EMAIL</Text>
-                  <View style={styles.privateContainer}>
-                    <Text style={styles.private}>Private</Text>
-                  </View>
+            {userData && (
+              <View>
+                <View style={styles.imageContainer}>
+                  {userData.profileImage ? (
+                    <Image
+                      style={styles.image}
+                      source={{uri: userData.profileImage}}
+                    />
+                  ) : (
+                    <Image style={styles.image} source={appIcons.profile} />
+                  )}
                 </View>
-                <Text style={styles.textValue}>{userData.email}</Text>
-              </View>
-              <View style={AppStyles.marginVerticals}>
-                <View style={{flexDirection: 'row'}}>
-                  <Text style={styles.field}>Phone</Text>
-                  <View style={styles.privateContainer}>
-                    <Text style={styles.private}>Private</Text>
+                <View>
+                  <View style={AppStyles.marginVerticals}>
+                    <Text style={styles.field}>NAME</Text>
+                    <Text style={styles.textValue}>{userData.name}</Text>
                   </View>
-                </View>
+                  <View style={AppStyles.marginVerticals}>
+                    <Text style={styles.field}>USERNAME</Text>
+                    <Text style={styles.textValue}>{userData.userName}</Text>
+                  </View>
+                  <View style={AppStyles.marginVerticals}>
+                    <View style={{flexDirection: 'row'}}>
+                      <Text style={styles.field}>EMAIL</Text>
+                      <View style={styles.privateContainer}>
+                        <Text style={styles.private}>Private</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.textValue}>{userData.email}</Text>
+                  </View>
+                  <View style={AppStyles.marginVerticals}>
+                    <View style={{flexDirection: 'row'}}>
+                      <Text style={styles.field}>Phone</Text>
+                      <View style={styles.privateContainer}>
+                        <Text style={styles.private}>Private</Text>
+                      </View>
+                    </View>
 
-                <Text style={styles.textValue}>{userData.phone}</Text>
-              </View>
-              <View style={AppStyles.marginVerticals}>
-              <View style={styles.textinputcontainer}>
-            <View
-              style={[
-                styles.touchable,
-                {
-                  backgroundColor:
-                    userData.gender === 'Male' ? Colors.barBackground : '',
-                },
-              ]}
-            >
-              <Text style={[styles.touchText, { color: userData.gender === 'Male' ? Colors.lebal : Colors.text2 }]}>
-                Male
-              </Text>
-            </View>
-            <View
-              style={[
-                styles.touchable,
-                {
-                  backgroundColor:
-                    userData.gender === 'Female' ? Colors.barBackground : '',
-                },
-              ]}
-            >
-              <Text style={[styles.touchText, { color: userData.gender === 'Female' ? Colors.lebal : Colors.text2 }]}>
-                Female
-              </Text>
-            </View>
-            <View
-              style={[
-                styles.touchable,
-                {
-                  backgroundColor:
-                    userData.gender === 'Others' ? Colors.barBackground : '',
-                },
-              ]}
-            >
-              <Text style={[styles.touchText, { color: userData.gender === 'Other' ? Colors.lebal : Colors.text2 }]}>
-                Other
-              </Text>
-            </View>
-          </View>
-              </View>
-              <View style={AppStyles.marginVerticals}>
-                <Text style={styles.field}>FAVORITE SNEAKER BRANDS</Text>
-                <Text style={styles.textValue}>No Brands Selected</Text>
-              </View>
-              <View style={AppStyles.marginVerticals}>
-                <Text style={styles.field}>SNEAKER SIZE</Text>
-                <Text style={styles.textValue}>No Size Selected</Text>
-              </View>
-              <View style={AppStyles.marginVerticals}>
-                <TouchableOpacity onPress={Logout}
-                  style={[
-                    container,
-                    {flexDirection: 'row', justifyContent: 'space-between'},
-                  ]}>
-                  <View style={{width: '80%', alignItems:'center',marginLeft:'10%'}}>
-                    <Text style={styles.editText}>Log Out</Text>
+                    <Text style={styles.textValue}>{userData.phone}</Text>
                   </View>
-                  
-                </TouchableOpacity>
+                  <View style={AppStyles.marginVerticals}>
+                    <View style={styles.textinputcontainer}>
+                      <View
+                        style={[
+                          styles.touchable,
+                          {
+                            backgroundColor:
+                              userData.gender === 'Male'
+                                ? Colors.barBackground
+                                : Colors.fieldBackground,
+                                borderTopLeftRadius: scale(6),
+                                borderBottomLeftRadius: scale(6),
+                          },
+                        ]}>
+                        <Text
+                          style={[
+                            styles.touchText,
+                            {
+                              color:
+                                userData.gender === 'Male'
+                                  ? Colors.lebal
+                                  : Colors.text2,
+                            },
+                          ]}>
+                          Male
+                        </Text>
+                      </View>
+                      <View
+                        style={[
+                          styles.touchable,
+                          {
+                            backgroundColor:
+                              userData.gender === 'Female'
+                                ? Colors.barBackground
+                                : Colors.fieldBackground,
+                                
+                          },
+                        ]}>
+                        <Text
+                          style={[
+                            styles.touchText,
+                            {
+                              color:
+                                userData.gender === 'Female'
+                                  ? Colors.lebal
+                                  : Colors.text2,
+                            },
+                          ]}>
+                          Female
+                        </Text>
+                      </View>
+                      <View
+                        style={[
+                          styles.touchable,
+                          {
+                            backgroundColor:
+                              userData.gender === 'Others'
+                                ? Colors.barBackground
+                                : Colors.fieldBackground,
+                                borderTopRightRadius: scale(6),
+                                borderBottomRightRadius: scale(6),
+                          },
+                        ]}>
+                        <Text
+                          style={[
+                            styles.touchText,
+                            {
+                              color:
+                                userData.gender === 'Other'
+                                  ? Colors.lebal
+                                  : Colors.text2,
+                            },
+                          ]}>
+                          Other
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                  <View style={[AppStyles.marginVerticals,{marginLeft:0 ,}]}>
+                    <Text style={[styles.field,{marginLeft:responsiveWidth(5) ,}]}>FAVORITE SNEAKER BRANDS</Text>
+
+                    {Array.isArray(userData.brandlist) &&
+                    userData.brandlist.length > 0 ? (
+                      <FlatList
+                        data={userData.brandlist}
+                        horizontal={true}
+                        keyExtractor={(item, index) => index.toString()}
+                        renderItem={({item, index}) => {
+                          
+                          return (
+                            <View style={{flexDirection: 'row'}}>
+                              <View
+                                style={AppStyles.brandlist}>
+                                <Image
+                                  style={{
+                                    height: responsiveHeight(5),
+                                    width: responsiveWidth(7),
+                                    resizeMode: 'contain',
+                                  }}
+                                  source={{uri: item.image}}
+                                />
+                              </View>
+                            </View>
+                          );
+                        }}
+                      />
+                    ) : (
+                      <Text style={[styles.textValue,{marginLeft: '5%'}]}>No Brands Selected</Text>
+                    )}
+                  </View>
+                  <View style={AppStyles.marginVerticals}>
+                    <Text style={styles.field}>SNEAKER SIZE</Text>
+                    {userData.sneakerSize ? (
+                      <Text style={styles.textValue}>
+                        {userData.sneakerSize}
+                      </Text>
+                    ) : (
+                      <Text style={styles.textValue}>No Size Selected</Text>
+                    )}
+                  </View>
+                  <View style={AppStyles.marginVerticals}>
+                    <TouchableOpacity
+                      onPress={Logout}
+                      style={[
+                        container,
+                        {flexDirection: 'row', justifyContent: 'space-between'},
+                      ]}>
+                      <View
+                        style={{
+                          width: '80%',
+                          alignItems: 'center',
+                          marginLeft: '10%',
+                        }}>
+                        <Text style={styles.editText}>Log Out</Text>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+                </View>
               </View>
-            </View>
-            </View>)}
+            )}
           </ScrollView>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
@@ -215,7 +292,7 @@ const styles = StyleSheet.create({
     fontSize: fontSize.userName,
     color: Colors.username,
   },
-  
+
   private: {
     fontSize: fontSize.fieldText,
     fontFamily: fontFamily.LatoMedium,

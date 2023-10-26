@@ -8,9 +8,7 @@ import {
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
 import {AppStyles} from '../../services/utilities/AppStyles';
-import {Picker} from '@react-native-picker/picker';
 import {scale} from 'react-native-size-matters';
-import { appIcons } from '../../services/utilities/Assets';
 
 const Input = props => {
   const container = {
@@ -49,7 +47,7 @@ export default Input;
 
 const styles = StyleSheet.create({
   input: {
-   
+    minWidth: '60%',
     fontFamily: fontFamily.LatoBold,
     fontSize: fontSize.h1,
     color: Colors.text3,

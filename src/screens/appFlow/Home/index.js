@@ -69,8 +69,8 @@ const Home = ({navigation}) => {
   const Events = () => {
     navigation.navigate('Events');
   };
-  const details = () => {
-    navigation.navigate('UserDetails');
+  const details = (itemId) => {
+    navigation.navigate('UserDetails', { selectedUserId: itemId });
   };
   const [selectedTab, setSelectedTab] = useState('MY CLOSET');
 

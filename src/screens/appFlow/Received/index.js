@@ -89,28 +89,6 @@ const Received = props => {
       console.error('Error handling decline: ', error);
     }
   };
-  
-
-  // useEffect(() => {
-  //   const fetchReceivedUsers = async () => {
-  //     try {
-  //       const userDoc = await firestore()
-  //         .collection('Users')
-  //         .doc(user.uid)
-  //         .get();
-  //       if (userDoc.exists) {
-  //         const userData = userDoc.data();
-  //         if (userData.received) {
-  //           setReceivedUsers(userData.received);
-  //         }
-  //       }
-  //     } catch (error) {
-  //       console.error('Error fetching received users: ', error);
-  //     }
-  //   };
-
-  //   fetchReceivedUsers();
-  // }, [user.uid]);
 
   return (
     <FlatList
@@ -121,12 +99,20 @@ const Received = props => {
       keyExtractor={item => item.Id}
       data={props.data}
       renderItem={({item, index}) => {
+        if (item.Id === user.uid) {
+          return null; 
+        }
+        const handlePress = () => props.onPress(item.Id);
         return (
-          <TouchableOpacity style={AppStyles.userContainer}>
-            <Image
-              source={item.profileImage ? item.profileImage : appIcons.profile}
-              style={AppStyles.memberimage}
-            />
+          <TouchableOpacity style={AppStyles.userContainer} onPress={handlePress}>
+           {item.Image ? (
+                    <Image
+                    style={AppStyles.memberimage}
+                      source={{uri: item.Image}}
+                    />
+                  ) : (
+                    <Image style={AppStyles.memberimage} source={appIcons.profile} />
+                  )}
             <View style={{flex: 1}}>
               <View style={{marginLeft: responsiveWidth(4)}}>
                 <Text numberOfLines={1} style={AppStyles.userText}>

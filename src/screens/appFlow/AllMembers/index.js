@@ -28,8 +28,8 @@ import firestore from '@react-native-firebase/firestore';
 import { AuthContext } from '../../../navigation/AuthProvider';
 
 const AllMembers = ({navigation, route}) => {
-  //const [users, setUsers] = useState([]);
-  const { users } = route.params;
+  const [users, setUsers] = useState([]);
+  //const { users } = route.params;
   const [selectedOption, setSelectedOption] = useState(null);
   const {user} = useContext(AuthContext)
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -43,6 +43,31 @@ const AllMembers = ({navigation, route}) => {
   const [filterFollowerData, setFilterFollowerData] = useState([])
   const [use, setUse] = useState([])
   const [refresh, setRefresh] = useState(false); 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const usersCollection = await firestore().collection('Users').get();
+        const fetchedUsers = [];
+        usersCollection.forEach((doc) => {
+          fetchedUsers.push({ Id: doc.id, ...doc.data() });
+        });
+        setUsers(fetchedUsers);
+      } catch (error) {
+        console.error('Error fetching users: ', error);
+      }
+    };
+    const unsubscribe = firestore()
+    .collection('Users')
+    .onSnapshot(() => {
+      fetchData();
+      setRefresh((prev) => !prev); 
+    });
+
+  return () => {
+    unsubscribe();
+  };
+
+  }, [use, refresh]);
   
   useEffect(() => {
     const fetchUserData = async () => {
@@ -87,6 +112,9 @@ const AllMembers = ({navigation, route}) => {
   const back = () => {
     navigation.goBack();
   };
+  const details = (itemId) => {
+    navigation.navigate('UserDetails', { selectedUserId: itemId });
+  };
 
   const Profile = () => {
     navigation.navigate('Profile');
@@ -101,23 +129,23 @@ const AllMembers = ({navigation, route}) => {
 
   switch (selectedOption) {
     case 'All':
-      selectedComponent = <UserView vertical={true} members={users} />;
+      selectedComponent = <UserView vertical={true} onPress={details} members={users} />;
       break;
     case 'Followers':
-      selectedComponent = <Followers  data={followerData}/>;
+      selectedComponent = <Followers onPress={details}  data={followerData}/>;
       break;
     case 'Following':
-      selectedComponent = <Following data={followingData} />;
+      selectedComponent = <Following onPress={details} data={followingData} />;
       break;
     case 'Sent':
-      selectedComponent = <Sent data={sentData} />;
+      selectedComponent = <Sent onPress={details} data={sentData} />;
       break;
     case 'Received':
-      selectedComponent = <Received  data={recievedData}/>;
+      selectedComponent = <Received onPress={details}  data={recievedData}/>;
       break;
 
     default:
-      selectedComponent = <UserView vertical={true} members={users} />;
+      selectedComponent = <UserView onPress={details} vertical={true} members={users} />;
       break;
   }
 
@@ -125,22 +153,8 @@ const AllMembers = ({navigation, route}) => {
     setSelectedOption(option);
   };
   
-  // useEffect(() => {
-  //   const timer = setTimeout(() => {
-  //     handleSearch('');
-  //   }, 1000); 
   
-  //   return () => clearTimeout(timer);
-  // }, []);
   const handleSearch = (text) => {
-    // if (text === '') {
-    //   console.log('Text is empty. Setting filtered users to all users.');
-    //   setFilteredUsers(users);
-    //   setFilterSentData(sentData);
-    //   setFilterFollowerData(followerData);
-    //   setFilterFollowingData(followingData);
-    //   setFilterRecievedData(recievedData);
-    // } else {
       const filteredData = users.filter((user) =>
         user.name.toLowerCase().includes(text.toLowerCase())
       );
@@ -202,15 +216,15 @@ const AllMembers = ({navigation, route}) => {
             contentContainerStyle={[AppStyles.contentContainer]}
           >
             {selectedOption === 'Sent' && filterSentData.length > 0 ? (
-              <Sent data={filterSentData} />
+              <Sent data={filterSentData} onPress={details}/>
             ) : selectedOption === 'Received' && filterRecievedData.length > 0 ? (
-              <Received data={filterRecievedData} />
+              <Received data={filterRecievedData} onPress={details}/>
             ) :  selectedOption === 'All' && filteredUsers.length > 0 ? (
-              <UserView vertical={true} members={filteredUsers} />
+              <UserView vertical={true} members={filteredUsers} onPress={details}/>
             ) : selectedOption === 'Following' && filterFollowingtData.length > 0 ? (
-              <Following data={filterFollowingtData} />
+              <Following data={filterFollowingtData} onPress={details}/>
             ) : selectedOption === 'Followers' && filterFollowerData.length > 0 ? (
-              <Followers data={filterFollowerData} />
+              <Followers data={filterFollowerData} onPress={details}/>
             ) : (
               selectedComponent
             )}
