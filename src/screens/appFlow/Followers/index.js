@@ -169,7 +169,7 @@ const Followers = props => {
             </View>
             {following ? (
               <View>
-                <Text numberOfLines={1}  style={{marginRight: responsiveWidth(5)}}>
+                <Text numberOfLines={1}  style={[AppStyles.userHorizontalText,{marginRight: responsiveWidth(5), color: Colors.follow}]}>
                   FOLLOWING
                 </Text>
               </View>

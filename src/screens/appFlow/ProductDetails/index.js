@@ -202,7 +202,7 @@ const ProductDetails = ({navigation,route}) => {
                   keyExtractor={(item) => item.name.toString()}
                   initialScrollIndex={selectedIndex}
               getItemLayout={(data, index) => ({
-                length: responsiveWidth(80), // your item's height
+                length: responsiveWidth(80), 
                 offset: responsiveWidth(90) * index,
                 index,
               })}
