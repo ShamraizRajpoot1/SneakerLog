@@ -34,22 +34,34 @@ const Home = ({navigation}) => {
   const {user} = useContext(AuthContext)
   const [users, setUsers] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [showTopTab, setShowTopTab] = useState(false); // Added state to control the visibility of the top tab
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const usersCollection = await firestore().collection('Users').get();
-        const fetchedUsers = [];
-        usersCollection.forEach((doc) => {
-          fetchedUsers.push({ Id: doc.id, ...doc.data() });
+        const usersCollection = firestore().collection('Users');
+        usersCollection.onSnapshot(async (snapshot) => {
+          const fetchedUsers = [];
+          snapshot.forEach((doc) => {
+            fetchedUsers.push({ Id: doc.id, ...doc.data() });
+          });
+          setUsers(fetchedUsers);
+          if (user && user.uid) {
+            const userDoc = firestore().collection('Users').doc(user.uid);
+            const doc = await userDoc.get();
+            const userData = doc.data();
+            if (userData && userData.followersData && userData.followersData.length > 0) {
+              setShowTopTab(true);
+            }
+          }
         });
-        setUsers(fetchedUsers);
       } catch (error) {
         console.error('Error fetching users: ', error);
       }
     };
-
+  
     fetchData();
-  }, []);
+  }, [user]);
   
   const toggleCollection = () => {
     setModalVisible(prev => !prev);
@@ -87,41 +99,31 @@ const Home = ({navigation}) => {
             style={{flex: 1}}
             contentContainerStyle={[AppStyles.contentContainer]}
             keyboardShouldPersistTaps="handled">
-            <View style={styles.topTab}>
-              <TouchableOpacity
-                style={
-                  selectedTab === 'MY CLOSET'
-                    ? styles.topTabbtn
-                    : styles.topTabbtn2
-                }
-                onPress={() => setSelectedTab('MY CLOSET')}>
-                <Text
-                  style={
-                    selectedTab === 'MY CLOSET'
-                      ? styles.tabactiveText
-                      : styles.inActiveText
-                  }>
-                  MY CLOSET
-                </Text>
-              </TouchableOpacity>
+             {showTopTab && ( 
+        <View style={styles.topTab}>
+          <TouchableOpacity
+            style={selectedTab === 'MY CLOSET' ? styles.topTabbtn : styles.topTabbtn2}
+            onPress={() => setSelectedTab('MY CLOSET')}>
+            <Text
+              style={
+                selectedTab === 'MY CLOSET' ? styles.tabactiveText : styles.inActiveText
+              }>
+              MY CLOSET
+            </Text>
+          </TouchableOpacity>
 
-              <TouchableOpacity
-                style={
-                  selectedTab === 'COMMUNITY'
-                    ? styles.topTabbtn
-                    : styles.topTabbtn2
-                }
-                onPress={() => setSelectedTab('COMMUNITY')}>
-                <Text
-                  style={
-                    selectedTab === 'COMMUNITY'
-                      ? styles.tabactiveText
-                      : styles.inActiveText
-                  }>
-                  COMMUNITY
-                </Text>
-              </TouchableOpacity>
-            </View>
+          <TouchableOpacity
+            style={selectedTab === 'COMMUNITY' ? styles.topTabbtn : styles.topTabbtn2}
+            onPress={() => setSelectedTab('COMMUNITY')}>
+            <Text
+              style={
+                selectedTab === 'COMMUNITY' ? styles.tabactiveText : styles.inActiveText
+              }>
+              COMMUNITY
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
             {selectedTab === 'MY CLOSET' ? (
               <View>
                 <Text style={[AppStyles.fvrtText, {marginLeft: '5%'}]}>

@@ -62,16 +62,21 @@ const Collections = ({navigation, route}) => {
     navigation.goBack();
   };
   const addProduct = () => {
-    navigation.navigate('AddProduct');
+    navigation.navigate('AddProduct',{ selectedCollection });
   };
   const profile = () => {
     navigation.navigate('Profile');
   };
   const Sneakers = () => {
-    navigation.navigate('SneakerStack');
+    navigation.navigate('SneakerStack', {
+      screen: 'Sneakers',
+      params: { selectedCollection },
+    });
+   
   };
   const Search = () => {
-    navigation.navigate('SearchSneaker');
+    
+    navigation.navigate('SearchSneaker',{selectedCollection});
   };
   const details = (item, index) => {
     navigation.navigate('ProductDetails', {
@@ -145,7 +150,16 @@ const Collections = ({navigation, route}) => {
               </View>
             ) : (
               <>
-                {!filter ? (
+                {filter ?(
+                  <View style={styles.row}>
+                    <View style={{width: responsiveScreenWidth(80)}}>
+                      <SearchBar onChangeText={setSneaker} value={sneaker} />
+                    </View>
+                    <TouchableOpacity onPress={Filter}>
+                      <Text style={styles.cancel}>Cancel</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
                   <View
                     style={[
                       AppStyles.row2,
@@ -154,18 +168,21 @@ const Collections = ({navigation, route}) => {
                         marginBottom: responsiveHeight(3),
                       },
                     ]}>
+                      <View style={styles.iconContaier}>
+                      {selectedCollection.isPrivate ? 
                     <View style={styles.iconContaier}>
-                      <Image
-                        style={[styles.icon, {marginLeft: responsiveWidth(2)}]}
-                        source={appIcons.pvt}
-                      />
-                      <Text
-                        style={[
-                          AppStyles.resultText,
-                          {marginLeft: responsiveWidth(2)},
-                        ]}>
-                        Private
-                      </Text>
+                    <Image
+                      style={[styles.icon, {marginLeft: responsiveWidth(2)}]}
+                      source={appIcons.pvt}
+                    />
+                    <Text
+                      style={[
+                        AppStyles.resultText,
+                        {marginLeft: responsiveWidth(2)},
+                      ]}>
+                      Private
+                    </Text>
+                    </View> : null }
                     </View>
                     <View style={styles.iconContaier}>
                       <TouchableOpacity onPress={Share}>
@@ -197,16 +214,7 @@ const Collections = ({navigation, route}) => {
                       </TouchableOpacity>
                     </View>
                   </View>
-                ) : (
-                  <View style={styles.row}>
-                    <View style={{width: responsiveScreenWidth(80)}}>
-                      <SearchBar onChangeText={setSneaker} value={sneaker} />
-                    </View>
-                    <TouchableOpacity onPress={Filter}>
-                      <Text style={styles.cancel}>Cancel</Text>
-                    </TouchableOpacity>
-                  </View>
-                )}
+                ) }
                 <View style={[AppStyles.collectionContainer, {marginTop: 0}]}>
                   {filteredData.length > 0 ? (
                    <FlatList

@@ -20,36 +20,45 @@ import {AppStyles} from '../../services/utilities/AppStyles';
 const InputField = props => {
   const [secureTextEntry, setSecureTextEntry] = useState(true);
   const [isFocused, setIsFocused] = useState(false);
-  //let formattedValue = props.Value;
-  const formatValue = value => {
-    if (props.lebal === 'Phone Number' && value) {
-      let formattedValue = value.replace(/[^\d]/g, ''); 
-      if (formattedValue.length > 0) {
-        let formattedNumber = '+1 (';
-        if (formattedValue.length >= 3) {
-          formattedNumber += formattedValue.substring(0, 3) + ') ';
+ 
+const formatValue = value => {
+  if (props.phone) {
+    let cleaned = ('' + value).replace(/\D/g, '');
+
+    if (cleaned.length >=0){
+      if (cleaned.length < 10) {
+        if (cleaned.length < 6) {
+          if (cleaned.length < 3) {
+            if (cleaned.length === 0) {
+              return '+'+'1'+'(';
+            } else  {
+            return '+'+'1'+'(' + cleaned; }
+          }
+          else{
+          return '+'+'1'+' (' + cleaned.slice(0, 3) + ') ' + cleaned.slice(3);
         }
-        if (formattedValue.length >= 6) {
-          formattedNumber += formattedValue.substring(3, 6) + '-';
-        }
-        if (formattedValue.length >= 10) {
-          formattedNumber += formattedValue.substring(6, 10);
-        }
-        return formattedNumber;
       }
+        else{
+        return '+'+'1'+' (' + cleaned.slice(0, 3) + ') ' + cleaned.slice(3, 6) + '-' + cleaned.slice(6);
+        }
+      }
+      else{
+      return '+'+'1'+' (' + cleaned.slice(0, 3) + ') ' + cleaned.slice(3, 6) + '-' + cleaned.slice(6, 10);
     }
+  }
+  } else {
     return value;
-  };
-
-
-  // if (props.lebal === 'Phone Number') {
-  //   formattedValue = formatValue(props.Value);
-  // }
+  }
+};
 
   const toggleSecureTextEntry = () => {
     setSecureTextEntry(prev => !prev);
   };
-
+  const onBlurHandler = () => {
+    setIsFocused(false);
+    props.onBlur && props.onBlur(); 
+  };
+  
   return (
     <View style={styles.container}>
       <Text style={styles.label}>{props.lebal}</Text>
@@ -69,17 +78,17 @@ const InputField = props => {
           style={AppStyles.input}
           placeholder={props.placeholder}
           onChangeText={props.onChangeText}
-          value={props.Value}
+          value={formatValue(props.value)}
           keyboardType={props.type}
           secureTextEntry={secureTextEntry && props.secureTextEntry}
           onFocus={() => {
             setIsFocused(true);
-            {props.setCross && props.setCross(null);} 
+            {props.onFocus && props.onFocus();} 
           }}
           maxLength={props.maxLength}
-          onBlur={() => setIsFocused(false)}
+          onBlur={onBlurHandler}
         />
-        {props.cross && !props.secureTextEntry && (
+        {props.message  && !props.secureTextEntry && (
           <View style={styles.right}>
             <Image
               source={appIcons.cross}
@@ -87,7 +96,7 @@ const InputField = props => {
             />
           </View>
         )}
-        {props.cross === false && !props.secureTextEntry && (
+        {props.message === null && !props.secureTextEntry && (
           <View style={styles.right}>
             <Image
               source={appIcons.tickgreen}
@@ -107,9 +116,9 @@ const InputField = props => {
           </TouchableOpacity>
         )}
       </View>
-      {props.cross && (
+      {props.message && (
         <Text style={[styles.username,{color: Colors.forgot}]}>
-         Please enter a valid value
+        {props.message}
         </Text>
       )}
       {props.userName && (
@@ -125,7 +134,6 @@ export default InputField;
 
 const styles = StyleSheet.create({
   container: {
-    //height:responsiveHeight(11.5),
     marginHorizontal: '10%',
     marginTop: responsiveHeight(1.5),
   },

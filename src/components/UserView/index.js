@@ -108,7 +108,6 @@ const UserView = (props) => {
     userRef
       .update({
         sent: firestore.FieldValue.arrayUnion(userData),
-        //sentCount: firestore.FieldValue.increment(1),
       })
       .then(() => {
         console.log('User data added successfully: ', userData);

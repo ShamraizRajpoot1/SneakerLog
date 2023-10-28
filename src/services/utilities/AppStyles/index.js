@@ -252,28 +252,31 @@ export const AppStyles = StyleSheet.create({
     width: '95%',
     marginTop: 10,
   },
-  dropdown: {
-    backgroundColor: 'white',
-    borderColor: '#B6BBC8',
-    borderWidth: 1,
+  dcontainer: {
+    height: responsiveHeight(7),
     borderRadius: 5,
-    zIndex: 1000, 
+    width: responsiveWidth(90),
+    marginTop: responsiveHeight(1),
   },
-  itemStyle: {
-    justifyContent: 'flex-start',
-    paddingLeft: 10,
+  Dropdown: {
+    backgroundColor: Colors.fieldBackground,
+    top: 2,
+    borderRadius: scale(5),
+    borderColor: Colors.border1,
+    width: responsiveWidth(90),
   },
-  labelStyle: {
-    fontSize: fontSize.h3,
-    color: Colors.blackText,
-    fontFamily: fontFamily.LatoBold,
-  },
-  dropDown: {
-    backgroundColor: 'white',
-    borderColor: '#B6BBC8',
-    borderWidth: 1,
+  dropDownStyle: {
+    backgroundColor: Colors.fieldBackground,
     borderBottomLeftRadius: 5,
     borderBottomRightRadius: 5,
+    borderColor: Colors.border1,
+    width: responsiveWidth(90),
+  },
+  items: {
+    justifyContent: 'flex-start',
+    left: 10,
+    top: 4,
+    color: Colors.text3,
   },
   marginVerticals: {
     marginVertical: responsiveHeight(3),

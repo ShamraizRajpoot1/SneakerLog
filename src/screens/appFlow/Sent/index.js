@@ -26,15 +26,15 @@ const Sent = props => {
 
       console.log('Current user data:', currentUserData); 
 
-      if (currentUserData && currentUserData.name && currentUserData.userName) {
-        const {name: currentUserName, userName: currentUserUserName} = currentUserData;
+      if (currentUserData && currentUserData.name && currentUserData.userName && (currentUserData.profileImage || '')) {
+        const {name: currentUserName, userName: currentUserUserName, profileImage: currentUserProfileImage } = currentUserData;
 
         await selectedUserDocRef.update({
-          sent: firestore.FieldValue.arrayRemove({
+          received: firestore.FieldValue.arrayRemove({
             Id: user.uid,
             name: currentUserName,
             userName: currentUserUserName,
-            //Image: currentUserProfileImage,
+            Image: currentUserProfileImage,
           }),
         });
 

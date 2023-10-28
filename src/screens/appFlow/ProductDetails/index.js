@@ -15,25 +15,33 @@ import Header from '../../../components/Header';
 import {Colors} from '../../../services/utilities/Colors';
 import {fontFamily, fontSize} from '../../../services/utilities/Fonts';
 import {
-  responsiveFontSize,
-  responsiveHeight,
   responsiveScreenHeight,
   responsiveScreenWidth,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import {appIcons, appImages} from '../../../services/utilities/Assets';
+import {appIcons} from '../../../services/utilities/Assets';
 import {scale} from 'react-native-size-matters';
 import CollectionHeader from '../../../components/CollectionHeader';
 import ProductEdit from '../../../components/Modals/ProductEdit';
-import {DeleteProduct} from '../../../components/Modals';
+import {CollectionModal, DeleteProduct} from '../../../components/Modals';
 import firestore from '@react-native-firebase/firestore';
 
-
-const ProductDetails = ({navigation,route}) => {
+const ProductDetails = ({navigation, route}) => {
   const [productEdit, setProductEdit] = useState(false);
   const [deleteProduct, setDeleteProduct] = useState(false);
   const [data, setData] = useState([]);
-  const selectedCollection = route.params.selectedCollection
+  const [itemToDelete, setItemToDelete] = useState();
+  const [itemToEdit, setItemToEdit] = useState();
+  const [collection, setCollection] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
+  const toggleCollection = () => {
+    setCollection(prev => !prev);
+  };
+  const setCollectionId = (selectedItem) => {
+    setCollection(prev => !prev);
+    setSelectedId(selectedItem);
+  };
+  const selectedCollection = selectedId ? selectedId : route.params.selectedCollection;
   const selectedIndex = route.params.selectedIndex;
   useEffect(() => {
     const fetchFirestoreData = async () => {
@@ -43,45 +51,53 @@ const ProductDetails = ({navigation,route}) => {
           const collectionRef = firestore()
             .collection('Collections')
             .doc(selectedCollectionId);
-          const doc = await collectionRef.get();
-  
-          if (doc.exists) {
-            const data = doc.data();
-            if (data && data.sneakers) {
-              const sneakersData = data.sneakers.map(sneaker => ({
-                id: sneaker.id || '',
-                name: sneaker.sneakerName || '',
-                price: sneaker.price || '',
-                image: sneaker.image || '',
-                colorway: sneaker.colorway || '',
-                year: sneaker.year || 2023,
-                condition: sneaker.condition || '',
-                style: sneaker.style || '',
-                size: sneaker.size || '',
-                status: sneaker.status || '',
-                estimatedPrice: sneaker.estimatedPrice || '',
-                quantity: sneaker.quantity || '',
-              }));
-              setData(sneakersData);
+
+          const unsubscribe = collectionRef.onSnapshot((doc) => {
+            if (doc.exists) {
+              const data = doc.data();
+              if (data && data.sneakers) {
+                const sneakersData = data.sneakers.map(sneaker => ({
+                  estimatedPrice: sneaker.estimatedPrice || '',
+                  style: sneaker.style || '',
+                  image: sneaker.image || '',
+                  sneakerName: sneaker.sneakerName || '',
+                  brand: sneaker.brand || '',
+                  price: sneaker.price || '',
+                  size: sneaker.size || '',
+                  condition: sneaker.condition || '',
+                  sku: sneaker.sku || '',
+                  colorway: sneaker.colorway || '',
+                  quantity: sneaker.quantity || '',
+                  status: sneaker.status || '',
+                  year: sneaker.year || '',
+                }));
+                setData(sneakersData);
+              } else {
+                console.log('Sneakers data not found.');
+              }
             } else {
-              console.log('Sneakers data not found.');
+              console.log('No such document!');
             }
-          } else {
-            console.log('No such document!');
-          }
+          });
+
+          // Unsubscribe when the component unmounts
+          return () => unsubscribe();
         }
       } catch (error) {
         console.error('Error fetching Firestore data: ', error);
       }
     };
-  
+
     fetchFirestoreData();
   }, [route.params.selectedCollection]);
-  
-  const deleteToggle = () => {
+
+
+  const deleteToggle = item => {
+    setItemToDelete(item);
     setDeleteProduct(prev => !prev);
   };
-  const toggle = () => {
+  const toggle = item => {
+    setItemToEdit(item);
     setProductEdit(prev => !prev);
   };
   const back = () => {
@@ -94,18 +110,32 @@ const ProductDetails = ({navigation,route}) => {
   const Collection = () => {
     navigation.navigate('ChoseCollection');
   };
+  const deleteItem = async item => {
+    try {
+      const selectedCollectionId = selectedCollection.id;
+      const collectionRef = firestore()
+        .collection('Collections')
+        .doc(selectedCollectionId);
+      await collectionRef.update({
+        sneakers: firestore.FieldValue.arrayRemove(item),
+      });
+      deleteToggle(null);
+    } catch (error) {
+      console.error('Error deleting product: ', error);
+    }
+  };
   const renderItem = ({item, index}) => (
     <View style={styles.container}>
       <View style={styles.nameContainer}>
         <View style={{width: '78%', marginRight: responsiveWidth(1)}}>
           <Text style={styles.name}>SNEAKER</Text>
-          <Text style={styles.names}>{item.name}</Text>
+          <Text style={styles.names}>{item.sneakerName}</Text>
         </View>
         <View style={styles.iconContainer}>
-          <TouchableOpacity onPress={toggle}>
+          <TouchableOpacity onPress={() => toggle(item)}>
             <Image style={styles.icon} source={appIcons.edit} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={deleteToggle}>
+          <TouchableOpacity onPress={() => deleteToggle(item)}>
             <Image style={styles.icon} source={appIcons.delete} />
           </TouchableOpacity>
         </View>
@@ -174,6 +204,7 @@ const ProductDetails = ({navigation,route}) => {
             </Text>
           </View>
         </View>
+        {collection && <CollectionModal onBackdropPress={toggleCollection} onPress={setCollectionId} />}
       </View>
     </View>
   );
@@ -192,29 +223,41 @@ const ProductDetails = ({navigation,route}) => {
             contentContainerStyle={[AppStyles.contentContainer]}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}>
-            <CollectionHeader name={selectedCollection.name} onPress={Collection} />
+            <CollectionHeader
+              name={selectedCollection.name}
+              onPress={toggleCollection}
+            />
             <View style={{marginLeft: responsiveScreenWidth(5)}}>
-            {data.length > 0 ? (
+              {data.length > 0 ? (
                 <FlatList
                   data={data}
                   horizontal
                   renderItem={renderItem}
-                  keyExtractor={(item) => item.name.toString()}
+                  keyExtractor={item => item.sneakerName.toString()}
                   initialScrollIndex={selectedIndex}
-              getItemLayout={(data, index) => ({
-                length: responsiveWidth(80), 
-                offset: responsiveWidth(90) * index,
-                index,
-              })}
+                  getItemLayout={(data, index) => ({
+                    length: responsiveWidth(80),
+                    offset: responsiveWidth(90) * index,
+                    index,
+                  })}
                 />
               ) : (
                 <Text>No data available</Text>
               )}
               {deleteProduct && (
-                <DeleteProduct onBackdropPress={deleteToggle} />
+                <DeleteProduct
+                  onBackdropPress={() => deleteToggle(null)}
+                  onDelete={() => deleteItem(itemToDelete)}
+                  item={itemToDelete}
+                />
               )}
               {productEdit && (
-                <ProductEdit isVisible={productEdit} onBackdropPress={toggle} />
+                <ProductEdit
+                  isVisible={productEdit}
+                  item={itemToEdit}
+                  onBackdropPress={() => toggle(null)}
+                  selectedId={selectedCollection.id}
+                />
               )}
             </View>
           </ScrollView>

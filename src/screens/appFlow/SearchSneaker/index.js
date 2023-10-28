@@ -22,11 +22,21 @@ import { fontFamily, fontSize } from '../../../services/utilities/Fonts';
 import CollectionHeader from '../../../components/CollectionHeader';
 import SearchBar from '../../../components/SearchBar';
 import { appIcons, appImages } from '../../../services/utilities/Assets';
+import { CollectionModal } from '../../../components/Modals';
 
-const SearchSneaker = ({ navigation }) => {
+const SearchSneaker = ({ navigation,route }) => {
   const [sneaker, setSneaker] = useState('');
   const [search, setSearch] = useState(false);
-
+  const [selectedId, setSelectedId] = useState(null);
+  const [collection, setCollection] = useState(false);
+  const selectedCollection = selectedId ? selectedId : route.params.selectedCollection;
+  const setCollectionId = (selectedItem) => {
+    setCollection(prev => !prev);
+    setSelectedId(selectedItem);
+  };
+  const toggle = () => {
+    setCollection(prev => !prev);
+  };
   const handleClearText = () => {
     setSneaker('');
     setSearch(false)
@@ -95,7 +105,7 @@ const SearchSneaker = ({ navigation }) => {
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
-            <CollectionHeader />
+            <CollectionHeader name={selectedCollection.name} />
 
             <SearchBar
               Text={'Search Sneakers'}
@@ -130,6 +140,7 @@ const SearchSneaker = ({ navigation }) => {
                   If you cannot find the sneaker, {'\n'} {'   '}you can add it
                   manually
                 </Text>
+                {collection && <CollectionModal onBackdropPress={toggle} onPress={setCollectionId} />}
               </View>
             )}
           </ScrollView>

@@ -15,16 +15,19 @@ const Header = props => {
   const {user} = useContext(AuthContext);
   const [userData, setUserData] = useState(null);
   useEffect(() => {
-    const docId = user.uid;
-    const docRef = firestore().collection('Users').doc(docId);
-
-    const unsubscribe = docRef.onSnapshot(doc => {
-      if (doc.exists) {
-        setUserData({Id: doc.id, ...doc.data()});
-      } else {
-      }
-    });
-    return () => unsubscribe();
+    if (user && user.uid) {
+      const docId = user.uid;
+      const docRef = firestore().collection('Users').doc(docId);
+  
+      const unsubscribe = docRef.onSnapshot(doc => {
+        if (doc.exists) {
+          setUserData({ Id: doc.id, ...doc.data() });
+        } else {
+          setUserData(null); 
+        }
+      });
+      return () => unsubscribe();
+    }
   }, [user]);
   const optionimage = {
     ...styles.headerback,

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useContext, useState, useEffect} from 'react';
 import {
   StyleSheet,
   Text,
@@ -12,75 +12,61 @@ import {AppStyles} from '../../../services/utilities/AppStyles';
 import {
   responsiveFontSize,
   responsiveHeight,
+  responsiveScreenWidth,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
 import {Colors} from '../../../services/utilities/Colors';
 import {scale} from 'react-native-size-matters';
 import {fontFamily, fontSize} from '../../../services/utilities/Fonts';
 import {Report, ReportModal, ThankYou} from '../../../components/Modals';
+import {AuthContext} from '../../../navigation/AuthProvider';
+import firestore from '@react-native-firebase/firestore';
 
 const Comunity = () => {
-  const users = [
-    {
-      id: 1,
-      name: 'User 1',
-      profileImage: appImages.member1,
-      username: 'user1',
-    },
-    {
-      id: 2,
-      name: 'User 2',
-      profileImage: appImages.member2,
-      username: 'user2',
-    },
-  ];
+  const {user} = useContext(AuthContext);
+  const [users, setUsers] = useState([]);
+  const [sneakers, setSneakers] = useState([]);
+  useEffect(() => {
+    const fetchFollowersData = async () => {
+      try {
+        const doc = await firestore().collection('Users').doc(user.uid).get();
+        const userData = doc.data();
+        if (userData && userData.followersData) {
+          setUsers(userData.followersData);
+        }
+      } catch (error) {
+        console.error('Error fetching followers data: ', error);
+      }
+    };
 
-  const products = [
-    [
-      {
-        id: 1,
-        name: 'Product 1',
-        price: 10,
-        color: 'Dark Grey',
-        image: appImages.product1,
-        size: 'not Available',
-      },
-      {
-        id: 2,
-        name: 'Product 2',
-        price: 20,
-        color: 'Dark Grey',
-        image: appImages.product2,
-        size: 'not Available',
-      },
-      {
-        id: 3,
-        name: 'Product 3',
-        price: 30,
-        color: 'Dark Grey',
-        image: appImages.product3,
-        size: 'not Available',
-      },
-    ],
-    [
-      {
-        id: 4,
-        name: 'Product 4',
-        price: 15,
-        color: 'Dark Grey',
-        image: appImages.product2,
-        size: 'not Available',
-      },
-      {
-        id: 5,
-        name: 'Product 5',
-        price: 25,
-        color: 'Dark Grey',
-        image: appImages.product2,
-        size: 'not Available',
-      },
-    ],
-  ];
+    fetchFollowersData();
+  }, []);
+  useEffect(() => {
+    const fetchSneakers = async followerId => {
+      try {
+        const fetchedSneakers = [];
+        const collectionsSnapshot = await firestore()
+          .collection('Collections')
+          .get();
+
+        collectionsSnapshot.forEach(doc => {
+          const data = doc.data();
+          if (data.userId === followerId && data.sneakers && !data.isPrivate) {
+            fetchedSneakers.push(...data.sneakers);
+          }
+        });
+
+        setSneakers(prevSneakers => [...prevSneakers, fetchedSneakers]);
+      } catch (error) {
+        console.error('Error fetching sneakers data: ', error);
+      }
+    };
+
+    users.forEach(follower => {
+      fetchSneakers(follower.Id);
+    });
+  }, [users]);
+
   const collection = {
     ...AppStyles.collection,
     borderWidth: scale(0.7),
@@ -109,10 +95,18 @@ const Comunity = () => {
     <View key={index.toString()} style={styles.userContainer}>
       <View style={styles.userDetails}>
         <View style={{flexDirection: 'row', alignItems: 'center'}}>
-          <Image source={users[index].profileImage} style={styles.userImage} />
+          {users[index].profileImage ? (
+            <Image
+              source={{uri: users[index].profileImage}}
+              style={styles.userImage}
+            />
+          ) : (
+            <Image source={appIcons.profile} style={styles.userImage} />
+          )}
+
           <View style={styles.nameContainer}>
             <Text style={styles.listdet2}>{users[index].name}</Text>
-            <Text style={styles.listdet3}>{users[index].name}</Text>
+            <Text style={styles.listdet3}>{users[index].userName}</Text>
           </View>
         </View>
         <View style={{flexDirection: 'row'}}>
@@ -131,30 +125,36 @@ const Comunity = () => {
         </View>
       </View>
       <View style={styles.productList}>
-        {products[index].map((product, productIndex) => (
-          <View key={product.id.toString()} style={collection}>
-            <View style={styles.inner1}>
-              <Image source={product.image} style={styles.productpic} />
-              <View style={styles.productDet}>
-                <Text style={styles.pname}>{product.name}</Text>
-                <Text style={styles.pcolor}>{product.color}</Text>
-                <Text style={styles.psize}>Size {product.size}</Text>
-                <View
-                  style={{
-                    marginTop: responsiveHeight(0.2),
-                    flexDirection: 'row',
-                  }}>
-                  <TouchableOpacity>
-                    <Image source={appIcons.heartFill} style={styles.like1} />
-                  </TouchableOpacity>
+        {Array.isArray(sneakers[index]) &&
+          sneakers[index].map((product, productIndex) => (
+            <View key={product.Id.toString()} style={collection}>
+              <View style={styles.inner1}>
+                {product.image && (
+                  <Image
+                    source={{uri: product.image}}
+                    style={styles.productpic}
+                  />
+                )}
+                <View style={styles.productDet}>
+                  <Text style={styles.pname}>{product.sneakerName}</Text>
+                  <Text style={styles.pcolor}>{product.colorway}</Text>
+                  <Text style={styles.psize}>Size {product.size}</Text>
+                  <View
+                    style={{
+                      marginTop: responsiveHeight(0.2),
+                      flexDirection: 'row',
+                    }}>
+                    <TouchableOpacity>
+                      <Image source={appIcons.heartFill} style={styles.like1} />
+                    </TouchableOpacity>
+                  </View>
                 </View>
               </View>
+              <View style={styles.action}>
+                <Text style={styles.pAction}>Added</Text>
+              </View>
             </View>
-            <View style={styles.action}>
-              <Text style={styles.pAction}>Added</Text>
-            </View>
-          </View>
-        ))}
+          ))}
       </View>
     </View>
   );
@@ -196,8 +196,16 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginLeft: responsiveWidth(2),
   },
-  inner1: {flexDirection: 'row', justifyContent: 'space-between'},
+  productpic: {
+    width: scale(40),
+    height: scale(65),
+    resizeMode: 'contain',
+  },
   productDet: {
+    marginLeft: responsiveScreenWidth(2),
+  },
+  inner1: {flexDirection: 'row', justifyContent: 'space-between'},
+  sneakersDet: {
     alignItems: 'flex-start',
     justifyContent: 'flex-start',
     alignSelf: 'center',
@@ -248,7 +256,7 @@ const styles = StyleSheet.create({
     height: scale(35),
     borderRadius: scale(100),
   },
-  productList: {
+  sneakersList: {
     flex: 2,
     marginTop: responsiveHeight(1),
   },
@@ -269,7 +277,7 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.LatoRegular,
     bottom: responsiveHeight(1),
   },
-  productpic: {height: scale(50), width: scale(50), resizeMode: 'contain'},
+  sneakerspic: {height: scale(50), width: scale(50), resizeMode: 'contain'},
 });
 
 export default Comunity;

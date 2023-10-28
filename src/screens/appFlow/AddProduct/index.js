@@ -1,14 +1,25 @@
 import { StyleSheet, Text, View, KeyboardAvoidingView, TouchableWithoutFeedback, ScrollView, TouchableOpacity, Image } from 'react-native'
-import React from 'react'
+import React,{useState} from 'react'
 import Header from '../../../components/Header'
-import { AppStyles } from '../../../services/utilities/AppStyles'
+import { AppStyles, } from '../../../services/utilities/AppStyles'
 import { responsiveHeight, responsiveWidth } from 'react-native-responsive-dimensions'
 import { Colors } from '../../../services/utilities/Colors'
 import { fontSize } from '../../../services/utilities/Fonts'
 import CollectionHeader from '../../../components/CollectionHeader'
 import AddSneakers from '../../../components/AddSneakers'
+import { CollectionModal } from '../../../components/Modals'
 
-const AddProduct = ({navigation}) => {
+const AddProduct = ({navigation, route}) => {
+  const [selectedId, setSelectedId] = useState(null);
+  const [collection, setCollection] = useState(false);
+  const selectedCollection = selectedId ? selectedId : route.params.selectedCollection;
+  const setCollectionId = (selectedItem) => {
+    setCollection(prev => !prev);
+    setSelectedId(selectedItem);
+  };
+  const toggle = () => {
+    setCollection(prev => !prev);
+  };
     const back = () => {
         navigation.goBack();
       };
@@ -16,10 +27,14 @@ const AddProduct = ({navigation}) => {
         navigation.navigate('Profile')
       };
       const Sneakers = () => {
-        navigation.navigate('SneakerStack')
+        navigation.navigate('SneakerStack', {
+          screen: 'Sneakers',
+          params: { selectedCollection },
+        });
+       
       };
       const Search = () => {
-        navigation.navigate('SearchSneaker')
+        navigation.navigate('SearchSneaker',{ selectedCollection })
       };
       
   return (
@@ -36,8 +51,9 @@ const AddProduct = ({navigation}) => {
           contentContainerStyle={[AppStyles.contentContainer]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}>
-            <CollectionHeader />
+            <CollectionHeader name={selectedCollection.name} onPress={toggle}/>
             <AddSneakers onPress={Sneakers} press={Search}/>
+            {collection && <CollectionModal onBackdropPress={toggle} onPress={setCollectionId} />}
           </ScrollView>
           </TouchableWithoutFeedback>
           </KeyboardAvoidingView>

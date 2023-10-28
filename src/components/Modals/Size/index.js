@@ -105,7 +105,7 @@ const Size = (props) => {
                   marginRight: responsiveScreenWidth(5),
                 }}>
                 <Image style={styles.rular} source={appIcons.rular} />
-                <TouchableOpacity onPress={sizeGuide}>
+                <TouchableOpacity onPress={sizeGuide} disabled={props.disable}>
                   <Text
                     style={[
                       AppStyles.labelStyle,

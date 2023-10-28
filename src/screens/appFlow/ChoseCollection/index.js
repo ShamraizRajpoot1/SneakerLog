@@ -199,16 +199,17 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: responsiveScreenHeight(2.5),
     paddingBottom: responsiveScreenHeight(2.5),
-    borderBottomWidth: responsiveScreenWidth(0.1),
+    borderBottomWidth: responsiveScreenWidth(0.15),
   },
   name: {
     color: Colors.text3,
     fontFamily: fontFamily.LatoBold,
     marginLeft: responsiveWidth(4),
+    fontSize:fontSize.fieldText
   },
   sneakerCount: {
     color: Colors.blackText,
-
+    fontSize: fontSize.fieldText,
     marginLeft: responsiveWidth(4),
   },
 });

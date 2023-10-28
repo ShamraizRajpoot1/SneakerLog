@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
   Keyboard,
   Dimensions,
-  Alert
+  Alert,
 } from 'react-native';
 import React, {useContext, useState, useEffect} from 'react';
 import {AppStyles} from '../../../services/utilities/AppStyles';
@@ -33,13 +33,13 @@ import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
 import * as ImagePicker from 'react-native-image-picker';
 import ImageResizer from 'react-native-image-resizer';
+import { v4 as uuidv4 } from 'uuid';
 
-const Sneakers = ({navigation}) => {
+const Sneakers = ({navigation, route}) => {
   const {user} = useContext(AuthContext);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
-  const [collections, setCollections] = useState([]);
-  const [selectedCollection, setSelectedCollection] = useState(null);
+  const [selectedColl, setSelectedColl] = useState([]);
   const [collection, setCollection] = useState(false);
   const [sizemodal, setSizemodal] = useState(false);
   const [image, setImage] = useState(null);
@@ -51,27 +51,46 @@ const Sneakers = ({navigation}) => {
   const [sku, setSku] = useState('');
   const [colorway, setColorway] = useState('');
   const [quantity, setQuantity] = useState(1);
-  const [selectedValue, setSelectedValue] = useState('');
+  const [status, setStatus] = useState('');
+  const [estimatedPrice, setEstimatedPrice] = useState('');
+  const [style, setStyle] = useState('');
+  const [year, setYear] = useState('');
+  let selectedCollection;
+
+if (selectedId) {
+  selectedCollection = selectedId;
+} else if (route?.params?.selectedCollection) {
+  selectedCollection = route.params.selectedCollection;
+} else {
+  selectedCollection = selectedColl;
+}
   const upload = async () => {
     try {
-      if(! image ||
+      const uniqueId = '_' + Math.random().toString(36).substr(2, 9);
+      
+      if (
+        !image ||
         !sneakerName ||
         !brand ||
         !price ||
         !size ||
         !condition ||
         !sku ||
-        !colorway||
+        !colorway ||
         !quantity ||
-        !selectedValue){
-          Alert.alert("Please fill all fields");
-          return
-        }
+        !status
+      ) {
+        Alert.alert('Please fill all fields');
+        return;
+      }
       await firestore()
         .collection('Collections')
         .doc(selectedCollection.id)
         .update({
           sneakers: firestore.FieldValue.arrayUnion({
+            Id: uniqueId,
+            estimatedPrice,
+            style,
             image,
             sneakerName,
             brand,
@@ -81,17 +100,34 @@ const Sneakers = ({navigation}) => {
             sku,
             colorway,
             quantity,
-            selectedValue,
+            status,
+            year,
           }),
         });
-        navigation.navigate('CollectionStack', {
-          screen: 'Collections',
-          params: { selectedCollection },
-        });
+      navigation.navigate('CollectionStack', {
+        screen: 'Collections',
+        params: {selectedCollection},
+      });
     } catch (error) {
       console.error('Error uploading sneaker data to Firestore: ', error);
     }
   };
+  useEffect(() => {
+      setImage(null);
+      setSneakerName('');
+      setBrand('');
+      setPrice('');
+      setSize('');
+      setCondition('Used');
+      setSku('');
+      setColorway('');
+      setQuantity(1);
+      setStatus('');
+      setEstimatedPrice('');
+      setStyle('');
+      setYear('');
+    
+  }, []);
   useEffect(() => {
     const fetchCollections = async () => {
       try {
@@ -112,9 +148,9 @@ const Sneakers = ({navigation}) => {
             });
           });
 
-          setCollections(fetchedCollections);
+        
           if (!selectedId && fetchedCollections.length > 0) {
-            setSelectedCollection(fetchedCollections[0]);
+            setSelectedColl(fetchedCollections[0]);
           }
         });
       } catch (error) {
@@ -123,7 +159,7 @@ const Sneakers = ({navigation}) => {
     };
 
     fetchCollections();
-  }, [user.uid, selectedId]);
+  }, [selectedId]);
   const decreaseQuantity = () => {
     if (quantity > 1) {
       setQuantity(prevQuantity => prevQuantity - 1);
@@ -138,7 +174,6 @@ const Sneakers = ({navigation}) => {
   const setCollectionId = selectedItem => {
     setCollection(prev => !prev);
     setSelectedId(selectedItem);
-    setSelectedCollection(selectedItem);
   };
   const Profile = () => {
     navigation.navigate('Profile');
@@ -177,15 +212,15 @@ const Sneakers = ({navigation}) => {
         path: 'images',
       },
     };
-  
+
     ImagePicker.launchImageLibrary(options, async response => {
       if (response.didCancel) {
       } else if (response.error) {
       } else if (response.assets && response.assets.length > 0) {
         const selectedAsset = response.assets[0];
-        const source = { uri: selectedAsset.uri };
+        const source = {uri: selectedAsset.uri};
         const filename = selectedAsset.fileName;
-  
+
         const resizedImage = await ImageResizer.createResizedImage(
           selectedAsset.uri,
           Dimensions.get('window').width / 1,
@@ -193,8 +228,11 @@ const Sneakers = ({navigation}) => {
           'JPEG',
           70,
         );
-  
-        const uploadUri = Platform.OS === 'ios' ? resizedImage.uri.replace('file://', '') : resizedImage.uri;
+
+        const uploadUri =
+          Platform.OS === 'ios'
+            ? resizedImage.uri.replace('file://', '')
+            : resizedImage.uri;
         const reference = storage().ref(`/Sneakers/${filename}`);
         try {
           await reference.putFile(uploadUri);
@@ -231,7 +269,10 @@ const Sneakers = ({navigation}) => {
                 {marginTop: responsiveHeight(3), height: responsiveHeight(20)},
               ]}>
               {image ? (
-                <Image style={[styles.image,{borderRadius: scale(10)}]} source={{uri: image}} />
+                <Image
+                  style={[styles.image, {borderRadius: scale(10)}]}
+                  source={{uri: image}}
+                />
               ) : (
                 <Image style={styles.image} source={appIcons.camera} />
               )}
@@ -366,14 +407,13 @@ const Sneakers = ({navigation}) => {
                   labelStyle={styles.label}
                   placeholder={' '}
                   dropDownMaxHeight={170}
-                  itemStyle={styles.items}
-                  containerStyle={styles.dcontainer}
-                  style={styles.Dropdown}
-                  setValue={value => setSelectedValue(value)}
+                  containerStyle={AppStyles.dcontainer}
+                  style={AppStyles.Dropdown}
+                  setValue={value => setStatus(value)}
                   setOpen={() => setIsOpen(!isOpen)}
                   open={isOpen}
-                  value={selectedValue}
-                  dropDownStyle={styles.dropDownStyle}
+                  value={status}
+                  dropDownStyle={AppStyles.dropDownStyle}
                 />
               </View>
             </View>
@@ -407,7 +447,8 @@ const Sneakers = ({navigation}) => {
         <TouchableOpacity style={[AppStyles.touchable]}>
           <Text style={[styles.touchText, {color: Colors.blue}]}>Cancel</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={upload}
+        <TouchableOpacity
+          onPress={upload}
           style={[touchable, {backgroundColor: Colors.barBackground}]}>
           <Text style={[styles.touchText, {color: Colors.lebal}]}>
             Add to Collection
