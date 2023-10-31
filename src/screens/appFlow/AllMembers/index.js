@@ -6,6 +6,7 @@ import {
   TouchableWithoutFeedback,
   ScrollView,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import {AppStyles} from '../../../services/utilities/AppStyles';
 import SearchBar from '../../../components/SearchBar';
@@ -28,9 +29,9 @@ import firestore from '@react-native-firebase/firestore';
 import { AuthContext } from '../../../navigation/AuthProvider';
 
 const AllMembers = ({navigation, route}) => {
-  const [users, setUsers] = useState([]);
-  //const { users } = route.params;
+  //const [users, setUsers] = useState([]);
   const [selectedOption, setSelectedOption] = useState(null);
+  const {users} = route.params
   const {user} = useContext(AuthContext)
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [sentData, setSentData] = useState([])
@@ -43,31 +44,38 @@ const AllMembers = ({navigation, route}) => {
   const [filterFollowerData, setFilterFollowerData] = useState([])
   const [use, setUse] = useState([])
   const [refresh, setRefresh] = useState(false); 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const usersCollection = await firestore().collection('Users').get();
-        const fetchedUsers = [];
-        usersCollection.forEach((doc) => {
-          fetchedUsers.push({ Id: doc.id, ...doc.data() });
-        });
-        setUsers(fetchedUsers);
-      } catch (error) {
-        console.error('Error fetching users: ', error);
-      }
-    };
-    const unsubscribe = firestore()
-    .collection('Users')
-    .onSnapshot(() => {
-      fetchData();
-      setRefresh((prev) => !prev); 
-    });
+  const [loading, setIsLoading] = useState(false);
+  
 
-  return () => {
-    unsubscribe();
-  };
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const usersCollection = await firestore().collection('Users').get();
+  //       const fetchedUsers = [];
+  //       usersCollection.forEach((doc) => {
+  //         fetchedUsers.push({ Id: doc.id, ...doc.data() });
+  //       });
+  //       setUsers(fetchedUsers);
+  //     } catch (error) {
+  //       console.error('Error fetching users: ', error);
+  //     } finally {
+  //       if (initialLoading) {
+  //         setInitialLoading(false);
+  //       }
+  //     }
+  //   };
 
-  }, [use, refresh]);
+  //   const unsubscribe = firestore().collection('Users').onSnapshot(() => {
+  //     fetchData();
+  //     setRefresh((prev) => !prev);
+  //   });
+
+  //   fetchData();
+
+  //   return () => {
+  //     unsubscribe();
+  //   };
+  // }, [navigation]);
   
   useEffect(() => {
     const fetchUserData = async () => {
@@ -183,6 +191,7 @@ const AllMembers = ({navigation, route}) => {
       <Header Image={true} options={true} onPress={back} press={Profile} />
 
       <View style={styles.container}>
+      
         <ScrollView
           style={styles.optionsContainer}
           horizontal
@@ -207,6 +216,9 @@ const AllMembers = ({navigation, route}) => {
       </View>
       <View style={{flex: 1}}>
         <TouchableWithoutFeedback>
+        {loading ? ( 
+          <ActivityIndicator style={AppStyles.loadingIndicator} size="large" color={Colors.primary} />
+        ) :
         <ScrollView
             showsVerticalScrollIndicator={false}
             style={{
@@ -228,7 +240,7 @@ const AllMembers = ({navigation, route}) => {
             ) : (
               selectedComponent
             )}
-          </ScrollView>
+          </ScrollView>}
         </TouchableWithoutFeedback>
       </View>
     </>

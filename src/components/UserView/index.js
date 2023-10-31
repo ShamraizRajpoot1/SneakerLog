@@ -41,7 +41,7 @@ const UserView = (props) => {
     };
 
     fetchLoggedInUserData();
-  }, [user.uid]);
+  }, [user]);
   useEffect(() => {
     const fetchData = async () => {
       try {

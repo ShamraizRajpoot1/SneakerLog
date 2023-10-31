@@ -43,7 +43,6 @@ const Followers = props => {
   }, [user.uid]);
   useEffect(() => {
     const userDocRef = firestore().collection('Users').doc(user.uid);
-  
     const unsubscribe = userDocRef.onSnapshot((doc) => {
       if (doc.exists) {
         const userData = doc.data();
@@ -57,11 +56,8 @@ const Followers = props => {
         console.log('No user data found for the specified ID');
       }
     });
-  
-    // Unsubscribe from the listener when the component is unmounted
     return () => unsubscribe();
   }, [user.uid]);
-  
   const handleFollow = (selectedUser) => {
     const userData = {
       name: selectedUser.name || '',

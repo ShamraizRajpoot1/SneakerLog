@@ -40,7 +40,7 @@ const ProductEdit = props => {
     {label: 'Holy Grail', value: 'Holy Grail'},
     {label: 'Gift', value: 'Gift'},
   ];
-  const [sneakerName, setSneakerName] = useState(item.sneakerName || '');
+  const [name, setSneakerName] = useState(item.name || '');
   const [size, setSize] = useState(props.item.size || '');
   const [condition, setCondition] = useState(item.condition || 'New');
   const [quantity, setQuantity] = useState(item.quantity || 1);
@@ -50,7 +50,7 @@ const ProductEdit = props => {
   const scrollViewRef = useRef();
 
   const handleCreate = async () => {
-    if (sneakerName) {
+    if (name) {
       const db = firestore();
       const collectionRef = db.collection('Collections');
   
@@ -66,10 +66,10 @@ const ProductEdit = props => {
         if (data.sneakers) {
           const sneakers = data.sneakers;
           const updatedSneakers = sneakers.map(sneaker => {
-            if (sneaker.image === item.image) {
+            if (sneaker.id === item.id) {
               return {
                 ...sneaker,
-                name: sneakerName,
+                name: name,
                 size: size,
                 condition: condition,
                 quantity: quantity,
@@ -142,7 +142,7 @@ const ProductEdit = props => {
                 keyboardShouldPersistTaps="handled">
                 <View style={{alignItems: 'center'}}>
                   <Text style={styles.modaltxt}>
-                    EDIT {item ? item.sneakerName : null}
+                    EDIT {item ? item.name : null}
                   </Text>
                   <View
                     style={[
@@ -153,7 +153,7 @@ const ProductEdit = props => {
                     <Input
                       family={true}
                       margin={true}
-                      value={sneakerName}
+                      value={name}
                       onChangeText={handleSneakerNameChange}
                     />
                   </View>

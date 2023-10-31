@@ -8,6 +8,7 @@ import {
   Image,
   TouchableOpacity,
   FlatList,
+  ActivityIndicator,
 } from 'react-native';
 import React, {useState, useEffect, useContext} from 'react';
 import Header from '../../../components/Header';
@@ -34,6 +35,7 @@ const UserDetails = ({navigation, route}) => {
   const [collectionCount, setCollectionCount] = useState(0);
   const [sneakerCount, setSneakerCount] = useState(0);
   const [data, setData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchSelectedUserData = async () => {
@@ -52,8 +54,10 @@ const UserDetails = ({navigation, route}) => {
             setInviteSentUsers(true);
           }
         } 
+        setIsLoading(false); 
       } catch (error) {
         console.error('Error fetching user data: ', error);
+        setIsLoading(false); 
       }
     };
 
@@ -84,8 +88,10 @@ const UserDetails = ({navigation, route}) => {
             setCollectionCount(fetchedCollections.length);
             setSneakerCount(count); 
           });
+         
       } catch (error) {
         console.error('Error fetching collections: ', error);
+        setIsLoading(false); 
       }
     };
 
@@ -137,6 +143,9 @@ const UserDetails = ({navigation, route}) => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -500}>
         <TouchableWithoutFeedback>
+        {isLoading ? ( 
+              <ActivityIndicator style={AppStyles.loadingIndicator} size="large" color={Colors.primaryColor} />
+            ) :
           <ScrollView
             style={{flex: 1}}
             contentContainerStyle={[AppStyles.contentContainer]}
@@ -239,7 +248,7 @@ const UserDetails = ({navigation, route}) => {
                 <View style={{height: responsiveHeight(7)}}></View>
               </View>
             )}
-          </ScrollView>
+          </ScrollView> }
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
     </>

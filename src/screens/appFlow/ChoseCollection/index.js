@@ -53,7 +53,7 @@ const ChoseCollection = ({navigation}) => {
           const fetchedCollections = [];
           snapshot.forEach((doc) => {
             const data = doc.data();
-            const { collectionName, isPrivate, sneakers, price } = data;
+            const { collectionName, isPrivate, sneakers,favorite, price } = data;
             const sneakerCount = sneakers ? sneakers.length : 0; 
             fetchedCollections.push({
               id: doc.id,
@@ -62,6 +62,7 @@ const ChoseCollection = ({navigation}) => {
               price: price,
               isPrivate: isPrivate,
               sneakerCount: sneakerCount, 
+              favorite: favorite || null
             });
           });
 
@@ -84,14 +85,22 @@ const ChoseCollection = ({navigation}) => {
           {marginHorizontal: responsiveScreenWidth(5)},
         ]}>
         <View style={{flexDirection: 'row', alignItems: 'center'}}>
-          <Image
+          {item.favorite ? <Image
             source={appIcons.star}
             style={{
               width: scale(25),
               height: scale(25),
               marginVertical: responsiveScreenHeight(2),
             }}
-          />
+          /> : 
+          <Image
+            source={appIcons.starUnselected}
+            style={{
+              width: scale(25),
+              height: scale(25),
+              marginVertical: responsiveScreenHeight(2),
+            }}
+          />}
           <View style={{marginLeft: responsiveScreenWidth(4)}}>
             <Text style={styles.name}>{item.name}</Text>
             <View style={{flexDirection: 'row'}}>

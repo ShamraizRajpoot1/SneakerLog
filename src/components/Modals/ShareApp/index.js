@@ -30,13 +30,13 @@ import {
           onPress={props.onBackdropPress}>
           <View style={styles.modalContent} onStartShouldSetResponder={() => true}>
             <Text style={styles.modaltxt}>Share Collection to...</Text>
-            <TouchableOpacity style={styles.textContainer}>
+            <TouchableOpacity style={styles.textContainer} onPress={props.onPress}>
               <Text style={styles.text}>Messages</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.textContainer}>
+            <TouchableOpacity style={styles.textContainer} onPress={props.press}>
               <Text style={styles.text}>Copy Link</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.textContainer}>
+            <TouchableOpacity style={styles.textContainer} onPress={props.onClick}>
               <Text style={styles.text}>Spreadsheet</Text>
             </TouchableOpacity>
           </View>

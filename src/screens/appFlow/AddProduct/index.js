@@ -2,7 +2,6 @@ import { StyleSheet, Text, View, KeyboardAvoidingView, TouchableWithoutFeedback,
 import React,{useState} from 'react'
 import Header from '../../../components/Header'
 import { AppStyles, } from '../../../services/utilities/AppStyles'
-import { responsiveHeight, responsiveWidth } from 'react-native-responsive-dimensions'
 import { Colors } from '../../../services/utilities/Colors'
 import { fontSize } from '../../../services/utilities/Fonts'
 import CollectionHeader from '../../../components/CollectionHeader'
@@ -12,6 +11,7 @@ import { CollectionModal } from '../../../components/Modals'
 const AddProduct = ({navigation, route}) => {
   const [selectedId, setSelectedId] = useState(null);
   const [collection, setCollection] = useState(false);
+  const favorite = route.params.favorite
   const selectedCollection = selectedId ? selectedId : route.params.selectedCollection;
   const setCollectionId = (selectedItem) => {
     setCollection(prev => !prev);
@@ -29,12 +29,11 @@ const AddProduct = ({navigation, route}) => {
       const Sneakers = () => {
         navigation.navigate('SneakerStack', {
           screen: 'Sneakers',
-          params: { selectedCollection },
+          params: { selectedCollection, favorite },
         });
-       
       };
       const Search = () => {
-        navigation.navigate('SearchSneaker',{ selectedCollection })
+        navigation.navigate('SearchSneaker',{ selectedCollection, favorite })
       };
       
   return (
@@ -51,7 +50,7 @@ const AddProduct = ({navigation, route}) => {
           contentContainerStyle={[AppStyles.contentContainer]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}>
-            <CollectionHeader name={selectedCollection.name} onPress={toggle}/>
+            <CollectionHeader Favorite={favorite} name={selectedCollection.name} onPress={toggle}/>
             <AddSneakers onPress={Sneakers} press={Search}/>
             {collection && <CollectionModal onBackdropPress={toggle} onPress={setCollectionId} />}
           </ScrollView>

@@ -32,6 +32,8 @@ import {AuthContext} from '../../../navigation/AuthProvider';
 import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
 import ImageResizer from 'react-native-image-resizer';
+import Toast from 'react-native-toast-message';
+import CustomToast from '../../../components/CustomToast';
 
 const EditProfile = ({navigation}) => {
   const {user} = useContext(AuthContext);
@@ -44,6 +46,29 @@ const EditProfile = ({navigation}) => {
   const [gender, setGender] = useState('');
   const [sneakerBrands, setSneakerBrands] = useState('');
   const [sneakerSize, setSneakerSize] = useState([]);
+
+  const showCustomToast = () => {
+    Toast.show({
+      type: 'success',
+      position: 'top',
+      text1: 'Update Successful',
+      visibilityTime: 4000,
+      autoHide: true,
+      topOffset: 30,
+      bottomOffset: 40,
+      text1Style: { height: responsiveScreenHeight(20) , fontWeight: 'bold', fontSize: 16, width: 200, marginVertical: responsiveScreenHeight(2) }, 
+      text2Style: { width: 200 },
+      customComponent: (
+        <View style={{ height: responsiveScreenHeight(15) ,flexDirection: 'row', alignItems: 'center' }}>
+          
+          <View>
+            <Text style={{ fontWeight: 'bold', fontSize: 16, marginVertical: responsiveScreenHeight(2) }}>Update Successful</Text>
+            
+          </View>
+        </View>
+      ),
+    });
+  };
   const toggleModal = () => {
     setSizeModal(prevModal => !prevModal);
   };
@@ -72,7 +97,7 @@ const EditProfile = ({navigation}) => {
         profileImage: profileImage,
       })
       .then(() => {
-       
+        showCustomToast();
         navigation.goBack();
       })
       .catch(error => {
@@ -161,14 +186,11 @@ const EditProfile = ({navigation}) => {
   
     ImagePicker.launchImageLibrary(options, async response => {
       if (response.didCancel) {
-        // Handle cancellation
       } else if (response.error) {
-        // Handle error
       } else if (response.assets && response.assets.length > 0) {
         const selectedAsset = response.assets[0];
         const source = { uri: selectedAsset.uri };
         const filename = selectedAsset.fileName;
-  
         const resizedImage = await ImageResizer.createResizedImage(
           selectedAsset.uri,
           Dimensions.get('window').width / 1,
@@ -176,7 +198,6 @@ const EditProfile = ({navigation}) => {
           'JPEG',
           70,
         );
-  
         const uploadUri = Platform.OS === 'ios' ? resizedImage.uri.replace('file://', '') : resizedImage.uri;
         const reference = storage().ref(`/Users/${filename}`);
   
@@ -267,7 +288,7 @@ const EditProfile = ({navigation}) => {
                     <Text style={styles.private}>Private</Text>
                   </View>
                 </View>
-
+               
                 <Input editable={false} value={phone} />
               </View>
               <View style={AppStyles.marginVerticals}>

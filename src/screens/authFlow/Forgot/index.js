@@ -24,6 +24,7 @@ import { firebase } from '@react-native-firebase/firestore';
 const Forgot = ({navigation}) => {
   const [email, setEmail] = useState('');
   const [buttonDisabled, setButtonDisabled] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const back = () => {
     navigation.goBack();
   };
@@ -52,10 +53,15 @@ const Forgot = ({navigation}) => {
   const handleSendPasswordReset = async (email) => {
     try {
       const auth = firebase.auth();
-      await auth.sendPasswordResetEmail(email).then(Alert.alert('EmailSent'))
+      setIsLoading(true); // set loading to true
+      await auth.sendPasswordResetEmail(email);
+      Alert.alert('Email Sent');
+      navigation.navigate('Login');
     } catch (error) {
       console.error('Error sending password reset email:', error.message);
       Alert.alert('Error', 'There was an error sending the password reset email.');
+    } finally {
+      setIsLoading(false); // set loading to false after the process is done
     }
   };
   
@@ -98,6 +104,7 @@ const Forgot = ({navigation}) => {
                 background={buttonColor}
                 text="Update Password"
                 disabled={isButtonDisabled}
+                isLoading={isLoading}
               />
             </View>
           </ScrollView>

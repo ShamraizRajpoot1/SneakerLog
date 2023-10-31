@@ -1,86 +1,37 @@
 
-  import React, { useState } from 'react';
+  import React, { useState, useEffect } from 'react';
   import { View, Text, Image, FlatList, StyleSheet, ScrollView } from 'react-native';
   import { responsiveFontSize, responsiveHeight, responsiveWidth } from 'react-native-responsive-dimensions';
   import { appImages } from '../../services/utilities/Assets';
   import { fontFamily, fontSize } from '../../services/utilities/Fonts';
   import { Colors } from '../../services/utilities/Colors';
   import { scale } from 'react-native-size-matters';
-  
+  import firestore from '@react-native-firebase/firestore';
+  import moment from 'moment';
+
   const monthNames = [
-    'Jan', 'Febr', 'Mar', 'Apr', 'May', 'Jun',
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
     'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
   ];
-  
   const ProductView = (props) => {
-    const [Releasedata] = useState([
-      {
-        name: 'Converse Aeon Active CX',
-        releaseDate: '2023-04-12',
-        image: appImages.product1 ,
-      },
-      {
-        name: 'Air Jordon 2 x Union Rattan',
-        releaseDate: '2023-04-15',
-        image: appImages.product2,
-      },
-      {
-        name: 'Air Jordon 2 x Grey Fog',
-        releaseDate: '2023-04-15',
-        image: appImages.product3,
-      },
-      {
-        name: 'Converse Aeon Active C',
-        releaseDate: '2023-04-12', 
-        image: appImages.product1 ,
-      },
-      {
-        name: 'Air Jordon 2 x Union',
-        releaseDate: '2023-04-15',
-        image: appImages.product2,
-      },
-      {
-        name: 'Air Jordon 2 x Gre',
-        releaseDate: '2023-04-15',
-        image: appImages.product3,
-      },
-      {
-        name: 'Converse Aeon Activeu C',
-        releaseDate: '2023-04-12', 
-        image: appImages.product1 ,
-      },
-      {
-        name: 'Air Jordon 2 x Unions',
-        releaseDate: '2023-04-15',
-        image: appImages.product2,
-      },
-      {
-        name: 'Air Jordon 2 x Greys',
-        releaseDate: '2023-04-15',
-        image: appImages.product3,
-      },
-      {
-        name: 'Converse Aeon Active Cv',
-        releaseDate: '2023-04-12', 
-        image: appImages.product1 ,
-      },
-      {
-        name: 'Air Jordon 2 x Union 5',
-        releaseDate: '2023-04-15',
-        image: appImages.product2,
-      },
-      {
-        name: 'Air Jordon 2 x Grey 0',
-        releaseDate: '2023-04-15',
-        image: appImages.product3,
-      },
-      {
-        name: 'Air Jordon 2 x Grey 05',
-        releaseDate: '2023-04-15',
-        image: appImages.product3,
-      },
-    ]);
-    const displayedData = props.sliceSize ? Releasedata.slice(0, props.sliceSize) : Releasedata;
+    const [releaseDate, setReleaseDate] = useState([]);
+    useEffect(() => {
+      const fetchEventsData = async () => {
+        try {
+          const snapshot = await firestore().collection('ReleaseDate').get();
+          const eventsData = [];
+          snapshot.forEach(doc => {
+            eventsData.push({id: doc.id, ...doc.data()});
+          });
+          setReleaseDate(eventsData);
+        } catch (error) {
+          console.error('Error fetching Events data: ', error);
+        }
+      };
+      fetchEventsData();
+    }, []);
+   
+    const displayedData = props.sliceSize ? releaseDate.slice(0, props.sliceSize) : releaseDate;
     if (props.vertical) {
       return (
         <FlatList
@@ -91,7 +42,16 @@
           data={displayedData}
           keyExtractor={(item) => item.name}
           renderItem={({ item, index }) => {
-            const releaseDate = new Date(item.releaseDate);
+            const formatDate = (dateTime) => {
+              return moment(dateTime).format('DD');
+            };
+            const formatMonth = (dateTime) => {
+              return moment(dateTime).format('MM');
+            };
+          
+            const Day =  formatDate(item.date.toDate()) ;
+            const Month = formatMonth(item.date.toDate());
+          
     
             return (
               <View
@@ -99,7 +59,7 @@
                   marginLeft: responsiveWidth(6.5),
                   marginBottom: 2,
                   marginRight:
-                    index + 1 === Releasedata.length
+                    index + 1 === releaseDate.length
                       ? responsiveWidth(5)
                       : 0,
                 }}>
@@ -115,7 +75,7 @@
                           styles.datetext,
                           { fontFamily: fontFamily.DinBold },
                         ]}>
-                        {monthNames[releaseDate.getMonth()]}
+                            {monthNames[Month]}
                       </Text>
                       <Text
                         style={[
@@ -125,12 +85,12 @@
                             fontFamily: fontFamily.DinBold,
                           },
                         ]}>
-                        {releaseDate.getDate()}
+                        {Day}
                       </Text>
                     </View>
                     <Image
                       resizeMode="contain"
-                      source={item.image}
+                      source={{uri: item.image}}
                       style={styles.productimage}
                     />
                   </View>
@@ -164,10 +124,17 @@
       <FlatList
         showsHorizontalScrollIndicator={false}
         horizontal={true}
-        data={Releasedata}
+        data={releaseDate}
         keyExtractor={(item) => item.name}
         renderItem={({ item, index }) => {
-          const releaseDate = new Date(item.releaseDate);
+          const formatDate = (dateTime) => {
+            return moment(dateTime).format('DD');
+          };
+          const formatMonth = (dateTime) => {
+            return moment(dateTime).format('MM');
+          };
+          const Day =  formatDate(item.date.toDate()) ;
+          const Month =  formatMonth(item.date.toDate()) ;
   
           return (
             <View
@@ -175,7 +142,7 @@
                 marginLeft: responsiveWidth(5),
                 marginBottom: 2,
                 marginRight:
-                  index + 1 === Releasedata.length
+                  index + 1 === releaseDate.length
                     ? responsiveWidth(5)
                     : 0,
               }}>
@@ -191,7 +158,7 @@
                         styles.datetext,
                         { fontFamily: fontFamily.DinBold },
                       ]}>
-                      {monthNames[releaseDate.getMonth()]}
+                     {monthNames[Month]}
                     </Text>
                     <Text
                       style={[
@@ -201,12 +168,12 @@
                           fontFamily: fontFamily.DinBold,
                         },
                       ]}>
-                      {releaseDate.getDate()}
+                      {Day}
                     </Text>
                   </View>
                   <Image
                     resizeMode="contain"
-                    source={item.image}
+                    source={{uri: item.image}}
                     style={styles.productimage}
                   />
                 </View>

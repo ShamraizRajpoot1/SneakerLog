@@ -74,13 +74,14 @@ const CollectionModal = props => {
           const fetchedCollections = [];
           snapshot.forEach(doc => {
             const data = doc.data();
-            const {collectionName, isPrivate, sneakers} = data;
+            const {collectionName,favorite, isPrivate, sneakers} = data;
             const sneakerCount = sneakers ? sneakers.length : 0;
             fetchedCollections.push({
               id: doc.id,
               name: collectionName,
               isPrivate: isPrivate,
               sneakerCount: sneakerCount,
+              favorite : favorite
             });
           });
 
@@ -102,6 +103,7 @@ const CollectionModal = props => {
           {marginHorizontal: responsiveScreenWidth(5)},
         ]}>
         <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          {item.favorite ?
           <Image
             source={appIcons.star}
             style={{
@@ -109,7 +111,14 @@ const CollectionModal = props => {
               height: scale(25),
               marginVertical: responsiveScreenHeight(2),
             }}
-          />
+          /> :  <Image
+          source={appIcons.starUnselected}
+          style={{
+            width: scale(25),
+            height: scale(25),
+            marginVertical: responsiveScreenHeight(2),
+          }}
+        />}
           <View style={{marginLeft: responsiveScreenWidth(4)}}>
             <Text style={styles.name}>{item.name}</Text>
             <View style={{flexDirection: 'row'}}>
@@ -190,8 +199,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.fieldBackground,
     width: responsiveScreenWidth(100),
     height: responsiveScreenHeight(67),
-    borderTopLeftRadius: scale(6),
-    borderTopRightRadius: scale(6),
+    borderTopLeftRadius: scale(24),
+    borderTopRightRadius: scale(24),
     justifyContent: 'space-between',
   },
   titleContainer: {
@@ -206,5 +215,16 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: fontSize.h4,
     color: Colors.blackText,
+  },
+  name: {
+    color: Colors.text3,
+    fontFamily: fontFamily.LatoBold,
+    marginLeft: responsiveWidth(4),
+    fontSize:fontSize.fieldText
+  },
+  sneakerCount: {
+    color: Colors.blackText,
+    fontSize: fontSize.fieldText,
+    marginLeft: responsiveWidth(4),
   },
 });

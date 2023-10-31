@@ -8,8 +8,9 @@ import {
   Image,
   TouchableOpacity,
   FlatList,
+  ActivityIndicator,
 } from 'react-native';
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {AppStyles} from '../../../services/utilities/AppStyles';
 import Header from '../../../components/Header';
 import {Colors} from '../../../services/utilities/Colors';
@@ -34,63 +35,54 @@ const ProductDetails = ({navigation, route}) => {
   const [itemToEdit, setItemToEdit] = useState();
   const [collection, setCollection] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
+  const [selectedIndexId, setSelectedIndexId] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [favorite, setFavorite] = useState();
+  const flatListRef = useRef();
   const toggleCollection = () => {
     setCollection(prev => !prev);
   };
-  const setCollectionId = (selectedItem) => {
+  const setCollectionId = selectedItem => {
     setCollection(prev => !prev);
     setSelectedId(selectedItem);
   };
-  const selectedCollection = selectedId ? selectedId : route.params.selectedCollection;
-  const selectedIndex = route.params.selectedIndex;
-  useEffect(() => {
-    const fetchFirestoreData = async () => {
-      try {
-        if (route.params.selectedCollection) {
-          const selectedCollectionId = route.params.selectedCollection.id;
-          const collectionRef = firestore()
-            .collection('Collections')
-            .doc(selectedCollectionId);
+  const selectedCollection = selectedId
+    ? selectedId
+    : route.params.selectedCollection;
+  const selectedIndex = selectedIndexId
+    ? selectedIndexId
+    : route.params.selectedIndex;
+  const fetchFirestoreData = async () => {
+    try {
+      setLoading(true);
+      if (selectedCollection) {
+        const selectedCollectionId = selectedCollection.id;
+        const collectionRef = firestore()
+          .collection('Collections')
+          .doc(selectedCollectionId);
 
-          const unsubscribe = collectionRef.onSnapshot((doc) => {
-            if (doc.exists) {
-              const data = doc.data();
-              if (data && data.sneakers) {
-                const sneakersData = data.sneakers.map(sneaker => ({
-                  estimatedPrice: sneaker.estimatedPrice || '',
-                  style: sneaker.style || '',
-                  image: sneaker.image || '',
-                  sneakerName: sneaker.sneakerName || '',
-                  brand: sneaker.brand || '',
-                  price: sneaker.price || '',
-                  size: sneaker.size || '',
-                  condition: sneaker.condition || '',
-                  sku: sneaker.sku || '',
-                  colorway: sneaker.colorway || '',
-                  quantity: sneaker.quantity || '',
-                  status: sneaker.status || '',
-                  year: sneaker.year || '',
-                }));
-                setData(sneakersData);
-              } else {
-                console.log('Sneakers data not found.');
-              }
-            } else {
-              console.log('No such document!');
-            }
-          });
-
-          // Unsubscribe when the component unmounts
-          return () => unsubscribe();
-        }
-      } catch (error) {
-        console.error('Error fetching Firestore data: ', error);
+        const unsubscribe = collectionRef.onSnapshot(doc => {
+          if (doc.exists) {
+            const data = doc.data();
+            setFavorite(data.favorite);
+            const sneakers = data.sneakers || [];
+            setData(sneakers);
+          } else {
+            console.log('No such document!');
+          }
+          setLoading(false);
+        });
+        return () => unsubscribe();
       }
-    };
+    } catch (error) {
+      console.error('Error fetching Firestore data: ', error);
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchFirestoreData();
-  }, [route.params.selectedCollection]);
-
+  }, [selectedCollection]);
 
   const deleteToggle = item => {
     setItemToDelete(item);
@@ -107,9 +99,6 @@ const ProductDetails = ({navigation, route}) => {
   const profile = () => {
     navigation.navigate('Profile');
   };
-  const Collection = () => {
-    navigation.navigate('ChoseCollection');
-  };
   const deleteItem = async item => {
     try {
       const selectedCollectionId = selectedCollection.id;
@@ -120,16 +109,21 @@ const ProductDetails = ({navigation, route}) => {
         sneakers: firestore.FieldValue.arrayRemove(item),
       });
       deleteToggle(null);
+      setSelectedIndexId(0);
+      if (flatListRef) {
+        flatListRef.current.scrollToIndex({animated: true, index: 0});
+      }
     } catch (error) {
       console.error('Error deleting product: ', error);
     }
   };
+
   const renderItem = ({item, index}) => (
     <View style={styles.container}>
       <View style={styles.nameContainer}>
         <View style={{width: '78%', marginRight: responsiveWidth(1)}}>
           <Text style={styles.name}>SNEAKER</Text>
-          <Text style={styles.names}>{item.sneakerName}</Text>
+          <Text style={styles.names}>{item.name}</Text>
         </View>
         <View style={styles.iconContainer}>
           <TouchableOpacity onPress={() => toggle(item)}>
@@ -141,71 +135,80 @@ const ProductDetails = ({navigation, route}) => {
         </View>
       </View>
       <View style={styles.imageContainer}>
-        <Image source={{uri: item.image}} style={styles.image} />
+        {item.image && item.image.small ? (
+          <Image source={{uri: item.image.small}} style={styles.image} />
+        ) : item.image && typeof item.image === 'string' && (
+          <Image source={{uri: item.image}} style={AppStyles.productImage} />
+        ) 
+        }
       </View>
       <View style={styles.detailContainer}>
-        <Text style={styles.name}>COLORWAY</Text>
-        <Text style={styles.names}>
-          {item.colorway.length === 0 ? '-' : `${item.colorway}`}
-        </Text>
-        <View style={styles.detailrow}>
-          <View style={{width: '30%'}}>
-            <Text style={styles.name}>RETAIL PRICE</Text>
-            <Text style={styles.names}>
-              {item.price.length === 0 ? '-' : `$ ${item.price}`}
-            </Text>
-          </View>
-          <View style={{width: '15%'}}>
-            <Text style={styles.name}>YEAR</Text>
-            <Text style={styles.names}>
-              {item.year.length === 0 ? '-' : `${item.year}`}
-            </Text>
-          </View>
-          <View style={{width: '28%'}}>
-            <Text style={styles.name}>CONDITION</Text>
-            <Text style={styles.names}>
-              {item.condition.length === 0 ? '-' : `${item.condition}`}
-            </Text>
-          </View>
-        </View>
-        <View style={styles.detailrow}>
-          <View style={{width: '30%'}}>
-            <Text style={styles.name}>STYLE</Text>
-            <Text style={styles.names}>
-              {item.style.length === 0 ? '-' : `${item.style}`}
-            </Text>
-          </View>
-          <View style={{width: '15%'}}>
-            <Text style={styles.name}>SIZE</Text>
-            <Text style={styles.names}>
-              {item.size.length === 0 ? '-' : ` ${item.size}`}
-            </Text>
-          </View>
-          <View style={{width: '28%'}}>
-            <Text style={styles.name}>STATUS</Text>
-            <Text style={styles.names}>
-              {item.status.length === 0 ? '-' : `${item.status}`}
-            </Text>
-          </View>
-        </View>
-        <View style={styles.detailrow}>
-          <View style={{width: '70%'}}>
-            <Text style={styles.name}>ESTIMATED MARKET VALUE</Text>
-            <Text style={styles.names}>
-              {item.estimatedPrice.length === 0
-                ? '-'
-                : `$ ${item.estimatedPrice}`}
-            </Text>
-          </View>
-          <View style={{width: '28%'}}>
-            <Text style={styles.name}>QUANTITY</Text>
-            <Text style={styles.names}>
-              {item.quantity.length === 0 ? '-' : `${item.quantity}`}
-            </Text>
-          </View>
-        </View>
-        {collection && <CollectionModal onBackdropPress={toggleCollection} onPress={setCollectionId} />}
-      </View>
+  <Text style={styles.name}>COLORWAY</Text>
+  <Text style={styles.names}>
+    {item.colorway ? item.colorway : '-'}
+  </Text>
+  <View style={styles.detailrow}>
+    <View style={{width: '30%'}}>
+      <Text style={styles.name}>RETAIL PRICE</Text>
+      <Text style={styles.names}>
+        {item.retailPrice ? `$ ${item.retailPrice}` : '-'}
+      </Text>
+    </View>
+    <View style={{width: '15%'}}>
+      <Text style={styles.name}>YEAR</Text>
+      <Text style={styles.names}>
+        {item.releaseYear ? item.releaseYear : '-'}
+      </Text>
+    </View>
+    <View style={{width: '28%'}}>
+      <Text style={styles.name}>CONDITION</Text>
+      <Text style={styles.names}>
+        {item.condition ? item.condition : '-'}
+      </Text>
+    </View>
+  </View>
+  <View style={styles.detailrow}>
+    <View style={{width: '30%'}}>
+      <Text style={styles.name}>STYLE</Text>
+      <Text style={styles.names}>
+        {item.sku? item.sku : '-'}
+      </Text>
+    </View>
+    <View style={{width: '15%'}}>
+      <Text style={styles.name}>SIZE</Text>
+      <Text style={styles.names}>
+        {item.size ? item.size : '-'}
+      </Text>
+    </View>
+    <View style={{width: '28%'}}>
+      <Text style={styles.name}>STATUS</Text>
+      <Text style={styles.names}>
+        {item.status ? item.status : '-'}
+      </Text>
+    </View>
+  </View>
+  <View style={styles.detailrow}>
+    <View style={{width: '70%'}}>
+      <Text style={styles.name}>ESTIMATED MARKET VALUE</Text>
+      <Text style={styles.names}>
+        {item.estimatedMarketValue ? `$ ${item.estimatedMarketValue}` : '-'}
+      </Text>
+    </View>
+    <View style={{width: '28%'}}>
+      <Text style={styles.name}>QUANTITY</Text>
+      <Text style={styles.names}>
+        {item.quantity ? item.quantity : '-'}
+      </Text>
+    </View>
+  </View>
+  {collection && (
+    <CollectionModal
+      onBackdropPress={toggleCollection}
+      onPress={setCollectionId}
+    />
+  )}
+</View>
+
     </View>
   );
 
@@ -218,49 +221,66 @@ const ProductDetails = ({navigation, route}) => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -500}>
         <TouchableWithoutFeedback>
-          <ScrollView
-            style={{flex: 1}}
-            contentContainerStyle={[AppStyles.contentContainer]}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}>
-            <CollectionHeader
-              name={selectedCollection.name}
-              onPress={toggleCollection}
+          {loading ? (
+            <ActivityIndicator
+              style={AppStyles.loadingIndicator}
+              size="large"
+              color={Colors.primary}
             />
-            <View style={{marginLeft: responsiveScreenWidth(5)}}>
-              {data.length > 0 ? (
-                <FlatList
-                  data={data}
-                  horizontal
-                  renderItem={renderItem}
-                  keyExtractor={item => item.sneakerName.toString()}
-                  initialScrollIndex={selectedIndex}
-                  getItemLayout={(data, index) => ({
-                    length: responsiveWidth(80),
-                    offset: responsiveWidth(90) * index,
-                    index,
-                  })}
-                />
-              ) : (
-                <Text>No data available</Text>
-              )}
-              {deleteProduct && (
-                <DeleteProduct
-                  onBackdropPress={() => deleteToggle(null)}
-                  onDelete={() => deleteItem(itemToDelete)}
-                  item={itemToDelete}
-                />
-              )}
-              {productEdit && (
-                <ProductEdit
-                  isVisible={productEdit}
-                  item={itemToEdit}
-                  onBackdropPress={() => toggle(null)}
-                  selectedId={selectedCollection.id}
-                />
-              )}
-            </View>
-          </ScrollView>
+          ) : (
+            <ScrollView
+              style={{flex: 1}}
+              contentContainerStyle={[AppStyles.contentContainer]}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}>
+              <CollectionHeader
+                Favorite={favorite}
+                name={selectedCollection.name}
+                onPress={toggleCollection}
+              />
+              <View style={{marginLeft: responsiveScreenWidth(5)}}>
+                {data.length >= 1 ? (
+                  <FlatList
+                    ref={flatListRef}
+                    data={data}
+                    horizontal
+                    renderItem={renderItem}
+                    keyExtractor={item => item.id.toString()}
+                    initialScrollIndex={selectedIndex}
+                    getItemLayout={(data, index) => ({
+                      length: responsiveWidth(80),
+                      offset: responsiveWidth(90) * index,
+                      index,
+                    })}
+                  />
+                ) : (
+                  <View
+                    style={{
+                      flex: 1,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}>
+                    <Text>No data available</Text>
+                  </View>
+                )}
+                {deleteProduct && (
+                  <DeleteProduct
+                    onBackdropPress={() => deleteToggle(null)}
+                    onDelete={() => deleteItem(itemToDelete)}
+                    item={itemToDelete}
+                  />
+                )}
+                {productEdit && (
+                  <ProductEdit
+                    isVisible={productEdit}
+                    item={itemToEdit}
+                    onBackdropPress={() => toggle(null)}
+                    selectedId={selectedCollection.id}
+                  />
+                )}
+              </View>
+            </ScrollView>
+          )}
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
     </>
@@ -320,8 +340,7 @@ const styles = StyleSheet.create({
   },
   image: {
     height: '90%',
-    width: '100%',
-    resizeMode: 'contain',
+    width: '90%',
   },
   detailContainer: {
     width: '100%',

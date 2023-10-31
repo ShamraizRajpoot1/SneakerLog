@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Image,
   View,
+  Linking,
 } from 'react-native';
 import React from 'react';
 import {AppStyles} from '../../../services/utilities/AppStyles';
@@ -17,12 +18,31 @@ import {
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import {appImages} from '../../../services/utilities/Assets';
 import {fontFamily} from '../../../services/utilities/Fonts';
+import moment from 'moment';
 
-const EventsDetail = ({navigation}) => {
+const EventsDetail = ({navigation, route}) => {
+  const selectedItem = route && route.params ? route.params.selectedItem : null;
   const back = () => {
     navigation.goBack();
+  };
+  const formatDate = (date) => {
+    return moment(date).format('MM-DD-YYYY');
+  };
+
+  const date = selectedItem && selectedItem.date ? formatDate(selectedItem.date.toDate()) : '';
+  const formatDateTime = (dateTime) => {
+    return moment(dateTime).format('MM-DD-YYYY h:mm A');
+  };
+
+  const formattedStartDate = selectedItem && selectedItem.startTime ? formatDateTime(selectedItem.startTime.toDate()) : '';
+  const formattedEndDate = selectedItem && selectedItem.endTime ? formatDateTime(selectedItem.endTime.toDate()) : '';
+
+
+  const openMap = () => {
+    const address = selectedItem && selectedItem.location ? selectedItem.location : '';
+    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+    Linking.openURL(url).catch((err) => console.error('An error occurred', err));
   };
   return (
     <>
@@ -46,16 +66,18 @@ const EventsDetail = ({navigation}) => {
               ]}>
               UPCOMING EVENTS
             </Text>
-            <Image style={styles.Image} source={appImages.event1} />
+            <Image style={styles.Image} source={{uri: selectedItem.image}} />
             <View style={styles.detailContainer}>
               <Text style={[styles.heading, {marginTop: responsiveHeight(2)}]}>
                 DATE AND TIME
               </Text>
-              <Text style={styles.datetext}>05-21-2022</Text>
+              <Text style={styles.datetext}>{date}</Text>
               <Text style={styles.datetext}>
-                Start Time 05-21-2022 10:00 pm
+                Start Time {formattedStartDate}
               </Text>
-              <Text style={styles.datetext}>End Time 05-21-2022 10:00 pm</Text>
+              <Text style={styles.datetext}>
+                End Time {formattedEndDate}
+              </Text>
               <TouchableOpacity>
                 <Text
                   style={[
@@ -67,9 +89,9 @@ const EventsDetail = ({navigation}) => {
               </TouchableOpacity>
               <Text style={styles.heading}>LOCATION</Text>
               <Text style={styles.datetext}>
-                Anahiem Convention Center 800 W Katella Ave Anaheim, CA 92802
+                {selectedItem.location}
               </Text>
-              <TouchableOpacity>
+              <TouchableOpacity onPress={openMap}>
                 <Text
                   style={[
                     AppStyles.fvrtText,
@@ -79,20 +101,9 @@ const EventsDetail = ({navigation}) => {
                 </Text>
               </TouchableOpacity>
               <Text style={styles.heading}>LOCATION</Text>
-              <Text style={[styles.datetext,{marginBottom: responsiveHeight(3),}]}>
-                Join us May 21st & 22nd 2022 as we teleport through the metavers
-                to bring Apes to the greatest Sneakers Join us May 21st & 22nd 2022 as we teleport through the metavers
-                to bring Apes to the greatest Sneakers Join us May 21st & 22nd 2022 as we teleport through the metavers
-                to bring Apes to the greatest Sneakers Join us May 21st & 22nd 2022 as we teleport through the metavers
-                to bring Apes to the greatest Sneakers Join us May 21st & 22nd 2022 as we teleport through the metavers
-                to bring Apes to the greatest SneakersJoin us May 21st & 22nd 2022 as we teleport through the metavers
-                to bring Apes to the greatest SneakersJoin us May 21st & 22nd 2022 as we teleport through the metavers
-                to bring Apes to the greatest Sneakers Join us May 21st & 22nd 2022 as we teleport through the metavers
-                to bring Apes to the greatest Sneakers Join us May 21st & 22nd 2022 as we teleport through the metavers
-                to bring Apes to the greatest Sneakers Join us May 21st & 22nd 2022 as we teleport through the metavers
-                to bring Apes to the greatest Sneakers Join us May 21st & 22nd 2022 as we teleport through the metavers
-                to bring Apes to the greatest Sneakers Join us May 21st & 22nd 2022 as we teleport through the metavers
-                to bring Apes to the greatest Sneakers
+              <Text
+                style={[styles.datetext, {marginBottom: responsiveHeight(3)}]}>
+               {selectedItem.about}
               </Text>
             </View>
           </ScrollView>

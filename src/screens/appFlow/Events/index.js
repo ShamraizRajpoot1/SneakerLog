@@ -8,24 +8,22 @@ import {
   Image,
   TextInput
 } from 'react-native';
-import React from 'react';
+import React,{useState} from 'react';
 import EventsView from '../../../components/EventsView';
 import {AppStyles} from '../../../services/utilities/AppStyles';
 import Header from '../../../components/Header';
-import { responsiveHeight, responsiveScreenHeight, responsiveScreenWidth } from 'react-native-responsive-dimensions';
-import { scale } from 'react-native-size-matters';
-import { appIcons } from '../../../services/utilities/Assets';
-import { Colors } from '../../../services/utilities/Colors';
+import { responsiveHeight, responsiveScreenWidth } from 'react-native-responsive-dimensions';
 import SearchBar from '../../../components/SearchBar';
 
 const Events = ({navigation}) => {
-  const EventsDetail = () =>{
-    navigation.navigate('EventsDetail')
-  }
+  const [events, setEvents] = useState('');
+  const EventsDetail = (selectedItem) => {
+    navigation.navigate('EventsDetail', { selectedItem }); 
+  };
   const back = () => {
     navigation.goBack();
   };
-  return (
+  return ( 
     <>
       <Header Image={true} options={true} onPress={back} />
       <KeyboardAvoidingView
@@ -39,18 +37,9 @@ const Events = ({navigation}) => {
             keyboardShouldPersistTaps="handled">
                 <Text style={[AppStyles.fvrtText,{marginLeft:responsiveScreenWidth(5), marginBottom: responsiveHeight(-2)}]}>UPCOMING EVENTS</Text>
                
-               <SearchBar Text={"Search Events"}/>
+               <SearchBar Text={"Search Events"} onChangeText={setEvents} value={events}  />
                
-                {/* <View style={styles.search}>
-                <Image source={appIcons.searchEvents} />
-                <TextInput
-          style={AppStyles.input}
-          placeholder="Search Events"
-          placeholderTextColor={Colors.fieldText}
-          keyboardType= 'default'
-        />
-                </View> */}
-            <EventsView onPress={EventsDetail}/>
+            <EventsView filter={events} onPress={EventsDetail}/>
           </ScrollView>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>

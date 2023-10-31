@@ -51,6 +51,7 @@ collections : require('../../../assets/Icons/collections.png'),
 searchEvents : require('../../../assets/Icons/searchEvents.png'),
 arrowRight : require('../../../assets/Icons/arrowRight.png'),
 star: require('../../../assets/Icons/Star.png'),
+starUnselected: require('../../../assets/Icons/StarUnselected.png'),
 download: require('../../../assets/Icons/download.png'),
 camera: require('../../../assets/Icons/cam.png'),
 searchSneakers: require('../../../assets/Icons/searchSneakers.png'),
@@ -68,6 +69,7 @@ heartFill : require('../../../assets/Icons/heartFill.png'),
 arrow : require('../../../assets/Icons/downArrow.png'),
 tickgreen :  require('../../../assets/Icons/tickgreen.png'),
 cross :  require('../../../assets/Icons/cross.png'),
+greenCheck: require('../../../assets/Icons/CheckSuccessOutline.png')
 }
 
 export { appImages, appIcons}

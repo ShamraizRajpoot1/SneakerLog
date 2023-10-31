@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator } from 'react-native';
 import {
   responsiveScreenHeight,
 } from 'react-native-responsive-dimensions';
@@ -29,7 +29,11 @@ const Button = props => {
       onPress={props.onPress}
       disabled={props.disabled} // Add the disabled prop
     >
-      <Text style={[textStyles]}>{props.text}</Text>
+      {props.isLoading ? ( // check if isLoading prop is true
+        <ActivityIndicator color={Colors.lebal} /> // show the activity indicator
+      ) : (
+        <Text style={[textStyles]}>{props.text}</Text> // show the text
+      )}
     </TouchableOpacity>
   );
 };

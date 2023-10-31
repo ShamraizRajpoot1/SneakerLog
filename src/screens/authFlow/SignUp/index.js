@@ -28,8 +28,10 @@ import {AuthContext} from '../../../navigation/AuthProvider';
 import firestore from '@react-native-firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import auth from '@react-native-firebase/auth';
+import Toast from 'react-native-simple-toast';
 
 const SignUp = ({navigation}) => {
+  
   const {register} = useContext(AuthContext);
 
   const [isChecked, setIsChecked] = useState(false);
@@ -42,6 +44,7 @@ const SignUp = ({navigation}) => {
   const [phone, setPhone] = useState('');
   const [userName, setUserName] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const toggleCheck = () => {
     if (name && email && phone && userName && password) {
       setIsChecked(prevChecked => !prevChecked);
@@ -96,7 +99,7 @@ const SignUp = ({navigation}) => {
     }
   }
   const isValidEmail = email => {
-    const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+    const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
     return emailRegex.test(email);
   };
   const isValidPassword = password => {
@@ -107,20 +110,24 @@ const SignUp = ({navigation}) => {
   };
 
   const isUserName = userName => {
-    return userName.length >= 4 && userName.length <= 25;
+    return userName.length >= 3 && userName.length <= 25;
   };
   const SignUp = () => {
     try {
+      setIsLoading(true); 
+  
       if (!isValidEmail(email)) {
         setEmailCheck(true);
+        setIsLoading(false); 
         return;
       }
       if (isValidEmail(email)) {
         setEmailCheck(false);
       }
-
+  
       if (!isUserName(userName)) {
         setUserNameCheck(true);
+        setIsLoading(false);
         return;
       }
       if (isUserName(userName)) {
@@ -128,18 +135,16 @@ const SignUp = ({navigation}) => {
       }
       if (!isValidPassword(password)) {
         setPasswordCheck(true);
+        setIsLoading(false); 
         return;
       }
       if (isValidPassword(password)) {
         setPasswordCheck(false);
       }
-
+  
       register(email, password)
-        .then(async user => {
-          const userCredential = await auth().signInWithEmailAndPassword(
-            email,
-            password,
-          );
+        .then(async (user) => {
+          const userCredential = await auth().signInWithEmailAndPassword(email, password);
           const userId = userCredential.user.uid;
           if (user) {
             firestore()
@@ -153,23 +158,29 @@ const SignUp = ({navigation}) => {
                 userName: userName,
                 sneakerSize: '',
                 gender: '',
+                profileImage: '',
               })
               .then(async () => {
                 await AsyncStorage.setItem('Token', userId);
+                setIsLoading(false); 
                 navigation.navigate('App');
               })
-              .catch(error => {});
+              .catch((error) => {
+                setIsLoading(false); 
+              });
           } else {
-            //  Toast.show('Registration failed', Toast.LONG);
+            setIsLoading(false); 
+            Toast.show('Registration failed', Toast.LONG);
           }
         })
-        .catch(error => {
-          // setIsLoading(false); // Log here
+        .catch((error) => {
+          setIsLoading(false); 
           console.error(error);
-          //Toast.show('Registration error', Toast.LONG);
+          Toast.show('Registration error', Toast.LONG);
         });
     } catch (error) {
-      //Toast.show(error.message, Toast.LONG);
+      setIsLoading(false); // Set isLoading to false if there's any other error
+      Toast.show(error.message, Toast.LONG);
     }
   };
   const isButtonDisabled = !isChecked;
@@ -276,6 +287,7 @@ const SignUp = ({navigation}) => {
                 background={buttonColor}
                 text="Create Account"
                 disabled={isButtonDisabled}
+                isLoading={isLoading}
               />
             </View>
           </ScrollView>

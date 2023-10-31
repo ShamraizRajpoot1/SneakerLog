@@ -1,63 +1,63 @@
-import React from 'react';
-import { View, Image, FlatList, TouchableOpacity,StyleSheet } from 'react-native';
-import { responsiveHeight, responsiveWidth, responsiveScreenHeight, responsiveScreenWidth } from 'react-native-responsive-dimensions';
-import { appImages } from '../../services/utilities/Assets';
-
+import React, {useEffect, useState} from 'react';
+import {
+  View,
+  Image,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+} from 'react-native';
+import {
+  responsiveHeight,
+  responsiveWidth,
+  responsiveScreenWidth,
+} from 'react-native-responsive-dimensions';
+import firestore from '@react-native-firebase/firestore';
 const EventsView = props => {
-  const Events = [
-    {
-      id: '1',
-      name: 'Event 1',
-      image: appImages.event1,
-    },
-    {
-      id: '2',
-      name: 'Event 2',
-      image: appImages.event1,
-    },
-    {
-      id: '3',
-      name: 'Event 3',
-      image: appImages.event1,
-    },
-    {
-      id: '4',
-      name: 'Event 1',
-      image: appImages.event1,
-    },
-    {
-      id: '5',
-      name: 'Event 2',
-      image: appImages.event1,
-    },
-    {
-      id: '6',
-      name: 'Event 3',
-      image: appImages.event1,
-    },
-    {
-      id: '7',
-      name: 'Event 3',
-      image: appImages.event1,
-    },
-  ];
-  const displayedEvents = props.sliceSize ? Events.slice(0, props.sliceSize) : Events;
+  const [events, setEvents] = useState('');
+  useEffect(() => {
+    const fetchEventsData = async () => {
+      try {
+        const snapshot = await firestore().collection('Events').get();
+        const eventsData = [];
+        snapshot.forEach(doc => {
+          eventsData.push({id: doc.id, ...doc.data()});
+        });
+        setEvents(eventsData);
+      } catch (error) {
+        console.error('Error fetching Events data: ', error);
+      }
+    };
+    fetchEventsData();
+  }, []);
+  let displayedEvents = [];
+  if (props.sliceSize && Array.isArray(events)) {
+    displayedEvents = events.slice(0, props.sliceSize);
+  } else if (Array.isArray(events)) {
+    displayedEvents = events;
+  }
+  
+  let filteredData = [];
+  if (Array.isArray(displayedEvents)) {
+    filteredData = props.filter
+      ? displayedEvents.filter(
+          item =>
+            item.name &&
+            item.name.toLowerCase().includes(props.filter.toLowerCase())
+        )
+      : displayedEvents;
+  }
+  
   return (
     <FlatList
       showsScrollIndicator={false}
-      data={displayedEvents}
+      data={filteredData}
       scrollEnabled={false}
-      renderItem={({ item }) => {
+      renderItem={({item}) => {
         return (
           <TouchableOpacity
-            style={{ width: responsiveWidth(100) }}
-            onPress={props.onPress}
-              
-            >
-            <Image
-              source= {item.image} 
-              style={styles.eventimage}
-            />
+            style={{width: responsiveWidth(100)}}
+            onPress={() => props.onPress(item)}>
+            <Image source={{uri: item.image}} style={styles.eventimage} />
           </TouchableOpacity>
         );
       }}
@@ -66,7 +66,7 @@ const EventsView = props => {
 };
 
 export default EventsView;
-const styles = StyleSheet.create ({
+const styles = StyleSheet.create({
   eventimage: {
     height: responsiveHeight(20),
     width: responsiveWidth(90),

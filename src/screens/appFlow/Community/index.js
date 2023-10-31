@@ -38,7 +38,6 @@ const Comunity = () => {
         console.error('Error fetching followers data: ', error);
       }
     };
-
     fetchFollowersData();
   }, []);
   useEffect(() => {

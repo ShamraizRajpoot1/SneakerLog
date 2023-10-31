@@ -20,12 +20,16 @@ const CollectionHeader = (props) => {
       };
   return (
     <View style={row}>
-    <TouchableOpacity 
+    <TouchableOpacity onPress={props.press}
       style={[styles.textContainer, {width: responsiveWidth(17)}]}>
-      <Image
+        {props.Favorite ? <Image
         style={{width: scale(25), height: scale(25),marginLeft:responsiveWidth(5)}}
         source={appIcons.star}
-      />
+      /> :
+      <Image
+        style={{width: scale(25), height: scale(25),marginLeft:responsiveWidth(5)}}
+        source={appIcons.starUnselected}
+      /> }
     </TouchableOpacity>
     <View
       style={[styles.textContainer, {width: responsiveWidth(60)}]}>

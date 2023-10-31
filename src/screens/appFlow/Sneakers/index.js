@@ -10,6 +10,7 @@ import {
   Keyboard,
   Dimensions,
   Alert,
+  BackHandler
 } from 'react-native';
 import React, {useContext, useState, useEffect} from 'react';
 import {AppStyles} from '../../../services/utilities/AppStyles';
@@ -33,9 +34,21 @@ import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
 import * as ImagePicker from 'react-native-image-picker';
 import ImageResizer from 'react-native-image-resizer';
-import { v4 as uuidv4 } from 'uuid';
+import Toast from 'react-native-simple-toast';
+import { useIsFocused } from '@react-navigation/native';
 
 const Sneakers = ({navigation, route}) => {
+  const isFocused = useIsFocused();
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      handleBackPress,
+    );
+    return () => backHandler.remove();
+  }, []);
+  const handleBackPress = () => {
+    return true;
+  };
   const {user} = useContext(AuthContext);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
@@ -45,34 +58,45 @@ const Sneakers = ({navigation, route}) => {
   const [image, setImage] = useState(null);
   const [sneakerName, setSneakerName] = useState('');
   const [brand, setBrand] = useState('');
-  const [price, setPrice] = useState('');
+  const [retailPrice, setPrice] = useState('');
   const [size, setSize] = useState('');
   const [condition, setCondition] = useState('Used');
   const [sku, setSku] = useState('');
   const [colorway, setColorway] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [status, setStatus] = useState('');
-  const [estimatedPrice, setEstimatedPrice] = useState('');
+  const [estimatedMarketValue, setEstimatedPrice] = useState('');
   const [style, setStyle] = useState('');
-  const [year, setYear] = useState('');
+  const [releaseYear, setYear] = useState('');
+
+  let favorite;
+
+  if (selectedId) {
+    favorite = selectedId.favorite;
+  } else if (route?.params?.selectedCollection.favorite) {
+    favorite = route.params.selectedCollection.favorite;
+  } else {
+    favorite = selectedColl.favorite;
+  }
+  
   let selectedCollection;
 
-if (selectedId) {
-  selectedCollection = selectedId;
-} else if (route?.params?.selectedCollection) {
-  selectedCollection = route.params.selectedCollection;
-} else {
-  selectedCollection = selectedColl;
-}
+  if (selectedId) {
+    selectedCollection = selectedId;
+  } else if (route?.params?.selectedCollection) {
+    selectedCollection = route.params.selectedCollection;
+  } else {
+    selectedCollection = selectedColl;
+  }
   const upload = async () => {
     try {
       const uniqueId = '_' + Math.random().toString(36).substr(2, 9);
-      
+
       if (
         !image ||
         !sneakerName ||
         !brand ||
-        !price ||
+        !retailPrice ||
         !size ||
         !condition ||
         !sku ||
@@ -83,27 +107,30 @@ if (selectedId) {
         Alert.alert('Please fill all fields');
         return;
       }
+     // const timestamp = new Date();
       await firestore()
         .collection('Collections')
         .doc(selectedCollection.id)
         .update({
           sneakers: firestore.FieldValue.arrayUnion({
-            Id: uniqueId,
-            estimatedPrice,
+            id: uniqueId,
+            estimatedMarketValue,
             style,
             image,
-            sneakerName,
+            name,
             brand,
-            price,
+            retailPrice,
             size,
             condition,
             sku,
             colorway,
             quantity,
             status,
-            year,
+            releaseYear,
+           // timestamp: timestamp.toISOString(),
           }),
         });
+      Toast.show('Sneaker Adedd Successfully', Toast.LONG);
       navigation.navigate('CollectionStack', {
         screen: 'Collections',
         params: {selectedCollection},
@@ -113,6 +140,7 @@ if (selectedId) {
     }
   };
   useEffect(() => {
+    if (isFocused) {
       setImage(null);
       setSneakerName('');
       setBrand('');
@@ -126,8 +154,8 @@ if (selectedId) {
       setEstimatedPrice('');
       setStyle('');
       setYear('');
-    
-  }, []);
+    }
+  }, [isFocused]);
   useEffect(() => {
     const fetchCollections = async () => {
       try {
@@ -138,17 +166,17 @@ if (selectedId) {
           const fetchedCollections = [];
           snapshot.forEach(doc => {
             const data = doc.data();
-            const {collectionName, isPrivate, sneaker, price} = data;
+            const {collectionName, favorite, isPrivate, sneaker, price} = data;
             fetchedCollections.push({
               id: doc.id,
               name: collectionName,
               sneaker: sneaker,
               price: price,
               isPrivate: isPrivate,
+              favorite: favorite
             });
           });
 
-        
           if (!selectedId && fetchedCollections.length > 0) {
             setSelectedColl(fetchedCollections[0]);
           }
@@ -259,6 +287,7 @@ if (selectedId) {
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}>
             <CollectionHeader
+              Favorite={favorite}
               name={selectedCollection?.name}
               onPress={toggle}
             />
@@ -288,7 +317,7 @@ if (selectedId) {
             </View>
             <View style={AppStyles.margin}>
               <Text style={AppStyles.field}>PRICE</Text>
-              <Input value={price} onChangeText={setPrice} />
+              <Input value={retailPrice} onChangeText={setPrice} />
             </View>
             <View style={AppStyles.margin}>
               <Text style={[AppStyles.field]}>SNEAKER SIZE</Text>

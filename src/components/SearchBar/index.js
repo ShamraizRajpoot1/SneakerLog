@@ -24,6 +24,7 @@ const SearchBar = (props) => {
         value={props.value}
         onChangeText={props.onChangeText}
         onBlur={props.onBlur}
+        returnKeyType="search"
       />
       {props.value && props.clear ? (
         <TouchableOpacity onPress={onClear}>

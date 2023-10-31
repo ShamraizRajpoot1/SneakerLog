@@ -172,7 +172,6 @@ export const AppStyles = StyleSheet.create({
     marginVertical:responsiveHeight(1),
     width: responsiveWidth(12),
     height: responsiveHeight(5),
-    resizeMode: 'center',
   },
   priceContainer: {
     width: '40%',
@@ -253,6 +252,7 @@ export const AppStyles = StyleSheet.create({
     marginTop: 10,
   },
   dcontainer: {
+    
     height: responsiveHeight(7),
     borderRadius: 5,
     width: responsiveWidth(90),
@@ -264,6 +264,7 @@ export const AppStyles = StyleSheet.create({
     borderRadius: scale(5),
     borderColor: Colors.border1,
     width: responsiveWidth(90),
+    
   },
   dropDownStyle: {
     backgroundColor: Colors.fieldBackground,
@@ -271,6 +272,7 @@ export const AppStyles = StyleSheet.create({
     borderBottomRightRadius: 5,
     borderColor: Colors.border1,
     width: responsiveWidth(90),
+    
   },
   items: {
     justifyContent: 'flex-start',
@@ -281,5 +283,10 @@ export const AppStyles = StyleSheet.create({
   marginVerticals: {
     marginVertical: responsiveHeight(3),
     marginLeft: responsiveWidth(5),
+  },
+  loadingIndicator: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

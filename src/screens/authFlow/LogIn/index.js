@@ -7,9 +7,10 @@ import {
   TouchableWithoutFeedback,
   ScrollView,
   TouchableOpacity,
-  Alert
+  Alert,
+  BackHandler,
 } from 'react-native';
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import {Colors} from '../../../services/utilities/Colors';
 import {appIcons, appImages} from '../../../services/utilities/Assets';
 import {scale} from 'react-native-size-matters';
@@ -23,8 +24,19 @@ import InputField from '../../../components/InputField';
 import Button from '../../../components/Button';
 import { AuthContext } from '../../../navigation/AuthProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import Toast from 'react-native-simple-toast';
 const Login = ({navigation}) => {
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      handleBackPress,
+    );
+    return () => backHandler.remove();
+  }, []);
+  const handleBackPress = () => {
+    BackHandler.exitApp();
+    return true;
+  };
   const SignUp = () => {
     navigation.navigate('SignUp')
   }
@@ -32,7 +44,7 @@ const Login = ({navigation}) => {
     navigation.navigate('Forgot')
   }
   const { login, user } = useContext(AuthContext)
-  //const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -43,11 +55,11 @@ const Login = ({navigation}) => {
 
   const Login = () => {
     if (!isValidEmail(email)) {
-     // Toast.show('Invalid email address', Toast.LONG);
+      Toast.show('Invalid email address', Toast.LONG);
       return;
     }
 
-   // setLoading(true);
+   setLoading(true);
 
     login(email, password)
       .then((user) => {
@@ -60,14 +72,14 @@ const Login = ({navigation}) => {
       })
       .then(() => {
         navigation.navigate('App');
-       // Toast.show('Login Successful', Toast.LONG);
+        Toast.show('Login Successful', Toast.LONG);
       })
       .catch((error) => {
         console.error('Login error:', error); 
-      // Alert.alert('Login error:', error)
+       Alert.alert('Login error:', error)
       })
       .finally(() => {
-       // setLoading(false);
+       setLoading(false);
       });
   };
   return (
@@ -120,6 +132,7 @@ const Login = ({navigation}) => {
           background={Colors.button1}
           fontWeight={'900'}
           onPress={Login}
+          isLoading={loading}
           />
           <Button 
           onPress={SignUp}

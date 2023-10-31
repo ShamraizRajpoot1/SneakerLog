@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import React, {useContext, useEffect, useState} from 'react';
 import {AppStyles} from '../../../services/utilities/AppStyles';
@@ -29,20 +30,19 @@ import { CollectionModal } from '../../../components/Modals';
 
 const UserCollection = ({navigation, route}) => {
   const {user} = useContext(AuthContext);
-  // const [selectedUserData, setSelectedUserData] = useState([])
-  const [userid, setUserid] = useState('');
   const [collectionData, setData] = useState([]);
   const [data, setSneakersData] = useState([]);
   const [isFollowing, setIsFollowing] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [collection, setCollection] = useState(false);
-  
+  const [isLoading, setIsLoading] = useState();
   const selectedUserData = route.params.selectedUserData
  
   const selectedCollection = selectedId ? selectedId : route.params.selectedCollection;
    
   useEffect(() => {
     const fetchFirestoreData = async () => {
+      setIsLoading(true); 
       if (selectedUserData?.followersData.find(item => item.Id === user.uid)) {
         setIsFollowing(true);
       }
@@ -61,8 +61,10 @@ const UserCollection = ({navigation, route}) => {
         } else {
           setSneakersData([]);
         }
+        setIsLoading(false); 
       } catch (error) {
         console.error('Error fetching Firestore data: ', error);
+        setIsLoading(false); 
       }
     };
 
@@ -70,6 +72,7 @@ const UserCollection = ({navigation, route}) => {
   }, [route.params.selectedCollection, selectedId]);
   useEffect(() => {
     const fetchCollections = async () => {
+      setIsLoading(true); 
       try {
         const collectionRef = firestore().collection('Collections');
         collectionRef
@@ -94,8 +97,10 @@ const UserCollection = ({navigation, route}) => {
            
             
           });
+          setIsLoading(false); 
       } catch (error) {
         console.error('Error fetching collections: ', error);
+        setIsLoading(false); 
       }
     };
 
@@ -136,6 +141,9 @@ const UserCollection = ({navigation, route}) => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -500}>
         <TouchableWithoutFeedback>
+        {isLoading ? ( 
+              <ActivityIndicator style={AppStyles.loadingIndicator} size="large" color={Colors.primaryColor} />
+            ) :
           <ScrollView
             style={{flex: 1}}
             contentContainerStyle={[AppStyles.contentContainer]}
@@ -226,7 +234,7 @@ const UserCollection = ({navigation, route}) => {
                 data={collectionData}
               />
             )}
-          </ScrollView>
+          </ScrollView> }
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
     </>
