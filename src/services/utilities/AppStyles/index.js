@@ -260,11 +260,9 @@ export const AppStyles = StyleSheet.create({
   },
   Dropdown: {
     backgroundColor: Colors.fieldBackground,
-    top: 2,
     borderRadius: scale(5),
     borderColor: Colors.border1,
     width: responsiveWidth(90),
-    
   },
   dropDownStyle: {
     backgroundColor: Colors.fieldBackground,
@@ -272,7 +270,6 @@ export const AppStyles = StyleSheet.create({
     borderBottomRightRadius: 5,
     borderColor: Colors.border1,
     width: responsiveWidth(90),
-    
   },
   items: {
     justifyContent: 'flex-start',
@@ -288,5 +285,10 @@ export const AppStyles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  heading: {
+    fontFamily: fontFamily.LatoBold,
+    fontSize: fontSize.h2,
+    color: Colors.blackText,
   },
 });

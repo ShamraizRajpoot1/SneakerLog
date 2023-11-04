@@ -27,12 +27,12 @@ const Button = props => {
     <TouchableOpacity
       style={[styles.button, buttonStyles]}
       onPress={props.onPress}
-      disabled={props.disabled} // Add the disabled prop
+      disabled={props.disabled} 
     >
-      {props.isLoading ? ( // check if isLoading prop is true
-        <ActivityIndicator color={Colors.lebal} /> // show the activity indicator
+      {props.isLoading ? ( 
+        <ActivityIndicator color={Colors.lebal} /> 
       ) : (
-        <Text style={[textStyles]}>{props.text}</Text> // show the text
+        <Text style={[textStyles]}>{props.text}</Text> 
       )}
     </TouchableOpacity>
   );

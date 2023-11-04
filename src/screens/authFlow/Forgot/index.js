@@ -20,11 +20,26 @@ import {
 import Button from '../../../components/Button';
 import firestore from '@react-native-firebase/firestore';
 import { firebase } from '@react-native-firebase/firestore';
+import Toast from 'react-native-toast-message';
 
 const Forgot = ({navigation}) => {
   const [email, setEmail] = useState('');
   const [buttonDisabled, setButtonDisabled] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [message, setMassage] = useState()
+  const showCustomToast = () => {
+    Toast.show({
+      type: 'success',
+      position: 'top',
+      text1: 'Email sent to your email address',
+      visibilityTime: 4000,
+      autoHide: true,
+      topOffset: 30,
+      bottomOffset: 40,
+      text1Style: { height: responsiveScreenHeight(20) , fontWeight: 'bold', fontSize: 16, width: 200, marginVertical: responsiveScreenHeight(2) }, 
+      text2Style: { width: 200 },
+    });
+  };
   const back = () => {
     navigation.goBack();
   };
@@ -38,30 +53,31 @@ const Forgot = ({navigation}) => {
       .then(querySnapshot => {
         if (!querySnapshot.empty) {
           setButtonDisabled(false);
+          setMassage(null)
         } else {
           setButtonDisabled(true);
+          setMassage('')
         }
       })
       .catch(error => {
         console.error('Error checking email existence: ', error);
       });
   };
-
   React.useEffect(() => {
     checkEmailExistence();
   }, [email]);
   const handleSendPasswordReset = async (email) => {
     try {
       const auth = firebase.auth();
-      setIsLoading(true); // set loading to true
+      setIsLoading(true); 
       await auth.sendPasswordResetEmail(email);
-      Alert.alert('Email Sent');
+      showCustomToast();
       navigation.navigate('Login');
     } catch (error) {
       console.error('Error sending password reset email:', error.message);
       Alert.alert('Error', 'There was an error sending the password reset email.');
     } finally {
-      setIsLoading(false); // set loading to false after the process is done
+      setIsLoading(false); 
     }
   };
   
@@ -91,6 +107,7 @@ const Forgot = ({navigation}) => {
                 type="email-address"
                 onChangeText={setEmail}
                 value={email}
+                message={message}
               />
             </View>
 

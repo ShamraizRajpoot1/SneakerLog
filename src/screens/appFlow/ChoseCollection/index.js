@@ -30,6 +30,9 @@ const ChoseCollection = ({navigation}) => {
   const collection = selectedCollection => {
     navigation.navigate('Collections', {selectedCollection});
   };
+  const Product = selectedCollection => {
+    navigation.navigate('Collections', {selectedCollection});
+  };
   const back = () => {
     navigation.goBack();
   };
@@ -74,7 +77,7 @@ const ChoseCollection = ({navigation}) => {
     };
 
     fetchCollections();
-  }, [user.uid]);
+  }, []);
 
   const renderItem = ({item, index}) => (
     <View>
@@ -100,7 +103,7 @@ const ChoseCollection = ({navigation}) => {
               height: scale(25),
               marginVertical: responsiveScreenHeight(2),
             }}
-          />}
+          />} 
           <View style={{marginLeft: responsiveScreenWidth(4)}}>
             <Text style={styles.name}>{item.name}</Text>
             <View style={{flexDirection: 'row'}}>
@@ -169,7 +172,7 @@ const ChoseCollection = ({navigation}) => {
                   onBackdropPress={toggleCollection}
                   //onChangeText={}
                   //value={}
-                  onPress={toggleCollection}
+                  onPress={Product}
                 />
               )}
             </View>

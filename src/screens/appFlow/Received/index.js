@@ -91,6 +91,12 @@ const Received = props => {
   };
 
   return (
+    <>
+    {props.data.length === 0 ? (
+      <View style={{flex:1,alignItems: 'center', justifyContent:'center'}}>
+        <Text style={AppStyles.heading}>You have not sent any invites</Text>
+        </View>
+      ) : (
     <FlatList
       showsVerticalScrollIndicator={false}
       showsHorizontalScrollIndicator={false}
@@ -145,7 +151,8 @@ const Received = props => {
           </TouchableOpacity>
         );
       }}
-    />
+    />)} 
+    </>
   );
 };
 

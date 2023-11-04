@@ -28,10 +28,9 @@ import {AuthContext} from '../../../navigation/AuthProvider';
 import firestore from '@react-native-firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import auth from '@react-native-firebase/auth';
-import Toast from 'react-native-simple-toast';
+import Toast from 'react-native-toast-message';
 
 const SignUp = ({navigation}) => {
-  
   const {register} = useContext(AuthContext);
 
   const [isChecked, setIsChecked] = useState(false);
@@ -50,54 +49,54 @@ const SignUp = ({navigation}) => {
       setIsChecked(prevChecked => !prevChecked);
     }
   };
-  const focus1 = ()=>{
-    setEmailCheck('')
-  }
-  const focus2 = ()=>{
-    setPhoneCheck('')
-  }
-  const focus4 = ()=>{
-    setUserNameCheck('')
-  }
-  const focus3 = ()=>{
-    setPasswordCheck('')
-  }
-  const blur1 = () =>{
+  const focus1 = () => {
+    setEmailCheck('');
+  };
+  const focus2 = () => {
+    setPhoneCheck('');
+  };
+  const focus4 = () => {
+    setUserNameCheck('');
+  };
+  const focus3 = () => {
+    setPasswordCheck('');
+  };
+  const blur1 = () => {
     if (!isValidEmail(email)) {
-      setEmailCheck("Please enter a valid Email");
+      setEmailCheck('Please enter a valid Email');
       return;
     }
     if (isValidEmail(email)) {
       setEmailCheck(null);
     }
-  }
-  const blur2 = () =>{
+  };
+  const blur2 = () => {
     if (!isUserName(userName)) {
-      setUserNameCheck("UserName should be at least 5 characters!");
+      setUserNameCheck('UserName should be at least 5 characters!');
       return;
     }
     if (isUserName(userName)) {
       setUserNameCheck(null);
     }
-  }
-  const blur3 = () =>{
+  };
+  const blur3 = () => {
     if (!isValidPassword(password)) {
-      setPasswordCheck("Password should be at least 5 characters!");
+      setPasswordCheck('Password should be at least 5 characters!');
       return;
     }
     if (isValidPassword(password)) {
       setPasswordCheck(null);
     }
-  }
-  const blur4 = () =>{
+  };
+  const blur4 = () => {
     if (!isValidPhone(phone)) {
-      setPhoneCheck("Phone no should be at least 11 digits");
+      setPhoneCheck('Phone no should be at least 11 digits');
       return;
     }
     if (isValidPassword(password)) {
       setPhoneCheck(null);
     }
-  }
+  };
   const isValidEmail = email => {
     const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
     return emailRegex.test(email);
@@ -114,17 +113,17 @@ const SignUp = ({navigation}) => {
   };
   const SignUp = () => {
     try {
-      setIsLoading(true); 
-  
+      setIsLoading(true);
+
       if (!isValidEmail(email)) {
         setEmailCheck(true);
-        setIsLoading(false); 
+        setIsLoading(false);
         return;
       }
       if (isValidEmail(email)) {
         setEmailCheck(false);
       }
-  
+
       if (!isUserName(userName)) {
         setUserNameCheck(true);
         setIsLoading(false);
@@ -135,16 +134,19 @@ const SignUp = ({navigation}) => {
       }
       if (!isValidPassword(password)) {
         setPasswordCheck(true);
-        setIsLoading(false); 
+        setIsLoading(false);
         return;
       }
       if (isValidPassword(password)) {
         setPasswordCheck(false);
       }
-  
+
       register(email, password)
-        .then(async (user) => {
-          const userCredential = await auth().signInWithEmailAndPassword(email, password);
+        .then(async user => {
+          const userCredential = await auth().signInWithEmailAndPassword(
+            email,
+            password,
+          );
           const userId = userCredential.user.uid;
           if (user) {
             firestore()
@@ -162,31 +164,54 @@ const SignUp = ({navigation}) => {
               })
               .then(async () => {
                 await AsyncStorage.setItem('Token', userId);
-                setIsLoading(false); 
+                setIsLoading(false);
+                showCustomToast();
                 navigation.navigate('App');
               })
-              .catch((error) => {
-                setIsLoading(false); 
+              .catch(error => {
+                setIsLoading(false);
               });
           } else {
-            setIsLoading(false); 
-            Toast.show('Registration failed', Toast.LONG);
+            setIsLoading(false);
           }
         })
-        .catch((error) => {
-          setIsLoading(false); 
+        .catch(error => {
+          setIsLoading(false);
           console.error(error);
-          Toast.show('Registration error', Toast.LONG);
         });
     } catch (error) {
-      setIsLoading(false); // Set isLoading to false if there's any other error
+      setIsLoading(false);
       Toast.show(error.message, Toast.LONG);
     }
   };
+  const showCustomToast = () => {
+    Toast.show({
+      type: 'success',
+      position: 'top',
+      text1: 'SignUp Successfull',
+      visibilityTime: 6000,
+      autoHide: true,
+      topOffset: 30,
+      bottomOffset: 40,
+      text1Style: {
+        height: responsiveScreenHeight(20),
+        fontWeight: 'bold',
+        fontSize: fontSize.h3,
+        width: 200,
+        marginVertical: responsiveScreenHeight(2),
+      },
+      text2Style: {width: 200},
+    });
+  };
+
   const isButtonDisabled = !isChecked;
   const buttonColor = isButtonDisabled ? Colors.disabledButton : Colors.button1;
   const back = () => {
     navigation.goBack();
+  };
+  
+  const handlePhoneChange = (text) => {
+    setPhone(text);
   };
   return (
     <>
@@ -203,14 +228,13 @@ const SignUp = ({navigation}) => {
               {backgroundColor: Colors.backgroud1},
             ]}>
             <InputField
-              
               lebal="Name"
               type="default"
               onChangeText={setName}
               value={name}
             />
             <InputField
-            onFocus={focus1}
+              onFocus={focus1}
               lebal="Email"
               type="email-address"
               onChangeText={setEmail}
@@ -219,11 +243,11 @@ const SignUp = ({navigation}) => {
               message={emailCheck}
             />
             <InputField
-            onFocus={focus2}
+              onFocus={focus2}
               lebal="Phone Number"
               type="numeric"
-              placeholder={'+(1)8952-5982'}
-              onChangeText={setPhone}
+              placeholder={'+1 (895) 852-5982'}
+              onChangeText={handlePhoneChange}
               value={phone}
               maxLength={17}
               onBlur={blur4}
@@ -231,7 +255,7 @@ const SignUp = ({navigation}) => {
               phone={true}
             />
             <InputField
-            onFocus={focus4}
+              onFocus={focus4}
               userName={true}
               lebal="Username"
               type="default"
@@ -241,7 +265,7 @@ const SignUp = ({navigation}) => {
               message={userNameCheck}
             />
             <InputField
-            onFocus={focus3}
+              onFocus={focus3}
               lebal="Password"
               type="default"
               secureTextEntry={true}

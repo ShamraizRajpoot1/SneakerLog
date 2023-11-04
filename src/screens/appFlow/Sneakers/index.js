@@ -10,7 +10,7 @@ import {
   Keyboard,
   Dimensions,
   Alert,
-  BackHandler
+  BackHandler,
 } from 'react-native';
 import React, {useContext, useState, useEffect} from 'react';
 import {AppStyles} from '../../../services/utilities/AppStyles';
@@ -34,10 +34,30 @@ import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
 import * as ImagePicker from 'react-native-image-picker';
 import ImageResizer from 'react-native-image-resizer';
-import Toast from 'react-native-simple-toast';
-import { useIsFocused } from '@react-navigation/native';
+import Toast from 'react-native-toast-message';
+import {useIsFocused} from '@react-navigation/native';
 
 const Sneakers = ({navigation, route}) => {
+  const showCustomToast = () => {
+    Toast.show({
+      type: 'success',
+      position: 'top',
+      text1: 'Item added to Collection',
+      visibilityTime: 6000,
+      autoHide: true,
+      topOffset: 30,
+      bottomOffset: 40,
+      text1Style: {
+        height: responsiveScreenHeight(20),
+        fontWeight: 'bold',
+        fontSize: 16,
+        width: 200,
+        marginVertical: responsiveScreenHeight(2),
+      },
+      text2Style: {width: 200},
+    });
+  };
+
   const isFocused = useIsFocused();
   useEffect(() => {
     const backHandler = BackHandler.addEventListener(
@@ -56,7 +76,7 @@ const Sneakers = ({navigation, route}) => {
   const [collection, setCollection] = useState(false);
   const [sizemodal, setSizemodal] = useState(false);
   const [image, setImage] = useState(null);
-  const [sneakerName, setSneakerName] = useState('');
+  const [name, setSneakerName] = useState('');
   const [brand, setBrand] = useState('');
   const [retailPrice, setPrice] = useState('');
   const [size, setSize] = useState('');
@@ -78,7 +98,7 @@ const Sneakers = ({navigation, route}) => {
   } else {
     favorite = selectedColl.favorite;
   }
-  
+
   let selectedCollection;
 
   if (selectedId) {
@@ -94,7 +114,7 @@ const Sneakers = ({navigation, route}) => {
 
       if (
         !image ||
-        !sneakerName ||
+        !name ||
         !brand ||
         !retailPrice ||
         !size ||
@@ -107,7 +127,7 @@ const Sneakers = ({navigation, route}) => {
         Alert.alert('Please fill all fields');
         return;
       }
-     // const timestamp = new Date();
+      // const timestamp = new Date();
       await firestore()
         .collection('Collections')
         .doc(selectedCollection.id)
@@ -127,10 +147,9 @@ const Sneakers = ({navigation, route}) => {
             quantity,
             status,
             releaseYear,
-           // timestamp: timestamp.toISOString(),
           }),
         });
-      Toast.show('Sneaker Adedd Successfully', Toast.LONG);
+      showCustomToast();
       navigation.navigate('CollectionStack', {
         screen: 'Collections',
         params: {selectedCollection},
@@ -173,7 +192,7 @@ const Sneakers = ({navigation, route}) => {
               sneaker: sneaker,
               price: price,
               isPrivate: isPrivate,
-              favorite: favorite
+              favorite: favorite,
             });
           });
 
@@ -309,7 +328,7 @@ const Sneakers = ({navigation, route}) => {
             </TouchableOpacity>
             <View style={AppStyles.margin}>
               <Text style={AppStyles.field}>SNEAKER</Text>
-              <Input value={sneakerName} onChangeText={setSneakerName} />
+              <Input value={name} onChangeText={setSneakerName} />
             </View>
             <View style={AppStyles.margin}>
               <Text style={AppStyles.field}>BRAND</Text>
@@ -443,6 +462,7 @@ const Sneakers = ({navigation, route}) => {
                   open={isOpen}
                   value={status}
                   dropDownStyle={AppStyles.dropDownStyle}
+                  dropDownDirection="TOP"
                 />
               </View>
             </View>
@@ -561,7 +581,10 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: scale(6),
   },
   image: {
-    height: responsiveHeight(10),
-    width: responsiveWidth(25),
+    height: scale(70),
+    width: scale(90),
+  },
+  dropdownContainer: {
+    marginBottom: responsiveScreenHeight(2),
   },
 });

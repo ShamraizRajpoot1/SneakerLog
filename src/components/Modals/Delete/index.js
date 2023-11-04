@@ -55,7 +55,7 @@ import {
                 ]}>
                 <Text style={styles.text}>No</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.textContainer} onPress={props.onBackdropPress}>
+              <TouchableOpacity style={styles.textContainer} onPress={props.onPress}>
                 <Text style={styles.text}>Yes</Text>
               </TouchableOpacity>
             </View>

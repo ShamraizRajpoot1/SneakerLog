@@ -36,7 +36,36 @@ const UserDetails = ({navigation, route}) => {
   const [sneakerCount, setSneakerCount] = useState(0);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loggedInUserData, setLoggedInUserData] = useState({
+    name: '',
+    userName: '',
+    Image: '',
+    Id: '',
+  });
+  useEffect(() => {
+    const fetchLoggedInUserData = async () => {
+      try {
+        if(user){
+        const userDoc = await firestore().collection('Users').doc(user.uid).get();
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          setLoggedInUserData({
+            Id: user.uid,
+            name: userData.name, 
+            userName: userData.userName, 
+            Image: userData.profileImage || '', 
+          });
+        }
+        } else {
+          console.log('No user data found for the specified ID');
+        }
+      } catch (error) {
+        console.error('Error fetching user data: ', error);
+      }
+    };
 
+    fetchLoggedInUserData();
+  }, []);
   useEffect(() => {
     const fetchSelectedUserData = async () => {
       try {
@@ -63,6 +92,43 @@ const UserDetails = ({navigation, route}) => {
 
     fetchSelectedUserData();
   }, [selectedUserId]);
+  const handleFollow = (selectedUser) => {
+    const userData = {
+      name: selectedUser.name || '',
+      userName: selectedUser.userName || '',
+      Id: selectedUser.userId || '',
+      Image: selectedUser.profileImage || '',
+    };
+
+    
+
+    const selectedUserRef = firestore().collection('Users').doc(selectedUserId);
+    const userRef = firestore().collection('Users').doc(user.uid);
+
+    selectedUserRef
+      .update({
+        received: firestore.FieldValue.arrayUnion(loggedInUserData),
+      })
+      .then(() => {
+        console.log('User data added successfully to selected user: ', loggedInUserData);
+       setInviteSentUsers([...inviteSentUsers, true]);
+      })
+      .catch((error) => {
+        console.error('Error adding user data to selected user: ', error);
+      });
+
+    userRef
+      .update({
+        sent: firestore.FieldValue.arrayUnion(userData),
+      })
+      .then(() => {
+        console.log('User data added successfully: ', userData);
+      })
+      .catch((error) => {
+        console.error('Error adding user data: ', error);
+      });
+  };
+
   useEffect(() => {
     const fetchCollections = async () => {
       try {
@@ -121,10 +187,20 @@ const UserDetails = ({navigation, route}) => {
             alignItems: 'center',
             marginVertical: '4%',
           }}>
-          <Image
+           {item.favorite ? <Image
             source={appIcons.star}
-            style={{width: scale(25), height: scale(25)}}
-          />
+            style={{
+              width: scale(25),
+              height: scale(25),
+            }}
+          /> : 
+          <Image
+            source={appIcons.starUnselected}
+            style={{
+              width: scale(25),
+              height: scale(25),
+            }}
+          />}
           <Text style={[styles.name, {marginLeft: responsiveWidth(3),} ]}>{item.name}</Text>
         </View>
         <View style={AppStyles.priceContainer}>
@@ -186,7 +262,7 @@ const UserDetails = ({navigation, route}) => {
                       </Text>
                     </View>
                   ) : ( 
-                    <TouchableOpacity style={styles.followContainer}>
+                    <TouchableOpacity style={styles.followContainer} onPress={() => handleFollow(selectedUserData)}>
                       <Text
                         style={[
                           AppStyles.userHorizontalText,

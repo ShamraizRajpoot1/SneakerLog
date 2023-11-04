@@ -16,7 +16,9 @@ import {appIcons, appImages} from '../../../services/utilities/Assets';
 import {scale} from 'react-native-size-matters';
 import {AppStyles} from '../../../services/utilities/AppStyles';
 import {
+  responsiveFontSize,
   responsiveHeight,
+  responsiveScreenHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
 import {fontFamily, fontSize} from '../../../services/utilities/Fonts';
@@ -24,8 +26,34 @@ import InputField from '../../../components/InputField';
 import Button from '../../../components/Button';
 import { AuthContext } from '../../../navigation/AuthProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Toast from 'react-native-simple-toast';
+import Toast from 'react-native-toast-message';
 const Login = ({navigation}) => {
+  const showCustomToast = () => {
+    Toast.show({
+      type: 'success',
+      position: 'top',
+      text1: 'Login Successfull',
+      visibilityTime: 6000,
+      autoHide: true,
+      topOffset: 30,
+      bottomOffset: 40,
+      text1Style: { height: responsiveScreenHeight(20) , fontWeight: 'bold', fontSize: fontSize.h3, width: 200, marginVertical: responsiveScreenHeight(2) }, 
+      text2Style: { width: 200 },
+    });
+  };
+  const showCustom = () => {
+    Toast.show({
+      type: 'error',
+      position: 'top',
+      text1: 'Please check your email or password',
+      visibilityTime: 6000,
+      autoHide: true,
+      topOffset: 30,
+      bottomOffset: 40,
+      text1Style: { height: responsiveScreenHeight(20) , fontWeight: 'bold', fontSize: fontSize.h3, width: 200, marginVertical: responsiveScreenHeight(2) }, 
+      text2Style: { width: 200 },
+    });
+  };
   useEffect(() => {
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
@@ -47,36 +75,23 @@ const Login = ({navigation}) => {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
-  const isValidEmail = (email) => {
-    const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
-    return emailRegex.test(email);
-  };
-
   const Login = () => {
-    if (!isValidEmail(email)) {
-      Toast.show('Invalid email address', Toast.LONG);
-      return;
-    }
-
    setLoading(true);
-
     login(email, password)
       .then((user) => {
         console.log('User:', user); 
         if (user) {
           return AsyncStorage.setItem('Token', user.uid);
         } else {
-         throw new Error('Login failed');
+          Alert.alert('Login Error')
         }
       })
       .then(() => {
         navigation.navigate('App');
-        Toast.show('Login Successful', Toast.LONG);
+        showCustomToast()
       })
       .catch((error) => {
-        console.error('Login error:', error); 
-       Alert.alert('Login error:', error)
+        showCustom()
       })
       .finally(() => {
        setLoading(false);
@@ -98,10 +113,7 @@ const Login = ({navigation}) => {
           <View style={styles.logoContainer}>
             <Image style={styles.logo} source={appImages.logo} />
             <Text style={[AppStyles.loginText]}>Please Log In to your account</Text>
-            <TouchableOpacity style={styles.fbContainer} >
-              <Image style={styles.facebook} source={appIcons.facebook} />
-            </TouchableOpacity>
-            <Text style={[AppStyles.loginText, {fontSize: fontSize.h2}]}>- OR -</Text>
+            
           </View>
           <View style={styles.fieldContainer}>
             <View style={styles.field}>

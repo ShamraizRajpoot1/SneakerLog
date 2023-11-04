@@ -11,7 +11,7 @@ const Sent = props => {
   const {user} = useContext(AuthContext);
   const [data, setData] = useState(props.data);
   useEffect(() => {
-    setData(props.data); 
+    setData(props.data);
   }, [props.data]);
   const handleWithDraw = async selectedUser => {
     try {
@@ -24,18 +24,19 @@ const Sent = props => {
       const currentUserDoc = await userDocRef.get();
       const currentUserData = currentUserDoc.data();
 
-      console.log('Current user data:', currentUserData); 
+      console.log('Current user data:', selectedUser);
 
-      if (currentUserData && currentUserData.name && currentUserData.userName && (currentUserData.profileImage || currentUserData.profileImage === '')) {
-        const {name: currentUserName, userName: currentUserUserName, profileImage: currentUserProfileImage } = currentUserData;
+     
+        const currentUserName = currentUserData.name ;
+        const currentUserUserName = currentUserData.userName ;
+        const currentUserProfileImage = currentUserData.profileImage || '';
 
         await selectedUserDocRef.update({
           received: firestore.FieldValue.arrayRemove({
             Id: user.uid,
-            Image: currentUserProfileImage || '' ,
+            Image: currentUserProfileImage || '',
             name: currentUserName,
             userName: currentUserUserName,
-            
           }),
         });
 
@@ -44,15 +45,18 @@ const Sent = props => {
         });
 
         console.log('Data removed successfully');
-      } else {
-        console.error('Current user data is undefined or incomplete');
-      }
-     
+      
     } catch (error) {
       console.error('Error handling withdrawal: ', error);
     }
   };
   return (
+    <>
+    {data.length === 0 ? (
+      <View style={{flex:1,alignItems: 'center', justifyContent:'center'}}>
+        <Text style={AppStyles.heading}>You have not sent any invites</Text>
+        </View>
+      ) : (
     <FlatList
       showsVerticalScrollIndicator={false}
       showsHorizontalScrollIndicator={false}
@@ -62,19 +66,18 @@ const Sent = props => {
       data={data}
       renderItem={({item, index}) => {
         if (item.Id === user.uid) {
-          return null; 
+          return null;
         }
         const handlePress = () => props.onPress(item.Id);
         return (
-          <TouchableOpacity style={AppStyles.userContainer} onPress={handlePress}>
+          <TouchableOpacity
+            style={AppStyles.userContainer}
+            onPress={handlePress}>
             {item.Image ? (
-                    <Image
-                    style={AppStyles.memberimage}
-                      source={{uri: item.Image}}
-                    />
-                  ) : (
-                    <Image style={AppStyles.memberimage} source={appIcons.profile} />
-                  )}
+              <Image style={AppStyles.memberimage} source={{uri: item.Image}} />
+            ) : (
+              <Image style={AppStyles.memberimage} source={appIcons.profile} />
+            )}
             <View style={{flex: 1}}>
               <View style={{marginLeft: responsiveWidth(2)}}>
                 <Text numberOfLines={1} style={AppStyles.userText}>
@@ -98,7 +101,8 @@ const Sent = props => {
           </TouchableOpacity>
         );
       }}
-    />
+    /> ) }
+    </>
   );
 };
 

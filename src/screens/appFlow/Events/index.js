@@ -37,7 +37,7 @@ const Events = ({navigation}) => {
             keyboardShouldPersistTaps="handled">
                 <Text style={[AppStyles.fvrtText,{marginLeft:responsiveScreenWidth(5), marginBottom: responsiveHeight(-2)}]}>UPCOMING EVENTS</Text>
                
-               <SearchBar Text={"Search Events"} onChangeText={setEvents} value={events}  />
+               <SearchBar placeholder={"Search Events"} onChangeText={setEvents} value={events}  />
                
             <EventsView filter={events} onPress={EventsDetail}/>
           </ScrollView>

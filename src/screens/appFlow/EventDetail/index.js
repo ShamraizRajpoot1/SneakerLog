@@ -64,7 +64,7 @@ const EventsDetail = ({navigation, route}) => {
                   marginTop: responsiveHeight(1.5),
                 },
               ]}>
-              UPCOMING EVENTS
+             {selectedItem.name}
             </Text>
             <Image style={styles.Image} source={{uri: selectedItem.image}} />
             <View style={styles.detailContainer}>
@@ -100,7 +100,7 @@ const EventsDetail = ({navigation, route}) => {
                   View Map
                 </Text>
               </TouchableOpacity>
-              <Text style={styles.heading}>LOCATION</Text>
+              <Text style={styles.heading}>ABOUT THIS EVENT</Text>
               <Text
                 style={[styles.datetext, {marginBottom: responsiveHeight(3)}]}>
                {selectedItem.about}

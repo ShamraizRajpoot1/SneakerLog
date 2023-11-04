@@ -23,6 +23,7 @@ const UserView = (props) => {
   useEffect(() => {
     const fetchLoggedInUserData = async () => {
       try {
+        if(user){
         const userDoc = await firestore().collection('Users').doc(user.uid).get();
         if (userDoc.exists) {
           const userData = userDoc.data();
@@ -32,6 +33,7 @@ const UserView = (props) => {
             userName: userData.userName, 
             Image: userData.profileImage || '', 
           });
+        }
         } else {
           console.log('No user data found for the specified ID');
         }
@@ -41,7 +43,7 @@ const UserView = (props) => {
     };
 
     fetchLoggedInUserData();
-  }, [user]);
+  }, []);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -59,11 +61,12 @@ const UserView = (props) => {
     fetchData();
   }, []);
   useEffect(() => {
-    const checkIfInviteSent = async () => {
+    const userDocRef = firestore().collection('Users').doc(user.uid);
+  
+    const unsubscribe = userDocRef.onSnapshot((doc) => {
       try {
-        const userDoc = await firestore().collection('Users').doc(user.uid).get();
-        if (userDoc.exists) {
-          const userData = userDoc.data();
+        if (doc.exists) {
+          const userData = doc.data();
           if (userData.sent && userData.sent.length > 0) {
             const updatedInvitedSentUsers = userData.sent.map((sentUser) => sentUser.Id);
             setInviteSentUsers(updatedInvitedSentUsers);
@@ -76,9 +79,11 @@ const UserView = (props) => {
       } catch (error) {
         console.error('Error checking if invite sent: ', error);
       }
-    };
-    checkIfInviteSent();
-  }, [user.uid]);
+    });
+  
+    return () => unsubscribe();
+  }, []);
+  
 
   const handleFollow = (selectedUser) => {
     const userData = {
@@ -138,7 +143,7 @@ const UserView = (props) => {
       keyExtractor={(item) => item.userId}
       data={displayedUsers}
       renderItem={({ item, index }) => {
-        if (item.Id === user.uid) {
+        if (user && item.Id === user.uid) {
           return null; 
         }
         const isUserInvited = inviteSentUsers.includes(item.Id);

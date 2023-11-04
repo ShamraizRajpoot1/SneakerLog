@@ -24,8 +24,8 @@ const ProfileHead = props => {
             </TouchableOpacity>
           )}
           {props.update && (
-            <TouchableOpacity onPress={props.updatePress}>
-              <Text style={[styles.text]}>Update</Text>
+            <TouchableOpacity onPress={props.updatePress} disabled={props.disabled}>
+              <Text style={[styles.text, {color : props.disabled ?'gray' : Colors.forgot } ]}>Update</Text>
             </TouchableOpacity>
           )}
         </View>

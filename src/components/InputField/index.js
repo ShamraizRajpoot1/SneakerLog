@@ -20,37 +20,25 @@ import {AppStyles} from '../../services/utilities/AppStyles';
 const InputField = props => {
   const [secureTextEntry, setSecureTextEntry] = useState(true);
   const [isFocused, setIsFocused] = useState(false);
- 
-const formatValue = value => {
-  if (props.phone) {
-    let cleaned = ('' + value).replace(/\D/g, '');
-
-    if (cleaned.length >=0){
-      if (cleaned.length < 10) {
-        if (cleaned.length < 6) {
-          if (cleaned.length < 3) {
-            if (cleaned.length === 0) {
-              return '+'+'1'+'(';
-            } else  {
-            return '+'+'1'+'(' + cleaned; }
-          }
-          else{
-          return '+'+'1'+' (' + cleaned.slice(0, 3) + ') ' + cleaned.slice(3);
+  const telephoneCheck = str => {
+    const patt = /^\+?1?\s*?\(?\d{3}(?:\)|[-|\s])?\s*?\d{3}[-|\s]?\d{4}$/;
+    return patt.test(str);
+  };
+  const formatValue = value => {
+    if (props.phone) {
+      let cleaned = ('' + value).replace(/\D/g, '');
+      let output = '';
+  
+      if (telephoneCheck(cleaned)) {
+        if (cleaned.length === 10) {
+          output += `+1 (${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
+          return output;
         }
       }
-        else{
-        return '+'+'1'+' (' + cleaned.slice(0, 3) + ') ' + cleaned.slice(3, 6) + '-' + cleaned.slice(6);
-        }
-      }
-      else{
-      return '+'+'1'+' (' + cleaned.slice(0, 3) + ') ' + cleaned.slice(3, 6) + '-' + cleaned.slice(6, 10);
+    } else {
+      return value;
     }
-  }
-  } else {
-    return value;
-  }
-};
-
+  };
   const toggleSecureTextEntry = () => {
     setSecureTextEntry(prev => !prev);
   };

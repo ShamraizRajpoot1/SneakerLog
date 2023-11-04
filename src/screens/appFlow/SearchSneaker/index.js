@@ -161,6 +161,7 @@ const SearchSneaker = ({navigation, route}) => {
     );
   
     return (
+      <>
       <TouchableOpacity style={AppStyles.collection}>
         <View style={{ flexDirection: 'row', width: '80%', alignItems: 'center' }}>
           {item.image ? (
@@ -192,7 +193,10 @@ const SearchSneaker = ({navigation, route}) => {
             />
           )}
         </TouchableOpacity>
+       
       </TouchableOpacity>
+       <View style={[AppStyles.line]} />
+       </>
     );
   };
   

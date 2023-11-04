@@ -7,7 +7,7 @@ import {
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
-import React,{useState} from 'react';
+import React,{useContext, useState , useEffect} from 'react';
 import Header from '../../../components/Header';
 import {AppStyles} from '../../../services/utilities/AppStyles';
 import {fontFamily, fontSize} from '../../../services/utilities/Fonts';
@@ -19,15 +19,152 @@ import {Colors} from '../../../services/utilities/Colors';
 import Input from '../../../components/Input';
 import {scale} from 'react-native-size-matters';
 import Delete from '../../../components/Modals/Delete';
-
+import firestore from '@react-native-firebase/firestore';
+import { firebase } from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AuthContext } from '../../../navigation/AuthProvider';
 const ManageAccount = ({navigation}) => {
+  const {logout} = useContext(AuthContext)
     const [deleteModal, setDeleteModal] = useState(false)
     const toggleModal = () =>{
         setDeleteModal(prevModal => !prevModal)
     }
+    const [email, setEmail] = useState('');
+    const [buttonDisabled, setButtonDisabled] = useState(true);
+    const [isAccountDisabled, setIsAccountDisabled] = useState(false);
+     const isButtonDisabled = buttonDisabled;
+  const buttonColor = isButtonDisabled ? Colors.disabledButton : Colors.button1;
+  const checkEmailExistence = async () => {
+    try {
+      const usersRef = firestore().collection('Users');
+      const querySnapshot = await usersRef.where('email', '==', email).limit(1).get();
+      if (!querySnapshot.empty) {
+        setButtonDisabled(false);
+      } else {
+        setButtonDisabled(true);
+      }
+    } catch (error) {
+      console.error('Error checking email existence: ', error);
+    }
+  };
+  
+  React.useEffect(() => {
+    if (email) {
+      checkEmailExistence();
+    }
+  }, [email]);
+  
   const back = () => {
     navigation.goBack();
   };
+  const deleteAccount = async () => {
+    try {
+      const user = auth().currentUser;
+      if (!user) {
+        console.error('No user is currently signed in.');
+        return;
+      }
+  
+      const userId = user.uid;
+      await user.delete();
+      console.log('User account deleted successfully');
+      await AsyncStorage.removeItem('Token');
+      navigation.navigate('Auth', { screen: 'Login' });
+      const collectionsRef = firestore().collection('Collections');
+      const collectionQuerySnapshot = await collectionsRef.where('userId', '==', userId).get();
+      collectionQuerySnapshot.forEach((doc) => {
+        doc.ref.delete().then(() => {
+          console.log('Document successfully deleted from Collections collection!');
+        }).catch((error) => {
+          console.error('Error removing document from Collections collection: ', error);
+        });
+      });
+      const usersRef = firestore().collection('Users');
+      const userQuerySnapshot = await usersRef.where('userId', '==', userId).get();
+      userQuerySnapshot.forEach((doc) => {
+        doc.ref.delete().then(() => {
+          console.log('Document successfully deleted from Firestore!');
+        }).catch((error) => {
+          console.error('Error removing document: ', error);
+        });
+      });
+    } catch (error) {
+      console.error('Error deleting user account:', error);
+    }
+  };
+  
+useEffect(() => {
+  const user = auth().currentUser; 
+
+  if (user) {
+      const usersRef = firestore().collection('Users');
+      const userId = user.uid;
+
+      usersRef
+          .doc(userId)
+          .get()
+          .then((doc) => {
+              if (doc.exists) {
+                  const userData = doc.data();
+                  if (userData.isDisabled) {
+                      setIsAccountDisabled(true);
+                  }
+              } else {
+                  console.log('No such document!');
+              }
+          })
+          .catch((error) => {
+              console.error('Error getting document:', error);
+          });
+  }
+}, []);
+
+const enableAccount = async () => {
+  const user = auth().currentUser; 
+  const userId = user.uid;
+    await AsyncStorage.removeItem('Token');
+    logout();
+    navigation.navigate('Auth', {screen: 'Login'});
+      const usersRef = firestore().collection('Users');
+     
+
+      usersRef
+          .doc(userId)
+          .update({
+              isDisabled: false,
+          })
+          .then(() => {
+              console.log('Account enabled successfully');
+              setIsAccountDisabled(false);
+          })
+          .catch((error) => {
+              console.error('Error enabling account: ', error);
+          });
+  
+};
+const disableAccount = async () => {
+  const user = auth().currentUser; 
+  const userId = user.uid;
+ 
+    try {
+      await AsyncStorage.removeItem('Token');
+      logout();
+      navigation.navigate('Auth', { screen: 'Login' });
+
+      const usersRef = firestore().collection('Users');
+     
+
+      await usersRef.doc(userId).update({
+        isDisabled: true
+      });
+      console.log('Account disabled successfully');
+    } catch (error) {
+      console.error('Error disabling account: ', error);
+    }
+  
+};
+
   return (
     <>
       <Header Image={true} onPress={back} />
@@ -48,7 +185,7 @@ const ManageAccount = ({navigation}) => {
                   AppStyles.field,
                   {
                     fontSize: fontSize.usernameText,
-                    marginTop: responsiveScreenHeight(4),
+                    marginTop: responsiveScreenHeight(3),
                   },
                 ]}>
                 DISABLE/ENABLE MY ACCOUNT
@@ -63,7 +200,7 @@ const ManageAccount = ({navigation}) => {
                 style={[AppStyles.field, {fontSize: fontSize.usernameText}]}>
                 To Continue,ENTER EMAIL TO DISABLE ACCOUNT
               </Text>
-              <Input />
+              <Input value={email} onChangeText={setEmail} />
               <Text
                 style={[
                   AppStyles.field,
@@ -80,25 +217,26 @@ const ManageAccount = ({navigation}) => {
                 until you reactivate your account.Enabling your account will
                 make your Collections and Profile visible
               </Text>
-              <View style={[styles.button, {borderWidth: null}]}>
-                <Text style={styles.buttonText}>Disable Account</Text>
-              </View>
+              <TouchableOpacity style={[styles.button, { borderWidth: null, backgroundColor: buttonColor }]} disabled={isButtonDisabled} onPress={isAccountDisabled ? enableAccount : disableAccount}>
+            <Text style={[styles.buttonText]}>{isAccountDisabled ? 'Enable Account' : 'Disable Account'}</Text>
+        </TouchableOpacity>
               <Text
                 style={[
                   AppStyles.field,
                   {
                     fontSize: fontSize.usernameText,
-                    marginTop: responsiveScreenHeight(6),
+                    marginTop: responsiveScreenHeight(5),
+                    marginBottom: responsiveScreenHeight(1)
                   },
                 ]}>
                 DELETE ACCOUNT
               </Text>
-              <TouchableOpacity style={[styles.button, {backgroundColor: null}]} onPress={toggleModal}>
+              <TouchableOpacity style={[styles.button, {backgroundColor: null,marginBottom: responsiveScreenHeight(3),}]} disabled={isButtonDisabled} onPress={toggleModal}>
                 <Text style={[styles.buttonText, {color: Colors.blue}]}>
                   Yes
                 </Text>
               </TouchableOpacity>
-              {deleteModal && <Delete isVisible={deleteModal} onBackdropPress={toggleModal}/>}
+              {deleteModal && <Delete isVisible={deleteModal} onBackdropPress={toggleModal} onPress={deleteAccount}/>}
             </View>
           </ScrollView>
         </TouchableWithoutFeedback>

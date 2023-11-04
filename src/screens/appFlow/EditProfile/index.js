@@ -46,6 +46,8 @@ const EditProfile = ({navigation}) => {
   const [gender, setGender] = useState('');
   const [sneakerBrands, setSneakerBrands] = useState('');
   const [sneakerSize, setSneakerSize] = useState([]);
+  const [isDisabled, setIsDisabled] = useState(true);
+  
 
   const showCustomToast = () => {
     Toast.show({
@@ -71,10 +73,12 @@ const EditProfile = ({navigation}) => {
   };
   const toggleModal = () => {
     setSizeModal(prevModal => !prevModal);
+    setIsDisabled(false)
   };
 
   const handleSelection = selectedOption => {
     setGender(selectedOption);
+    setIsDisabled(false)
   };
 
   const container = {
@@ -128,7 +132,8 @@ const EditProfile = ({navigation}) => {
     };
   
     fetchUserData();
-  }, [user]);
+  }, []);
+  
   useEffect(() => {
     const docId = user.uid;
     const userDocRef = firestore().collection('Users').doc(docId);
@@ -155,7 +160,7 @@ const EditProfile = ({navigation}) => {
     });
 
     return () => unsubscribe(); 
-}, [user, firestore, setSneakerBrands]);
+}, [ firestore, setSneakerBrands]);
 
   
   
@@ -174,6 +179,7 @@ const EditProfile = ({navigation}) => {
 
   const sizeGuide = () => {
     navigation.navigate('SizeGuide', {sneakerSize});
+    setIsDisabled(fasle)
   };
   const pickImage = () => {
     const options = {
@@ -205,12 +211,24 @@ const EditProfile = ({navigation}) => {
           await reference.putFile(uploadUri);
           const url = await reference.getDownloadURL();
           setProfileImage(url);
+          setIsDisabled(false)
         } catch (error) {
           console.error('Error in uploading image to the bucket:', error);
         }
       }
     });
   };
+  const handleNameChange = (value) => {
+    setName(value);
+    setIsDisabled(false);
+  };
+
+  const handleUserNameChange = (value) => {
+    setUserName(value);
+    setIsDisabled(false);
+  };
+
+
   return (
     <View style={{flex: 1, backgroundColor: Colors.background}}>
       <Header onPress={back} />
@@ -219,6 +237,7 @@ const EditProfile = ({navigation}) => {
         update={true}
         cancelPress={back}
         updatePress={update}
+        disabled={isDisabled}
       />
 
       <KeyboardAvoidingView
@@ -266,11 +285,11 @@ const EditProfile = ({navigation}) => {
               </View>
               <View style={AppStyles.marginVerticals}>
                 <Text style={AppStyles.field}>NAME</Text>
-                <Input value={name} onChangeText={setName} />
+                <Input value={name} onChangeText={handleNameChange} />
               </View>
               <View style={AppStyles.marginVerticals}>
                 <Text style={AppStyles.field}>USERNAME</Text>
-                <Input value={userName} onChangeText={setUserName} />
+                <Input value={userName} onChangeText={handleUserNameChange} />
               </View>
               <View style={AppStyles.marginVerticals}>
                 <View style={{flexDirection: 'row'}}>

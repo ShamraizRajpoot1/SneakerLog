@@ -7,4 +7,5 @@ import DeleteProduct from "./DeleteProduct";
 import ReportModal from "./ReportModal";
 import Report from "./Report";
 import CollectionModal from "./CollectionModal";
-export{AddCollection, ShareApp, ProductEdit, Size, Delete, DeleteProduct, CollectionModal, ReportModal, Report }
+import Selection from "./Selection";
+export{AddCollection, ShareApp, ProductEdit, Size, Delete, DeleteProduct, CollectionModal, ReportModal, Report, Selection }

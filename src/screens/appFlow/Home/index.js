@@ -29,7 +29,6 @@ import ProductView from '../../../components/ProductView';
 import UserView from '../../../components/UserView';
 import EventsView from '../../../components/EventsView';
 import {AddCollection} from '../../../components/Modals';
-import Comunity from '../Community';
 import firestore from '@react-native-firebase/firestore';
 import {AuthContext} from '../../../navigation/AuthProvider';
 
@@ -48,74 +47,23 @@ const Home = ({navigation}) => {
   const {user} = useContext(AuthContext);
   const [users, setUsers] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
-  const [showTopTab, setShowTopTab] = useState(false);
   const [loading, setLoading] = useState(true);
   const [collections, setCollections] = useState([]);
-  const [followerUsers, setFollowerUsers] = useState([]);
-  const [sneakers, setSneakers] = useState([]);
-  
-  useEffect(() => {
-    const fetchFollowersData = async () => {
-      try {
-        const doc = await firestore().collection('Users').doc(user.uid).get();
-        const userData = doc.data();
-        if (userData && userData.followersData) {
-          setFollowerUsers(userData.followersData);
-        }
-      } catch (error) {
-        console.error('Error fetching followers data: ', error);
-      }
-    };
-    fetchFollowersData();
-  }, []);
-  useEffect(() => {
-    const fetchSneakers = async followerId => {
-      try {
-        const fetchedSneakers = [];
-        const collectionsSnapshot = await firestore()
-          .collection('Collections')
-          .get();
-
-        collectionsSnapshot.forEach(doc => {
-          const data = doc.data();
-          if (data.userId === followerId && data.sneakers && !data.isPrivate) {
-            fetchedSneakers.push(...data.sneakers);
-          }
-        });
-
-        setSneakers(prevSneakers => [...prevSneakers, fetchedSneakers]);
-      } catch (error) {
-        console.error('Error fetching sneakers data: ', error);
-      }
-    };
-
-    users.forEach(follower => {
-      fetchSneakers(follower.Id);
-    });
-  }, [users]);
+ 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
         const usersCollection = firestore().collection('Users');
-        usersCollection.onSnapshot(async snapshot => {
+        usersCollection.onSnapshot(async (snapshot) => {
           const fetchedUsers = [];
-          snapshot.forEach(doc => {
-            fetchedUsers.push({Id: doc.id, ...doc.data()});
+          snapshot.forEach(async (doc) => {
+            const userData = doc.data();
+            if (!userData.isDisabled) {
+              fetchedUsers.push({ Id: doc.id, ...userData });
+            }
           });
           setUsers(fetchedUsers);
-          if (user && user.uid) {
-            const userDoc = firestore().collection('Users').doc(user.uid);
-            const doc = await userDoc.get();
-            const userData = doc.data();
-            if (
-              userData &&
-              userData.followersData &&
-              userData.followersData.length > 0
-            ) {
-              setShowTopTab(true);
-            }
-          }
           setLoading(false);
         });
       } catch (error) {
@@ -123,9 +71,10 @@ const Home = ({navigation}) => {
         setLoading(false);
       }
     };
-
+  
     fetchData();
-  }, [user]);
+  }, []);
+  
   useEffect(() => {
     setLoading(true);
     const fetchCollections = async () => {
@@ -161,7 +110,7 @@ const Home = ({navigation}) => {
     };
 
     fetchCollections();
-  }, [user]);
+  }, []);
   const toggleCollection = () => {
     setModalVisible(prev => !prev);
   };
@@ -188,6 +137,7 @@ const Home = ({navigation}) => {
       screen: 'Collections',
       params: {selectedCollection},
     });
+    
   };
   const createNewDoc = async () => {
     const userId = user.uid;
@@ -213,7 +163,13 @@ const Home = ({navigation}) => {
       console.error('Error adding document: ', error);
     }
   };
-  const [selectedTab, setSelectedTab] = useState('MY CLOSET');
+  const Product = selectedCollection => {
+    navigation.navigate('CollectionStack', {
+      screen: 'Collections',
+      params: {selectedCollection: selectedCollection},
+    });
+   
+  }
   const renderItem = ({item, index}) => (
     <View>
       <TouchableOpacity
@@ -264,7 +220,7 @@ const Home = ({navigation}) => {
       </TouchableOpacity>
     </View>
   );
-  return (
+  return ( 
     <>
       <Header options={true} press={profile} />
       <KeyboardAvoidingView
@@ -284,44 +240,8 @@ const Home = ({navigation}) => {
               style={{flex: 1}}
               contentContainerStyle={[AppStyles.contentContainer]}
               keyboardShouldPersistTaps="handled">
-              {showTopTab && (
-                <View style={styles.topTab}>
-                  <TouchableOpacity
-                    style={
-                      selectedTab === 'MY CLOSET'
-                        ? styles.topTabbtn
-                        : styles.topTabbtn2
-                    }
-                    onPress={() => setSelectedTab('MY CLOSET')}>
-                    <Text
-                      style={
-                        selectedTab === 'MY CLOSET'
-                          ? styles.tabactiveText
-                          : styles.inActiveText
-                      }>
-                      MY CLOSET
-                    </Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={
-                      selectedTab === 'COMMUNITY'
-                        ? styles.topTabbtn
-                        : styles.topTabbtn2
-                    }
-                    onPress={() => setSelectedTab('COMMUNITY')}>
-                    <Text
-                      style={
-                        selectedTab === 'COMMUNITY'
-                          ? styles.tabactiveText
-                          : styles.inActiveText
-                      }>
-                      COMMUNITY
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-              {selectedTab === 'MY CLOSET' ? (
+              
+             
                 <View>
                   <Text style={[AppStyles.fvrtText, {marginLeft: '5%'}]}>
                     MY FOVORITE COLLECTIONS
@@ -397,16 +317,14 @@ const Home = ({navigation}) => {
                     </Text>
                   </TouchableOpacity>
                 </View>
-              ) : (
-                <Comunity users={followerUsers} sneakers={sneakers}/>
-              )}
+            
               {modalVisible && (
                 <AddCollection
                   isVisible={modalVisible}
                   onBackdropPress={toggleCollection}
                   //onChangeText={}
                   //value={}
-                  onPress={toggleCollection}
+                  onPress={Product}
                 />
               )}
             </ScrollView>

@@ -128,6 +128,12 @@ const Followers = props => {
     }
   }; 
   return (
+    <>
+  {displayedUsers.length === 0 ? (
+    <View style={{flex:1,alignItems: 'center', justifyContent:'center'}}>
+      <Text style={AppStyles.heading}>You do not have any followers</Text>
+      </View>
+    ) : (
     <FlatList
       showsVerticalScrollIndicator={false}
       showsHorizontalScrollIndicator={false}
@@ -194,7 +200,8 @@ const Followers = props => {
           </TouchableOpacity>
         );
       }}
-    />
+    /> )}
+    </>
   );
 };
 
@@ -202,3 +209,4 @@ export default Followers;
 const styles = {
   
 };
+{/* <Text>You do not have any followers</Text> */}

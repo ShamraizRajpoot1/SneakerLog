@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
   FlatList,
   ActivityIndicator,
-  BackHandler
+  BackHandler,Linking
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {AppStyles} from '../../../services/utilities/AppStyles';
@@ -32,6 +32,8 @@ import RNFS from 'react-native-fs';
 import Toast from 'react-native-simple-toast';
 import XLSX from 'xlsx';
 import Share from 'react-native-share';
+import Clipboard from '@react-native-clipboard/clipboard';
+import RNShare from 'react-native-share';
 
 const Collections = ({navigation, route}) => {
   const [data, setSneakersData] = useState([]);
@@ -40,7 +42,7 @@ const Collections = ({navigation, route}) => {
   const [filter, setFilter] = useState(false);
   const [collection, setCollection] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [favorite, setFavorite] = useState();
+  const [favorite, setFavorite] = useState([]);
   const selectedCollection = selectedId
     ? selectedId
     : route.params.selectedCollection;
@@ -55,36 +57,26 @@ useEffect(() => {
 const handleBackPress = () => {
   return true;
 };
-  useEffect(() => {
-   
-    const fetchFirestoreData = async () => {
-      setLoading(true);
-      try {
-        if (selectedCollection) {
-          const selectedCollectionId = selectedCollection.id;
-          const collectionRef = firestore()
-            .collection('Collections')
-            .doc(selectedCollectionId);
-          const doc = await collectionRef.get();
+useEffect(() => {
+  const selectedCollectionId = route.params.selectedCollection.id;
+  const collectionRef = firestore().collection('Collections').doc(selectedCollectionId);
 
-          if (doc.exists) {
-            const data = doc.data();
-            setFavorite(data.favorite)
-            const sneakers = data.sneakers || [];
-            setSneakersData(sneakers);
-          } else {
-            console.log('No such document!');
-            setSneakersData([]);
-          }
-        }
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching Firestore data: ', error);
-        setLoading(false);
-      }
-    };
-    fetchFirestoreData();
-  }, [route.params.selectedCollection, selectedId, navigation]);
+  const unsubscribe = collectionRef.onSnapshot((doc) => {
+    if (doc.exists) {
+      const data = doc.data();
+      setFavorite(data.favorite);
+      const sneakers = data.sneakers || [];
+      setSneakersData(sneakers);
+      setLoading(false)
+    } else {
+      console.log('No such document!');
+      setSneakersData([]);
+    }
+  });
+
+  return () => unsubscribe();
+}, [route.params.selectedCollection]);
+
   const back = () => {
     navigation.goBack();
   };
@@ -140,7 +132,7 @@ const handleBackPress = () => {
         <Image source={{ uri: item.image }} style={AppStyles.productImage} />
       ) }
           <Text style={[styles.name]}>
-        {item.name.length > 20 ? item.name.substring(0, 16) + '...' : item.name}
+        {item.name.length > 17 ? item.name.substring(0, 18) + '...' : item.name}
       </Text>
         </View>
         <View style={AppStyles.priceContainer}>
@@ -163,7 +155,7 @@ const handleBackPress = () => {
           favorite: false
         })
         .then(() => {
-          setFavorite(prev => !prev);
+          setFavorite(false);
         })
         .catch(error => {
           console.error('Error updating collection as not favorite: ', error);
@@ -176,7 +168,7 @@ const handleBackPress = () => {
           favorite: true
         })
         .then(() => {
-          setFavorite(prev => !prev);
+          setFavorite(true);
         })
         .catch(error => {
           console.error('Error updating collection as favorite: ', error);
@@ -186,10 +178,7 @@ const handleBackPress = () => {
   
   const SpreadSheet = () => {
     try {
-      if (data.length === 0) {
-        console.log('No data to export to spreadsheet.');
-        return;
-      }
+     
   
       let sheetData = data.map((item) => ({
         ID: item.Id || '',
@@ -212,12 +201,14 @@ const handleBackPress = () => {
       const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'binary' });
       const downloadsPath = RNFS.DownloadDirectoryPath + `/${selectedCollection.name}.xlsx`;
       RNFS.writeFile(downloadsPath, wbout, 'ascii')
+      
         .then(() => {
           console.log('Spreadsheet created at path:', downloadsPath);
           Toast.show('File Download Successfully', Toast.LONG);
-           Share.open({
+          Share.open({
           url: `file://${downloadsPath}`,
-          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          failOnCancel: false,
         })
           Shares()
           
@@ -229,12 +220,49 @@ const handleBackPress = () => {
       console.error('Error generating spreadsheet: ', error);
     }
   };
-  const ShareCollection=()=>{
-    
+ 
+  const ShareCollection = async () => {
+    try {
+      const uploadedFileURL = await uploadFile();
+  
+      const result = await Share.open({
+      title: 'Share Sneaker Collection',
+      message: 'Check out my Sneaker Collection!',
+      url: uploadedFileURL,
+    });
+
+    if (result.action === Share.sharedAction) {
+      if (result.activityType) {
+        console.log(`Shared with ${result.activityType}`);
+      } else {
+        console.log('Shared');
+      }
+    } else if (result.action === Share.dismissedAction) {
+      console.log('Sharing dismissed');
+    }
+    Shares()
+  } catch (error) {
+    Shares()
+    console.error('Error generating and sharing link:', error);
   }
-  const copyLink=()=>{
-    
-  }
+  };
+  
+  const uploadFile = async () => {
+    const currentCol = this.state?.CurrentCol || '';
+    const uploadedFileURL = `sneakerlog://App/Home/UserCollectionDetailslink/${selectedCollection.id}/${currentCol}`;
+    return uploadedFileURL;
+  };
+  const copyLink = async () => {
+    const link = `sneakerlog://App/Home/UserCollectionDetailslink/${selectedCollection.id}`;
+  
+    try {
+      await Clipboard.setString(link);
+      console.log('Link copied to clipboard:', link);
+      Shares()
+    } catch (error) {
+      console.error('Error copying link to clipboard:', error);
+    }
+  };
   return (
     <>
       <Header Image={true} onPress={back} options={true} press={profile} />

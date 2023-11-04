@@ -27,6 +27,7 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import {appIcons} from '../../../services/utilities/Assets';
 import firestore from '@react-native-firebase/firestore';
 import Size from '../Size';
+import Selection from '../Selection';
 const ProductEdit = props => {
   const {item} = props;
   if (!item) {
@@ -47,6 +48,7 @@ const ProductEdit = props => {
   const [status, setStatus] = useState(item.status || '');
   const [isOpen, setIsOpen] = useState(false);
   const [sizemodal, setSizemodal] = useState(false);
+  const [statusmodal, setStatusmodal] = useState(false);
   const scrollViewRef = useRef();
 
   const handleCreate = async () => {
@@ -100,6 +102,9 @@ const ProductEdit = props => {
   };
   const sizeToggle = () => {
     setSizemodal(prev => !prev);
+  };
+  const statusToggle = () => {
+    setStatusmodal(prev => !prev);
   };
   const handleSneakerNameChange = value => {
     setSneakerName(value);
@@ -267,39 +272,32 @@ const ProductEdit = props => {
                   </View>
                   <View style={[AppStyles.margin, {width: '95%'}]}>
                     <Text style={AppStyles.field}>SNEAKER STATUS</Text>
-                    <DropDownPicker
-                      items={data.map((item, index) => ({
-                        label: item.label,
-                        value: item.value,
-                        key: index.toString(),
-                      }))}
-                      dropDownDirection={-45}
-                      arrowColor={Colors.blackText}
-                      labelStyle={styles.label}
-                      placeholder={' '}
-                      dropDownMaxHeight={170}
-                      containerStyle={[
-                        AppStyles.dcontainer,
-                        {
-                          width: responsiveScreenWidth(72),
-                          marginBottom: isOpen
-                            ? responsiveScreenHeight(25)
-                            : null,
-                        },
-                      ]}
-                      style={[
-                        AppStyles.Dropdown,
-                        {width: responsiveScreenWidth(72)},
-                      ]}
-                      setValue={value => setStatus(value)}
-                      setOpen={() => setIsOpen(!isOpen)}
-                      open={isOpen}
-                      value={status}
-                      dropDownStyle={[
-                        AppStyles.dropDownStyle,
-                        {width: responsiveScreenWidth(72)},
-                      ]}
-                    />
+                    <TouchableOpacity
+                      onPress={statusToggle}
+                      style={styles.sizeContainer}>
+                      <Text
+                        style={[
+                          AppStyles.fvrtText,
+                          {
+                            color: Colors.text3,
+                            marginVertical: 0,
+                            width: '90%',
+                          },
+                        ]}>
+                        {status}
+                      </Text>
+                      <View
+                        style={{
+                          width: '5%',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}>
+                        <Image
+                          style={{width: scale(12), height: scale(15)}}
+                          source={appIcons.arrow}
+                        />
+                      </View>
+                    </TouchableOpacity>
                   </View>
                 </View>
               </ScrollView>
@@ -333,6 +331,13 @@ const ProductEdit = props => {
             <Size
               onBackdropPress={sizeToggle}
               onChange={setSize}
+              disable={true}
+            />
+          )}
+          {statusmodal && (
+            <Selection
+              onBackdropPress={statusToggle}
+              onChange={setStatus}
               disable={true}
             />
           )}

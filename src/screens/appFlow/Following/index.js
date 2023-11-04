@@ -48,6 +48,12 @@ const Following = props => {
   const displayedUsers = props.data;
 
   return (
+    <>
+  {displayedUsers.length === 0 ? (
+    <View style={{flex:1,alignItems: 'center', justifyContent:'center'}}>
+      <Text style={AppStyles.heading}>You are not following anyone.</Text>
+      </View>
+    ) : (
     <FlatList
       showsVerticalScrollIndicator={false}
       showsHorizontalScrollIndicator={false}
@@ -94,7 +100,8 @@ const Following = props => {
           </TouchableOpacity>
         );
       }}
-    />
+    /> ) } 
+    </>
   );
 };
 

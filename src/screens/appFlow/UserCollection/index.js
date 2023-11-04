@@ -26,25 +26,76 @@ import {fontFamily, fontSize} from '../../../services/utilities/Fonts';
 import CollectionHeader from '../../../components/CollectionHeader';
 import {AuthContext} from '../../../navigation/AuthProvider';
 import firestore from '@react-native-firebase/firestore';
-import { CollectionModal } from '../../../components/Modals';
+import {CollectionModal} from '../../../components/Modals';
 
 const UserCollection = ({navigation, route}) => {
   const {user} = useContext(AuthContext);
   const [collectionData, setData] = useState([]);
   const [data, setSneakersData] = useState([]);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [inviteSentUsers, setInviteSentUsers] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [collection, setCollection] = useState(false);
   const [isLoading, setIsLoading] = useState();
-  const selectedUserData = route.params.selectedUserData
- 
-  const selectedCollection = selectedId ? selectedId : route.params.selectedCollection;
-   
+  const selectedUserData = route.params.selectedUserData;
+
+  const selectedCollection = selectedId
+    ? selectedId
+    : route.params.selectedCollection;
+
+    let favorite;
+
+  if (selectedId) {
+    favorite = selectedId.favorite;
+  } else if (route?.params?.selectedCollection.favorite) {
+    favorite = route.params.selectedCollection.favorite;
+  } 
+  const handleFollow = selectedUser => {
+    const userData = {
+      name: selectedUser.name || '',
+      userName: selectedUser.userName || '',
+      Id: selectedUser.userId || '',
+      Image: selectedUser.profileImage || '',
+    };
+
+    const selectedUserRef = firestore().collection('Users').doc(selectedUserId);
+    const userRef = firestore().collection('Users').doc(user.uid);
+
+    selectedUserRef
+      .update({
+        received: firestore.FieldValue.arrayUnion(loggedInUserData),
+      })
+      .then(() => {
+        console.log(
+          'User data added successfully to selected user: ',
+          loggedInUserData,
+        );
+        setInviteSentUsers([...inviteSentUsers, true]);
+      })
+      .catch(error => {
+        console.error('Error adding user data to selected user: ', error);
+      });
+
+    userRef
+      .update({
+        sent: firestore.FieldValue.arrayUnion(userData),
+      })
+      .then(() => {
+        console.log('User data added successfully: ', userData);
+      })
+      .catch(error => {
+        console.error('Error adding user data: ', error);
+      });
+  };
+
   useEffect(() => {
     const fetchFirestoreData = async () => {
-      setIsLoading(true); 
+      setIsLoading(true);
       if (selectedUserData?.followersData.find(item => item.Id === user.uid)) {
         setIsFollowing(true);
+      }
+      if (selectedUserData?.received?.find(item => item.Id === user.uid)) {
+        setInviteSentUsers(true);
       }
       try {
         if (selectedCollection) {
@@ -61,10 +112,10 @@ const UserCollection = ({navigation, route}) => {
         } else {
           setSneakersData([]);
         }
-        setIsLoading(false); 
+        setIsLoading(false);
       } catch (error) {
         console.error('Error fetching Firestore data: ', error);
-        setIsLoading(false); 
+        setIsLoading(false);
       }
     };
 
@@ -72,20 +123,20 @@ const UserCollection = ({navigation, route}) => {
   }, [route.params.selectedCollection, selectedId]);
   useEffect(() => {
     const fetchCollections = async () => {
-      setIsLoading(true); 
+      setIsLoading(true);
       try {
         const collectionRef = firestore().collection('Collections');
         collectionRef
           .where('userId', '==', selectedUserData.userId)
           .onSnapshot(snapshot => {
-            let count = 0; 
+            let count = 0;
             const fetchedCollections = [];
             snapshot.forEach(doc => {
               const data = doc.data();
-              const { collectionName, isPrivate, sneakers, userId } = data;
+              const {collectionName, isPrivate, sneakers, userId} = data;
               fetchedCollections.push({
                 id: doc.id,
-                userId:userId,
+                userId: userId,
                 name: collectionName,
                 sneaker: sneakers,
                 isPrivate: isPrivate,
@@ -94,13 +145,11 @@ const UserCollection = ({navigation, route}) => {
             });
 
             setData(fetchedCollections);
-           
-            
           });
-          setIsLoading(false); 
+        setIsLoading(false);
       } catch (error) {
         console.error('Error fetching collections: ', error);
-        setIsLoading(false); 
+        setIsLoading(false);
       }
     };
 
@@ -109,7 +158,7 @@ const UserCollection = ({navigation, route}) => {
   const toggle = () => {
     setCollection(prev => !prev);
   };
-  const setCollectionId = (selectedItem) => {
+  const setCollectionId = selectedItem => {
     setCollection(prev => !prev);
     setSelectedId(selectedItem);
   };
@@ -121,16 +170,31 @@ const UserCollection = ({navigation, route}) => {
   };
   const renderItem = ({item, index}) => (
     <View>
-      <TouchableOpacity style={[AppStyles.collection, {width: '80%'}]}>
-        <View style={{flexDirection: 'row', alignItems: 'center'}}>
-          <Image source={{uri: item.image}} style={AppStyles.productImage} />
-          <Text style={styles.name}>{item.sneakerName}</Text>
+      <View style={[AppStyles.collection, {width: '90%'}]}>
+        <View style={{width:'60%',flexDirection: 'row', alignItems: 'center'}}>
+          {item.image && item.image.small ? (
+            <Image
+              source={{uri: item.image.small}}
+              style={AppStyles.productImage}
+            />
+          ) : (
+            item.image &&
+            typeof item.image === 'string' && (
+              <Image
+                source={{uri: item.image}}
+                style={AppStyles.productImage}
+              />
+            )
+          )}
+          <Text style={styles.name}>{item.name}</Text>
         </View>
         <View style={AppStyles.priceContainer}>
-          <Text>${item.price}</Text>
+          <Text>${item.retailPrice}</Text>
         </View>
-      </TouchableOpacity>
-      {index < data.length && <View style={[AppStyles.line,{marginHorizontal:0}]} />}
+      </View>
+      {index < data.length && (
+        <View style={[AppStyles.line, {marginHorizontal: 0}]} />
+      )}
     </View>
   );
   return (
@@ -141,100 +205,118 @@ const UserCollection = ({navigation, route}) => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -500}>
         <TouchableWithoutFeedback>
-        {isLoading ? ( 
-              <ActivityIndicator style={AppStyles.loadingIndicator} size="large" color={Colors.primaryColor} />
-            ) :
-          <ScrollView
-            style={{flex: 1}}
-            contentContainerStyle={[AppStyles.contentContainer]}
-            keyboardShouldPersistTaps="handled">
-            <View style={styles.profileContainer}>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  height: '100%',
-                  alignItems: 'center',
-                }}>
-                {selectedUserData.profileImage ? (
-                  <Image
-                    style={styles.image}
-                    source={{uri: selectedUserData.profileImage}}
-                  />
-                ) : (
-                  <Image style={styles.image} source={appIcons.profile} />
-                )}
-                <View style={{marginLeft: responsiveWidth(5)}}>
-                  <Text style={[styles.name]}>{selectedUserData.name}</Text>
-                  <Text
-                    style={[
-                      styles.additionalText,
-                      {marginTop: responsiveScreenHeight(0.5)},
-                    ]}>
-                    {selectedUserData.userName}
-                  </Text>
+          {isLoading ? (
+            <ActivityIndicator
+              style={AppStyles.loadingIndicator}
+              size="large"
+              color={Colors.primaryColor}
+            />
+          ) : (
+            <ScrollView
+              style={{flex: 1}}
+              contentContainerStyle={[AppStyles.contentContainer]}
+              keyboardShouldPersistTaps="handled">
+              <View style={styles.profileContainer}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    height: '100%',
+                    alignItems: 'center',
+                  }}>
+                  {selectedUserData.profileImage ? (
+                    <Image
+                      style={styles.image}
+                      source={{uri: selectedUserData.profileImage}}
+                    />
+                  ) : (
+                    <Image style={styles.image} source={appIcons.profile} />
+                  )}
+                  <View style={{marginLeft: responsiveWidth(5)}}>
+                    <Text style={[styles.name]}>{selectedUserData.name}</Text>
+                    <Text
+                      style={[
+                        styles.additionalText,
+                        {marginTop: responsiveScreenHeight(0.5)},
+                      ]}>
+                      {selectedUserData.userName}
+                    </Text>
+                  </View>
                 </View>
+                {isFollowing ? (
+                  <View style={styles.followContainer}>
+                    <Text
+                      style={[
+                        AppStyles.userHorizontalText,
+                        {color: Colors.forgot, marginTop: 0},
+                      ]}>
+                      Following
+                    </Text>
+                  </View>
+                ) : inviteSentUsers ? (
+                  <View style={styles.followContainer}>
+                    <Text
+                      style={[AppStyles.userHorizontalText, {marginTop: 0}]}>
+                      invite Sent
+                    </Text>
+                  </View>
+                ) : (
+                  <TouchableOpacity
+                    style={styles.followContainer}
+                    onPress={() => handleFollow(selectedUserData)}>
+                    <Text
+                      style={[
+                        AppStyles.userHorizontalText,
+                        {color: Colors.forgot, marginTop: 0},
+                      ]}>
+                      Follow
+                    </Text>
+                  </TouchableOpacity>
+                )}
               </View>
-              {isFollowing ? (
-                <View style={styles.followContainer}>
-                  <Text
-                    style={[
-                      AppStyles.userHorizontalText,
-                      {color: Colors.forgot, marginTop: 0},
-                    ]}>
-                    Following
-                  </Text>
+              <CollectionHeader
+               Favorite={favorite}
+                name={selectedCollection.name}
+                onPress={toggle}
+              />
+              {data !== 0 ? (
+                <View
+                  style={[
+                    styles.collectionContainer,
+                    {
+                      height: responsiveScreenHeight(35),
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    },
+                  ]}>
+                  <FlatList
+                    scrollEnabled={false}
+                    data={data}
+                    renderItem={renderItem}
+                    keyExtractor={(item, index) => index.toString()}
+                  />
                 </View>
               ) : (
-                <TouchableOpacity style={styles.followContainer}>
-                  <Text
-                    style={[
-                      AppStyles.userHorizontalText,
-                      {color: Colors.forgot, marginTop: 0},
-                    ]}>
-                    Follow
-                  </Text>
-                </TouchableOpacity>
+                <View
+                  style={[
+                    styles.collectionContainer,
+                    {
+                      height: responsiveScreenHeight(35),
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    },
+                  ]}>
+                  <Text style={styles.emptyText}>No Sneaker</Text>
+                </View>
               )}
-            </View>
-            <CollectionHeader name={selectedCollection.name} onPress={toggle} />
-            {data !== 0 ? (
-              <View
-                style={[
-                  styles.collectionContainer,
-                  {
-                    height: responsiveScreenHeight(35),
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  },
-                ]}>
-                <FlatList
-                  scrollEnabled={false}
-                  data={data}
-                  renderItem={renderItem}
-                  keyExtractor={(item, index) => index.toString()}
+              {collection && (
+                <CollectionModal
+                  onBackdropPress={toggle}
+                  onPress={setCollectionId}
+                  data={collectionData}
                 />
-              </View>
-            ) : (
-              <View
-                style={[
-                  styles.collectionContainer,
-                  {
-                    height: responsiveScreenHeight(35),
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  },
-                ]}>
-                <Text style={styles.emptyText}>No Sneaker</Text>
-              </View>
-            )}
-             {collection && (
-              <CollectionModal
-                onBackdropPress={toggle}
-                onPress={setCollectionId}
-                data={collectionData}
-              />
-            )}
-          </ScrollView> }
+              )}
+            </ScrollView>
+          )}
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
     </>

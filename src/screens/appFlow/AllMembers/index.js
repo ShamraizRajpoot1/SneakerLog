@@ -47,35 +47,7 @@ const AllMembers = ({navigation, route}) => {
   const [loading, setIsLoading] = useState(false);
   
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const usersCollection = await firestore().collection('Users').get();
-  //       const fetchedUsers = [];
-  //       usersCollection.forEach((doc) => {
-  //         fetchedUsers.push({ Id: doc.id, ...doc.data() });
-  //       });
-  //       setUsers(fetchedUsers);
-  //     } catch (error) {
-  //       console.error('Error fetching users: ', error);
-  //     } finally {
-  //       if (initialLoading) {
-  //         setInitialLoading(false);
-  //       }
-  //     }
-  //   };
-
-  //   const unsubscribe = firestore().collection('Users').onSnapshot(() => {
-  //     fetchData();
-  //     setRefresh((prev) => !prev);
-  //   });
-
-  //   fetchData();
-
-  //   return () => {
-  //     unsubscribe();
-  //   };
-  // }, [navigation]);
+  
   
   useEffect(() => {
     const fetchUserData = async () => {
@@ -85,18 +57,83 @@ const AllMembers = ({navigation, route}) => {
           const userData = userDoc.data();
           setUse(userData)
           if (userData.sent) {
-            setSentData(userData.sent);
+            const sentUsersData = await Promise.all(
+              userData.sent.map(async (sent) => {
+                const userSnapshot = await firestore().collection('Users').doc(sent.Id).get();
+                if (userSnapshot.exists) {
+                  const userDocData = userSnapshot.data();
+                  if (!userDocData.isDisabled) {
+                    return sent;
+                  } else {
+                    return null;
+                  }
+                } else {
+                  return null;
+                }
+              })
+            );
+            setSentData(sentUsersData.filter((data) => data !== null));
+          } else {
+            setSentData([]);
           }
+          
           if (userData.followingData) {
-            setFollowingData(userData.followingData);
+            const followingData = await Promise.all(
+              userData.followingData.map(async (sentUser) => {
+                const userSnapshot = await firestore().collection('Users').doc(sentUser.Id).get();
+                if (userSnapshot.exists) {
+                  const userDocData = userSnapshot.data();
+                  if (!userDocData.isDisabled) {
+                    return sentUser;
+                  } else {
+                    return null;
+                  }
+                } else {
+                  return null;
+                }
+              })
+            );
+            setFollowingData(followingData.filter((data) => data !== null));
           }
           if (userData.received) {
-            setReceivedData(userData.received);
+            const receivedData = await Promise.all(
+              userData.received.map(async (received) => {
+                const userSnapshot = await firestore().collection('Users').doc(received.Id).get();
+                if (userSnapshot.exists) {
+                  const userDocData = userSnapshot.data();
+                  if (!userDocData.isDisabled) {
+                    return received; 
+                  } else {
+                    return null;
+                  }
+                } else {
+                  return null;
+                }
+              })
+            );
+            setReceivedData(receivedData.filter((data) => data !== null));
           }
           if (userData.followersData) {
-            setFollowerData(userData.followersData);
+            const followersData = await Promise.all(
+              userData.followersData.map(async (follower) => {
+                const userSnapshot = await firestore().collection('Users').doc(follower.Id).get();
+                if (userSnapshot.exists) {
+                  const userDocData = userSnapshot.data();
+                  if (!userDocData.isDisabled) {
+                    return follower;
+                  } else {
+                    return null;
+                  }
+                } else {
+                  return null;
+                }
+              })
+            );
+            setFollowerData(followersData.filter((data) => data !== null));
           }
-        } else {
+         
+        }
+        else {
           console.log('No user data found for the specified ID');
         }
       } catch (error) {
@@ -163,27 +200,40 @@ const AllMembers = ({navigation, route}) => {
   
   
   const handleSearch = (text) => {
+    if (users) {
       const filteredData = users.filter((user) =>
-        user.name.toLowerCase().includes(text.toLowerCase())
-      );
-      const filterSent = sentData.filter((user) =>
-        user.name.toLowerCase().includes(text.toLowerCase())
-      );
-      const filterRecieved = recievedData.filter((user) =>
-        user.name.toLowerCase().includes(text.toLowerCase())
-      );
-      const filterFollowing = followingData.filter((user) =>
-        user.name.toLowerCase().includes(text.toLowerCase())
-      );
-      const filterFollower = followerData.filter((user) =>
-        user.name.toLowerCase().includes(text.toLowerCase())
+        user.name && user.name.toLowerCase().includes(text.toLowerCase())
       );
       setFilteredUsers(filteredData);
+    }
+  
+    if (sentData) {
+      const filterSent = sentData.filter((user) =>
+        user.name && user.name.toLowerCase().includes(text.toLowerCase())
+      );
       setFilterSentData(filterSent);
-      setFilterFollowerData(filterFollower);
+    }
+  
+    if (recievedData) {
+      const filterRecieved = recievedData.filter((user) =>
+        user.name && user.name.toLowerCase().includes(text.toLowerCase())
+      );
       setFilterRecievedData(filterRecieved);
+    }
+  
+    if (followingData) {
+      const filterFollowing = followingData.filter((user) =>
+        user.name && user.name.toLowerCase().includes(text.toLowerCase())
+      );
       setFilterFollowingData(filterFollowing);
-    
+    }
+  
+    if (followerData) {
+      const filterFollower = followerData.filter((user) =>
+        user.name && user.name.toLowerCase().includes(text.toLowerCase())
+      );
+      setFilterFollowerData(filterFollower);
+    }
   };
   
   return (

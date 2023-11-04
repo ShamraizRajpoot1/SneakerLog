@@ -42,7 +42,7 @@ const Profile = ({navigation}) => {
       }
     });
     return () => unsubscribe();
-  }, [user]);
+  }, []);
 
   const back = () => {
     navigation.goBack();

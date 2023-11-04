@@ -138,7 +138,7 @@ const ProductDetails = ({navigation, route}) => {
         {item.image && item.image.small ? (
           <Image source={{uri: item.image.small}} style={styles.image} />
         ) : item.image && typeof item.image === 'string' && (
-          <Image source={{uri: item.image}} style={AppStyles.productImage} />
+          <Image source={{uri: item.image}} style={styles.image} />
         ) 
         }
       </View>
